@@ -54,6 +54,13 @@ button{padding:2px 6px;font-size:11px;line-height:1.2}
  input,textarea{border:none;outline:none;background:transparent}
  body{background:#fff}
 }
+
+textarea{
+  resize:none;
+  white-space:pre-wrap;
+  word-wrap:break-word;
+}
+
 </style>
 </head>
 <body>
@@ -198,7 +205,7 @@ function calc(){
   subT+=amt;
  });
 
-   document.getElementById("sub").innerText=sub.toFixed(2);
+   document.getElementById("sub").innerText=subT.toFixed(2);
 
  const gstOn=document.getElementById("gstToggle").checked;
  const gstPer=+document.getElementById("gstPer").value||0;
@@ -206,9 +213,9 @@ function calc(){
  document.getElementById("gstRow").style.display = gstOn ? "block" : "none";
  document.getElementById("gstPercentRow").style.display = gstOn ? "block" : "none";
 
- let gstAmt = gstOn ? sub*gstPer/100 : 0;
+ let gstAmt = gstOn ? subT*gstPer/100 : 0;
  document.getElementById("gstAmt").innerText=gstAmt.toFixed(2);
- document.getElementById("grand").innerText=(sub+gstAmt).toFixed(2);
+ document.getElementById("grand").innerText=(subT+gstAmt).toFixed(2);
 }
 
 function saveEstimate(){
