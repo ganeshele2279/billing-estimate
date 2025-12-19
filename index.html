@@ -122,7 +122,8 @@ text-align:center;font-size:24px;font-weight:bold;width:100%">
    
   <div class="total-normal">Sub Total : ₹ <span id="sub">0.00</span></div>
   <div id="gstRow" class="total-normal" style="display:none">GST Amount : ₹ <span id="gstAmt">0.00</span></div>
-  <div class="total-grand">Grand Total : ₹ <span id="grand">0.00</span></div>
+  <div class="total-normal">Round Off : ₹ <span id="roundoff">0.00</span></div>
+<div class="total-grand">Grand Total : ₹ <span id="grand">0.00</span></div>
 <div id="amtWords" style="margin-top:6px;font-size:11px;font-style:italic">Amount in Words : Zero Only</div>
  </div>
 </div>
@@ -547,6 +548,154 @@ function openStatement(){
   w.document.close();
 }
 
+
+/* ===== FIXED FUNCTIONS (CLEAN) ===== */
+
+function togglePaid(p,i,btn){
+  const store = JSON.parse(localStorage.getItem("PARTY_DATA")||"{}");
+  if(!store[p] || !store[p][i]) return;
+
+  store[p][i].paid = !store[p][i].paid;
+  localStorage.setItem("PARTY_DATA", JSON.stringify(store));
+  btn.innerText = store[p][i].paid ? "Paid" : "Unpaid";
+}
+
+function printFromLedger(p,i){
+  const store = JSON.parse(localStorage.getItem("PARTY_DATA")||"{}");
+  if(!store[p] || !store[p][i]) return;
+
+  loadFromLedger(p,i);
+  setTimeout(()=>{ window.print(); },100);
+}
+
+
+
+/* ===== PAID / UNPAID : TEXT ONLY (NO COLOR CHANGE) ===== */
+function togglePaid(p,i,btn){
+  const store = JSON.parse(localStorage.getItem("PARTY_DATA")||"{}");
+  if(!store[p] || !store[p][i]) return;
+
+  store[p][i].paid = !store[p][i].paid;
+  localStorage.setItem("PARTY_DATA", JSON.stringify(store));
+
+  btn.innerText = store[p][i].paid ? "Paid" : "Unpaid";
+  btn.style.background = "";
+  btn.style.color = "";
+  btn.style.border = "";
+}
+
+
+
+/* ===== FINAL FIXES : NO UI CHANGE ===== */
+
+/* 1) Paid / Unpaid : TEXT ONLY, NO COLOR, NO STYLE TOUCH */
+function togglePaid(p,i,btn){
+  const store = JSON.parse(localStorage.getItem("PARTY_DATA")||"{}");
+  if(!store[p] || !store[p][i]) return;
+
+  store[p][i].paid = !store[p][i].paid;
+  localStorage.setItem("PARTY_DATA", JSON.stringify(store));
+
+  btn.innerText = store[p][i].paid ? "Paid" : "Unpaid";
+}
+
+/* 2) Ledger Print : PRINT ESTIMATE WITHOUT REDIRECTING MAIN PAGE */
+function printFromLedger(p,i){
+  const store = JSON.parse(localStorage.getItem("PARTY_DATA")||"{}");
+  if(!store[p] || !store[p][i]) return;
+
+  const data = store[p][i];
+
+  const w = window.open("","_blank");
+  w.document.write(`
+    <html>
+    <head>
+      <title>Estimate</title>
+      <style>
+        body{font-family:Arial;padding:20px}
+        table{width:100%;border-collapse:collapse}
+        th,td{border:1px solid #000;padding:6px;font-size:12px}
+        th{background:#eee}
+      </style>
+    </head>
+    <body onload="window.print()">
+      <h2 style="text-align:center">ESTIMATE</h2>
+      <b>Customer:</b> ${p}<br>
+      <b>Date:</b> ${data.header.date}<br><br>
+      <table>
+        <tr>
+          <th>#</th>
+          <th>Item</th>
+          <th>Qty</th>
+          <th>Rate</th>
+          <th>Amount</th>
+        </tr>
+        ${data.items.map((it,idx)=>`
+          <tr>
+            <td>${idx+1}</td>
+            <td>${it.item}</td>
+            <td>${it.qty}</td>
+            <td>${it.rate}</td>
+            <td>${it.amt}</td>
+          </tr>
+        `).join('')}
+      </table>
+      <br>
+      <b>Grand Total : ₹ ${data.totals.grand}</b>
+    </body>
+    </html>
+  `);
+  w.document.close();
+}
+
+
+
+/* ===== FINAL CORRECT BEHAVIOUR (RESTORED) ===== */
+
+/* Paid / Unpaid WITH COLOR (as original) */
+function togglePaid(p,i,btn){
+  const store = JSON.parse(localStorage.getItem("PARTY_DATA")||"{}");
+  if(!store[p] || !store[p][i]) return;
+
+  store[p][i].paid = !store[p][i].paid;
+  localStorage.setItem("PARTY_DATA", JSON.stringify(store));
+
+  btn.innerText = store[p][i].paid ? "Paid" : "Unpaid";
+  btn.style.background = store[p][i].paid ? "#c8e6c9" : "#ffcdd2";
+  btn.style.color = "#000";
+}
+
+/* Ledger → Print : PRINT SAME ESTIMATE BILL (NO BLANK, NO REDIRECT) */
+function printFromLedger(p,i){
+  const store = JSON.parse(localStorage.getItem("PARTY_DATA")||"{}");
+  if(!store[p] || !store[p][i]) return;
+
+  loadFromLedger(p,i);
+
+  setTimeout(()=>{
+    const billHTML = document.querySelector(".box").outerHTML;
+    const w = window.open("", "_blank");
+    w.document.write(`
+      <html>
+        <head>
+          <title>Estimate</title>
+          <style>
+            body{font-family:Arial;padding:20px}
+            ${document.querySelector("style").innerHTML}
+          </style>
+        </head>
+        <body onload="window.print()">
+          ${billHTML}
+        </body>
+      </html>
+    `);
+    w.document.close();
+  },200);
+}
+
 </script>
 </body>
 </html>
+
+
+
