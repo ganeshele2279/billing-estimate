@@ -101,9 +101,66 @@ textarea{
   font-size:14px;
 }
 
+
+/* ===== COMPANY COLOR THEMES ===== */
+:root{
+  --primary:#2c3e50;
+  --primary-light:#e8edf2;
+}
+
+body{ background:#eef1f4; }
+
+.box{
+  background:#fff;
+  box-shadow:0 6px 16px rgba(0,0,0,0.08);
+  border-radius:6px;
+}
+
+h2 input{ color:var(--primary); }
+
+table th{ background:var(--primary-light); }
+
+button{
+  background:var(--primary);
+  color:#fff;
+  border:none;
+  border-radius:4px;
+}
+
+button:hover{ filter:brightness(0.9); }
+
+.gst-btn{ background:var(--primary-light); }
+
+.grand-box{
+  border:2px solid var(--primary);
+  background:#f9fcff;
+}
+
+/* Theme presets */
+.theme-blue{ --primary:#2c3e50; --primary-light:#e8edf2; }
+.theme-green{ --primary:#1e7f43; --primary-light:#e6f4ec; }
+.theme-red{ --primary:#9b2c2c; --primary-light:#f8eaea; }
+.theme-black{ --primary:#000000; --primary-light:#eeeeee; }
+
+
+/* Extra themes */
+.theme-purple{ --primary:#6a1b9a; --primary-light:#f3e5f5; }
+.theme-orange{ --primary:#ef6c00; --primary-light:#fff3e0; }
+.theme-gold{ --primary:#b8860b; --primary-light:#fff8dc; }
+
 </style>
 </head>
-<body>
+<body class='theme-blue'>
+
+<div class="no-print" style="position:fixed;top:10px;right:10px;z-index:2000">
+<select onchange="setTheme(this.value)" style="font-size:11px;padding:4px">
+<option value="theme-blue">Blue</option>
+<option value="theme-green">Green</option>
+<option value="theme-red">Red</option>
+<option value="theme-black">Black</option><option value="theme-purple">Purple</option><option value="theme-orange">Orange</option><option value="theme-gold">Gold</option>
+</select>
+</div>
+
 
 <div class="box">
 <h2>
@@ -122,6 +179,12 @@ text-align:center;font-size:24px;font-weight:bold;width:100%">
   <input id="cust" list="custList">
   <datalist id="custList"></datalist>
  </div>
+
+<div id="printAddress" style="font-size:11px;margin-top:4px">
+  <div id="custMobile"></div>
+  <div id="custAddress"></div>
+</div>
+
 </div>
 
 <table>
@@ -143,15 +206,22 @@ text-align:center;font-size:24px;font-weight:bold;width:100%">
 <button class="no-print" onclick="addRow()">+ Add Row</button>
 <button class="no-print" onclick="saveEstimate()">Save</button>
 <button class="no-print" onclick="newEstimate()">New Estimate</button>
+<button class="no-print" onclick="refreshSameEstimate()">Refresh</button>
+<button class="no-print" onclick="exportBackup()">Export Backup</button>
+<button class="no-print" onclick="importBackup()">Import Backup</button>
+<input type="file" id="backupFile" accept=".json" style="display:none" onchange="handleBackupFile(this)">
 <button class="no-print" onclick="openLedger()">Party Ledger</button>
+<button class="no-print" onclick="openEditParty()">Edit Party</button>
 <button class="no-print" onclick="window.print()">Print</button>
 <label class="no-print gst-btn"><input type="checkbox" id="gstToggle" onchange="calc()"> GST</label>
 </div>
 
 <div style="display:flex;gap:20px;margin-top:10px">
  <div style="flex:1">
-  <b>Notes:</b>
-  <textarea id="notes" rows="3"></textarea>
+  <b>Terms and Conditions:</b>
+  <textarea id="notes" rows="4">1. GST EXTRA AS APPLICABLE.
+2. Goods once sold will not be TAKEN BACK or EXCHANGED.
+3. Subject to BANGALORE JURISDICTION only.</textarea>
  </div>
 
  <div style="flex:0 0 260px;text-align:right;font-size:11px">
@@ -494,6 +564,53 @@ function openStatement(){
   font-size:14px;
 }
 
+
+/* ===== COMPANY COLOR THEMES ===== */
+:root{
+  --primary:#2c3e50;
+  --primary-light:#e8edf2;
+}
+
+body{ background:#eef1f4; }
+
+.box{
+  background:#fff;
+  box-shadow:0 6px 16px rgba(0,0,0,0.08);
+  border-radius:6px;
+}
+
+h2 input{ color:var(--primary); }
+
+table th{ background:var(--primary-light); }
+
+button{
+  background:var(--primary);
+  color:#fff;
+  border:none;
+  border-radius:4px;
+}
+
+button:hover{ filter:brightness(0.9); }
+
+.gst-btn{ background:var(--primary-light); }
+
+.grand-box{
+  border:2px solid var(--primary);
+  background:#f9fcff;
+}
+
+/* Theme presets */
+.theme-blue{ --primary:#2c3e50; --primary-light:#e8edf2; }
+.theme-green{ --primary:#1e7f43; --primary-light:#e6f4ec; }
+.theme-red{ --primary:#9b2c2c; --primary-light:#f8eaea; }
+.theme-black{ --primary:#000000; --primary-light:#eeeeee; }
+
+
+/* Extra themes */
+.theme-purple{ --primary:#6a1b9a; --primary-light:#f3e5f5; }
+.theme-orange{ --primary:#ef6c00; --primary-light:#fff3e0; }
+.theme-gold{ --primary:#b8860b; --primary-light:#fff8dc; }
+
 </style>
     </head>
     <body onload="window.print()">
@@ -517,7 +634,25 @@ function openStatement(){
         </tr>
         ${rows}
       </table>
-    </body>
+    
+<!-- Edit Party Modal -->
+<div id="editPartyBox" style="display:none;position:fixed;top:20%;left:35%;width:300px;
+background:#fff;border:2px solid #000;padding:10px;z-index:2000">
+<h3>Edit Party</h3>
+<label>All Parties</label>
+<select id="partyList" onchange="loadPartyFromList()" style="width:100%;font-size:12px"></select><br><br>
+<label>Name</label>
+<input id="ep_name"><br><br>
+<label>Mobile</label>
+<input id="ep_mobile"><br><br>
+<label>Address</label>
+<textarea id="ep_address" rows="2"></textarea><br><br>
+<button onclick="savePartyDetails()">Save</button>
+<button onclick="deleteParty()">Delete</button>
+<button onclick="closeEditParty()">Close</button>
+</div>
+
+</body>
     </html>
   `);
   w.document.close();
@@ -648,6 +783,53 @@ function openStatement(){
   font-size:14px;
 }
 
+
+/* ===== COMPANY COLOR THEMES ===== */
+:root{
+  --primary:#2c3e50;
+  --primary-light:#e8edf2;
+}
+
+body{ background:#eef1f4; }
+
+.box{
+  background:#fff;
+  box-shadow:0 6px 16px rgba(0,0,0,0.08);
+  border-radius:6px;
+}
+
+h2 input{ color:var(--primary); }
+
+table th{ background:var(--primary-light); }
+
+button{
+  background:var(--primary);
+  color:#fff;
+  border:none;
+  border-radius:4px;
+}
+
+button:hover{ filter:brightness(0.9); }
+
+.gst-btn{ background:var(--primary-light); }
+
+.grand-box{
+  border:2px solid var(--primary);
+  background:#f9fcff;
+}
+
+/* Theme presets */
+.theme-blue{ --primary:#2c3e50; --primary-light:#e8edf2; }
+.theme-green{ --primary:#1e7f43; --primary-light:#e6f4ec; }
+.theme-red{ --primary:#9b2c2c; --primary-light:#f8eaea; }
+.theme-black{ --primary:#000000; --primary-light:#eeeeee; }
+
+
+/* Extra themes */
+.theme-purple{ --primary:#6a1b9a; --primary-light:#f3e5f5; }
+.theme-orange{ --primary:#ef6c00; --primary-light:#fff3e0; }
+.theme-gold{ --primary:#b8860b; --primary-light:#fff8dc; }
+
 </style>
     </head>
     <body onload="window.print()">
@@ -664,7 +846,25 @@ function openStatement(){
         </tr>
         ${rows}
       </table>
-    </body>
+    
+<!-- Edit Party Modal -->
+<div id="editPartyBox" style="display:none;position:fixed;top:20%;left:35%;width:300px;
+background:#fff;border:2px solid #000;padding:10px;z-index:2000">
+<h3>Edit Party</h3>
+<label>All Parties</label>
+<select id="partyList" onchange="loadPartyFromList()" style="width:100%;font-size:12px"></select><br><br>
+<label>Name</label>
+<input id="ep_name"><br><br>
+<label>Mobile</label>
+<input id="ep_mobile"><br><br>
+<label>Address</label>
+<textarea id="ep_address" rows="2"></textarea><br><br>
+<button onclick="savePartyDetails()">Save</button>
+<button onclick="deleteParty()">Delete</button>
+<button onclick="closeEditParty()">Close</button>
+</div>
+
+</body>
     </html>
   `);
   w.document.close();
@@ -778,6 +978,53 @@ function printFromLedger(p,i){
   font-size:14px;
 }
 
+
+/* ===== COMPANY COLOR THEMES ===== */
+:root{
+  --primary:#2c3e50;
+  --primary-light:#e8edf2;
+}
+
+body{ background:#eef1f4; }
+
+.box{
+  background:#fff;
+  box-shadow:0 6px 16px rgba(0,0,0,0.08);
+  border-radius:6px;
+}
+
+h2 input{ color:var(--primary); }
+
+table th{ background:var(--primary-light); }
+
+button{
+  background:var(--primary);
+  color:#fff;
+  border:none;
+  border-radius:4px;
+}
+
+button:hover{ filter:brightness(0.9); }
+
+.gst-btn{ background:var(--primary-light); }
+
+.grand-box{
+  border:2px solid var(--primary);
+  background:#f9fcff;
+}
+
+/* Theme presets */
+.theme-blue{ --primary:#2c3e50; --primary-light:#e8edf2; }
+.theme-green{ --primary:#1e7f43; --primary-light:#e6f4ec; }
+.theme-red{ --primary:#9b2c2c; --primary-light:#f8eaea; }
+.theme-black{ --primary:#000000; --primary-light:#eeeeee; }
+
+
+/* Extra themes */
+.theme-purple{ --primary:#6a1b9a; --primary-light:#f3e5f5; }
+.theme-orange{ --primary:#ef6c00; --primary-light:#fff3e0; }
+.theme-gold{ --primary:#b8860b; --primary-light:#fff8dc; }
+
 </style>
     </head>
     <body onload="window.print()">
@@ -804,7 +1051,25 @@ function printFromLedger(p,i){
       </table>
       <br>
       <b>Grand Total : ₹ ${data.totals.grand}</b>
-    </body>
+    
+<!-- Edit Party Modal -->
+<div id="editPartyBox" style="display:none;position:fixed;top:20%;left:35%;width:300px;
+background:#fff;border:2px solid #000;padding:10px;z-index:2000">
+<h3>Edit Party</h3>
+<label>All Parties</label>
+<select id="partyList" onchange="loadPartyFromList()" style="width:100%;font-size:12px"></select><br><br>
+<label>Name</label>
+<input id="ep_name"><br><br>
+<label>Mobile</label>
+<input id="ep_mobile"><br><br>
+<label>Address</label>
+<textarea id="ep_address" rows="2"></textarea><br><br>
+<button onclick="savePartyDetails()">Save</button>
+<button onclick="deleteParty()">Delete</button>
+<button onclick="closeEditParty()">Close</button>
+</div>
+
+</body>
     </html>
   `);
   w.document.close();
@@ -884,11 +1149,76 @@ function printFromLedger(p,i){
   font-size:14px;
 }
 
+
+/* ===== COMPANY COLOR THEMES ===== */
+:root{
+  --primary:#2c3e50;
+  --primary-light:#e8edf2;
+}
+
+body{ background:#eef1f4; }
+
+.box{
+  background:#fff;
+  box-shadow:0 6px 16px rgba(0,0,0,0.08);
+  border-radius:6px;
+}
+
+h2 input{ color:var(--primary); }
+
+table th{ background:var(--primary-light); }
+
+button{
+  background:var(--primary);
+  color:#fff;
+  border:none;
+  border-radius:4px;
+}
+
+button:hover{ filter:brightness(0.9); }
+
+.gst-btn{ background:var(--primary-light); }
+
+.grand-box{
+  border:2px solid var(--primary);
+  background:#f9fcff;
+}
+
+/* Theme presets */
+.theme-blue{ --primary:#2c3e50; --primary-light:#e8edf2; }
+.theme-green{ --primary:#1e7f43; --primary-light:#e6f4ec; }
+.theme-red{ --primary:#9b2c2c; --primary-light:#f8eaea; }
+.theme-black{ --primary:#000000; --primary-light:#eeeeee; }
+
+
+/* Extra themes */
+.theme-purple{ --primary:#6a1b9a; --primary-light:#f3e5f5; }
+.theme-orange{ --primary:#ef6c00; --primary-light:#fff3e0; }
+.theme-gold{ --primary:#b8860b; --primary-light:#fff8dc; }
+
 </style>
         </head>
         <body onload="window.print()">
           ${billHTML}
-        </body>
+        
+<!-- Edit Party Modal -->
+<div id="editPartyBox" style="display:none;position:fixed;top:20%;left:35%;width:300px;
+background:#fff;border:2px solid #000;padding:10px;z-index:2000">
+<h3>Edit Party</h3>
+<label>All Parties</label>
+<select id="partyList" onchange="loadPartyFromList()" style="width:100%;font-size:12px"></select><br><br>
+<label>Name</label>
+<input id="ep_name"><br><br>
+<label>Mobile</label>
+<input id="ep_mobile"><br><br>
+<label>Address</label>
+<textarea id="ep_address" rows="2"></textarea><br><br>
+<button onclick="savePartyDetails()">Save</button>
+<button onclick="deleteParty()">Delete</button>
+<button onclick="closeEditParty()">Close</button>
+</div>
+
+</body>
       </html>
     `);
     w.document.close();
@@ -903,7 +1233,172 @@ function updateLiveTime(){
 updateLiveTime();
 setInterval(updateLiveTime, 1000);
 
+
+function setTheme(t){
+  document.body.className = t;
+}
+
+
+function _old_openEditParty(){
+  const name = document.getElementById("cust").value || "";
+  const data = JSON.parse(localStorage.getItem("party_"+name) || "{}");
+  document.getElementById("ep_name").value = name;
+  document.getElementById("ep_mobile").value = data.mobile || "";
+  document.getElementById("ep_address").value = data.address || "";
+  document.getElementById("editPartyBox").style.display = "block";
+}
+
+function closeEditParty(){
+  document.getElementById("editPartyBox").style.display = "none";
+}
+
+function savePartyDetails(){
+  const name = document.getElementById("ep_name").value.trim();
+  if(!name){ alert("Party name required"); return; }
+  const data = {
+    mobile: document.getElementById("ep_mobile").value,
+    address: document.getElementById("ep_address").value
+  };
+  localStorage.setItem("party_"+name, JSON.stringify(data));
+  document.getElementById("cust").value = name;
+  closeEditParty();
+  alert("Party details updated");
+}
+
+
+document.getElementById("cust").addEventListener("change", ()=>{
+  const name = document.getElementById("cust").value;
+  const data = JSON.parse(localStorage.getItem("party_"+name) || "{}");
+  document.getElementById("custMobile").innerText = data.mobile || "";
+  document.getElementById("custAddress").innerText = data.address || "";
+});
+
+
+function deleteParty(){
+  const name = document.getElementById("ep_name").value.trim();
+  if(!name) return;
+  if(confirm("Delete this party?")){
+    localStorage.removeItem("party_"+name);
+    document.getElementById("cust").value = "";
+    document.getElementById("custMobile").innerText = "";
+    document.getElementById("custAddress").innerText = "";
+    closeEditParty();
+    alert("Party deleted");
+  }
+}
+
+
+function openEditParty(){
+  const sel = document.getElementById("partyList");
+  sel.innerHTML = "<option value=''>-- Select Party --</option>";
+  for(let k in localStorage){
+    if(k.startsWith("party_")){
+      const name = k.replace("party_","");
+      sel.innerHTML += `<option value="${name}">${name}</option>`;
+    }
+  }
+  document.getElementById("editPartyBox").style.display = "block";
+}
+
+function loadPartyFromList(){
+  const name = document.getElementById("partyList").value;
+  if(!name) return;
+  const data = JSON.parse(localStorage.getItem("party_"+name) || "{}");
+  document.getElementById("ep_name").value = name;
+  document.getElementById("ep_mobile").value = data.mobile || "";
+  document.getElementById("ep_address").value = data.address || "";
+}
+
+
+function refreshSameEstimate(){
+  // save current estimate number
+  const inv = document.getElementById("invNo").innerText;
+  sessionStorage.setItem("sameInvNo", inv);
+  location.reload();
+}
+
+window.addEventListener("load", ()=>{
+  const inv = sessionStorage.getItem("sameInvNo");
+  if(inv){
+    document.getElementById("invNo").innerText = inv;
+    sessionStorage.removeItem("sameInvNo");
+  }
+});
+
+
+function setTheme(t){
+  document.body.className = t;
+  localStorage.setItem("defaultTheme", t);
+}
+
+window.addEventListener("load", ()=>{
+  const t = localStorage.getItem("defaultTheme");
+  if(t){
+    document.body.className = t;
+    const sel = document.querySelector("select");
+    if(sel) sel.value = t;
+  }
+});
+
+
+function exportBackup(){
+  const data = {};
+  for(let k in localStorage){
+    if(localStorage.hasOwnProperty(k)){
+      data[k] = localStorage.getItem(k);
+    }
+  }
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "billing_backup.json";
+  a.click();
+}
+
+function importBackup(){
+  document.getElementById("backupFile").click();
+}
+
+function handleBackupFile(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      const data = JSON.parse(e.target.result);
+      if(confirm("This will overwrite existing data. Continue?")){
+        for(let k in data){
+          localStorage.setItem(k, data[k]);
+        }
+        alert("Backup restored successfully");
+        location.reload();
+      }
+    }catch(err){
+      alert("Invalid backup file");
+    }
+  };
+  reader.readAsText(file);
+}
+
 </script>
+
+<!-- Edit Party Modal -->
+<div id="editPartyBox" style="display:none;position:fixed;top:20%;left:35%;width:300px;
+background:#fff;border:2px solid #000;padding:10px;z-index:2000">
+<h3>Edit Party</h3>
+<label>All Parties</label>
+<select id="partyList" onchange="loadPartyFromList()" style="width:100%;font-size:12px"></select><br><br>
+<label>Name</label>
+<input id="ep_name"><br><br>
+<label>Mobile</label>
+<input id="ep_mobile"><br><br>
+<label>Address</label>
+<textarea id="ep_address" rows="2"></textarea><br><br>
+<button onclick="savePartyDetails()">Save</button>
+<button onclick="deleteParty()">Delete</button>
+<button onclick="closeEditParty()">Close</button>
+</div>
+
 </body>
 </html>
 
