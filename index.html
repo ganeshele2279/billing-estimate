@@ -148,6 +148,43 @@ button:hover{ filter:brightness(0.9); }
 .theme-orange{ --primary:#ef6c00; --primary-light:#fff3e0; }
 .theme-gold{ --primary:#b8860b; --primary-light:#fff8dc; }
 
+
+/* Theme control buttons */
+.theme-btn{
+  background:var(--primary-light);
+  color:var(--primary);
+  border:1px solid var(--primary);
+  font-size:10px;
+  padding:3px 6px;
+  border-radius:4px;
+  cursor:pointer;
+}
+.theme-btn:hover{
+  filter:brightness(0.95);
+}
+
+
+/* Danger button */
+.theme-btn.danger{
+  background:#ffecec;
+  color:#a40000;
+  border:1px solid #a40000;
+}
+.theme-btn.danger:hover{
+  background:#ffd6d6;
+}
+
+
+/* Support button */
+.theme-btn.support{
+  background:#f0f0ff;
+  color:#5b3fd6;
+  border:1px solid #5b3fd6;
+}
+.theme-btn.support:hover{
+  background:#e6e6ff;
+}
+
 </style>
 </head>
 <body class='theme-blue'>
@@ -159,6 +196,24 @@ button:hover{ filter:brightness(0.9); }
 <option value="theme-red">Red</option>
 <option value="theme-black">Black</option><option value="theme-purple">Purple</option><option value="theme-orange">Orange</option><option value="theme-gold">Gold</option>
 </select>
+
+<div class="no-print" style="margin-top:6px;display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+  <button class="theme-btn" onclick="exportBackup()">Export</button>
+  <button class="theme-btn" onclick="importBackup()">Import</button>
+  <button class="theme-btn" onclick="refreshSameEstimate()">Refresh</button>
+
+<button class="theme-btn danger" onclick="confirmDeleteAll()">Delete All</button>
+
+
+<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;margin-bottom:2px">
+  <span style="font-size:10px;color:#555">Welcome!</span>
+  <button class="theme-btn support" onclick="openSupport()">Support</button>
+</div>
+
+
+</div>
+<input type="file" id="backupFile" accept=".json" style="display:none" onchange="handleBackupFile(this)">
+
 </div>
 
 
@@ -206,10 +261,8 @@ text-align:center;font-size:24px;font-weight:bold;width:100%">
 <button class="no-print" onclick="addRow()">+ Add Row</button>
 <button class="no-print" onclick="saveEstimate()">Save</button>
 <button class="no-print" onclick="newEstimate()">New Estimate</button>
-<button class="no-print" onclick="refreshSameEstimate()">Refresh</button>
-<button class="no-print" onclick="exportBackup()">Export Backup</button>
-<button class="no-print" onclick="importBackup()">Import Backup</button>
-<input type="file" id="backupFile" accept=".json" style="display:none" onchange="handleBackupFile(this)">
+
+
 <button class="no-print" onclick="openLedger()">Party Ledger</button>
 <button class="no-print" onclick="openEditParty()">Edit Party</button>
 <button class="no-print" onclick="window.print()">Print</button>
@@ -611,6 +664,43 @@ button:hover{ filter:brightness(0.9); }
 .theme-orange{ --primary:#ef6c00; --primary-light:#fff3e0; }
 .theme-gold{ --primary:#b8860b; --primary-light:#fff8dc; }
 
+
+/* Theme control buttons */
+.theme-btn{
+  background:var(--primary-light);
+  color:var(--primary);
+  border:1px solid var(--primary);
+  font-size:10px;
+  padding:3px 6px;
+  border-radius:4px;
+  cursor:pointer;
+}
+.theme-btn:hover{
+  filter:brightness(0.95);
+}
+
+
+/* Danger button */
+.theme-btn.danger{
+  background:#ffecec;
+  color:#a40000;
+  border:1px solid #a40000;
+}
+.theme-btn.danger:hover{
+  background:#ffd6d6;
+}
+
+
+/* Support button */
+.theme-btn.support{
+  background:#f0f0ff;
+  color:#5b3fd6;
+  border:1px solid #5b3fd6;
+}
+.theme-btn.support:hover{
+  background:#e6e6ff;
+}
+
 </style>
     </head>
     <body onload="window.print()">
@@ -830,6 +920,43 @@ button:hover{ filter:brightness(0.9); }
 .theme-orange{ --primary:#ef6c00; --primary-light:#fff3e0; }
 .theme-gold{ --primary:#b8860b; --primary-light:#fff8dc; }
 
+
+/* Theme control buttons */
+.theme-btn{
+  background:var(--primary-light);
+  color:var(--primary);
+  border:1px solid var(--primary);
+  font-size:10px;
+  padding:3px 6px;
+  border-radius:4px;
+  cursor:pointer;
+}
+.theme-btn:hover{
+  filter:brightness(0.95);
+}
+
+
+/* Danger button */
+.theme-btn.danger{
+  background:#ffecec;
+  color:#a40000;
+  border:1px solid #a40000;
+}
+.theme-btn.danger:hover{
+  background:#ffd6d6;
+}
+
+
+/* Support button */
+.theme-btn.support{
+  background:#f0f0ff;
+  color:#5b3fd6;
+  border:1px solid #5b3fd6;
+}
+.theme-btn.support:hover{
+  background:#e6e6ff;
+}
+
 </style>
     </head>
     <body onload="window.print()">
@@ -1025,6 +1152,43 @@ button:hover{ filter:brightness(0.9); }
 .theme-orange{ --primary:#ef6c00; --primary-light:#fff3e0; }
 .theme-gold{ --primary:#b8860b; --primary-light:#fff8dc; }
 
+
+/* Theme control buttons */
+.theme-btn{
+  background:var(--primary-light);
+  color:var(--primary);
+  border:1px solid var(--primary);
+  font-size:10px;
+  padding:3px 6px;
+  border-radius:4px;
+  cursor:pointer;
+}
+.theme-btn:hover{
+  filter:brightness(0.95);
+}
+
+
+/* Danger button */
+.theme-btn.danger{
+  background:#ffecec;
+  color:#a40000;
+  border:1px solid #a40000;
+}
+.theme-btn.danger:hover{
+  background:#ffd6d6;
+}
+
+
+/* Support button */
+.theme-btn.support{
+  background:#f0f0ff;
+  color:#5b3fd6;
+  border:1px solid #5b3fd6;
+}
+.theme-btn.support:hover{
+  background:#e6e6ff;
+}
+
 </style>
     </head>
     <body onload="window.print()">
@@ -1195,6 +1359,43 @@ button:hover{ filter:brightness(0.9); }
 .theme-purple{ --primary:#6a1b9a; --primary-light:#f3e5f5; }
 .theme-orange{ --primary:#ef6c00; --primary-light:#fff3e0; }
 .theme-gold{ --primary:#b8860b; --primary-light:#fff8dc; }
+
+
+/* Theme control buttons */
+.theme-btn{
+  background:var(--primary-light);
+  color:var(--primary);
+  border:1px solid var(--primary);
+  font-size:10px;
+  padding:3px 6px;
+  border-radius:4px;
+  cursor:pointer;
+}
+.theme-btn:hover{
+  filter:brightness(0.95);
+}
+
+
+/* Danger button */
+.theme-btn.danger{
+  background:#ffecec;
+  color:#a40000;
+  border:1px solid #a40000;
+}
+.theme-btn.danger:hover{
+  background:#ffd6d6;
+}
+
+
+/* Support button */
+.theme-btn.support{
+  background:#f0f0ff;
+  color:#5b3fd6;
+  border:1px solid #5b3fd6;
+}
+.theme-btn.support:hover{
+  background:#e6e6ff;
+}
 
 </style>
         </head>
@@ -1378,6 +1579,26 @@ function handleBackupFile(input){
     }
   };
   reader.readAsText(file);
+}
+
+
+function confirmDeleteAll(){
+  const msg = "⚠️ WARNING!\n\nThis will permanently delete:\n- All Parties\n- All Saved Data\n\nThis action CANNOT be undone.\n\nType DELETE to confirm.";
+  const res = prompt(msg);
+  if(res === "DELETE"){
+    localStorage.clear();
+    sessionStorage.clear();
+    alert("All data deleted permanently.");
+    location.reload();
+  }else if(res !== null){
+    alert("Delete cancelled. Exact word DELETE required.");
+  }
+}
+
+
+function openSupport(){
+  // Opens Instagram profile (user can DM from there)
+  window.open("https://www.instagram.com/mr_kailash_seervi_/", "_blank");
 }
 
 </script>
