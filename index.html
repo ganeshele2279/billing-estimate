@@ -61,6 +61,46 @@ textarea{
   word-wrap:break-word;
 }
 
+
+/* FIX: Amount column number alignment */
+.col-amt, .amt, td.col-amt, td.amt {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+
+/* FIX: Totals alignment (index-style clean layout) */
+.totals-box{
+  display:grid;
+  grid-template-columns: auto auto;
+  row-gap:4px;
+  column-gap:8px;
+  justify-content:end;
+  font-variant-numeric: tabular-nums;
+}
+.totals-box .label{
+  text-align:right;
+  font-size:11px;
+}
+.totals-box .value{
+  text-align:right;
+  min-width:90px;
+}
+
+
+/* FIX: Box only for Grand Total */
+.grand-box{
+  border:2px solid #000;
+  padding:6px 8px;
+  display:contents;
+}
+.grand-box .label,
+.grand-box .value{
+  font-weight:700;
+  font-size:14px;
+}
+
 </style>
 </head>
 <body>
@@ -120,10 +160,12 @@ text-align:center;font-size:24px;font-weight:bold;width:100%">
   GST % <input id="gstPer" type="number" value="18" style="width:45px;font-size:11px"> 
 </div>
    
-  <div class="total-normal">Sub Total : ₹ <span id="sub">0.00</span></div>
-  <div id="gstRow" class="total-normal" style="display:none">GST Amount : ₹ <span id="gstAmt">0.00</span></div>
-  <div class="total-normal">Round Off : ₹ <span id="roundoff">0.00</span></div>
-<div class="total-grand">Grand Total : ₹ <span id="grand">0.00</span></div>
+<div class="totals-box">
+  <div class="label">Sub Total :</div><div class="value">₹ <span id="sub">0.00</span></div>
+  <div id="gstRow" class="label" style="display:none">GST Amount :</div><div id="gstRowVal" class="value" style="display:none">₹ <span id="gstAmt">0.00</span></div>
+  <div class="label">Round Off :</div><div class="value">₹ <span id="roundoff">0.00</span></div>
+  <div class="grand-box"><div class="label total-grand">Grand Total :</div><div class="value total-grand">₹ <span id="grand">0.00</span></div></div>
+</div>
 <div id="amtWords" style="margin-top:6px;font-size:11px;font-style:italic">Amount in Words : Zero Only</div>
  </div>
 </div>
@@ -216,6 +258,7 @@ function calc(){
  const gstPer=+document.getElementById("gstPer").value||0;
 
  document.getElementById("gstRow").style.display = gstOn ? "block" : "none";
+ document.getElementById("gstRowVal").style.display = gstOn ? "block" : "none";
  document.getElementById("gstPercentRow").style.display = gstOn ? "block" : "none";
 
  let gstAmt = gstOn ? subT*gstPer/100 : 0;
@@ -269,7 +312,6 @@ function showLedger(){
  data.forEach((d,i)=>{h+=`<tr><td>${d.header.est}</td><td>${d.header.date} ${d.header.time}</td><td>${d.totals.grand}</td>
  <td>
  <button onclick="loadFromLedger('${name}',${i})">Edit</button>
- <button onclick="printFromLedger('${name}',${i})">Print</button>
  <button onclick="togglePaid('${name}',${i},this)">Unpaid</button>
  <button onclick="deleteFromLedger('${name}',${i})">Delete</button>
 </td></tr>`;});
@@ -412,7 +454,47 @@ function openStatement(){
         th,td{border:1px solid #000;padding:6px;text-align:left}
         th{background:#eee}
         .right{text-align:right}
-      </style>
+      
+/* FIX: Amount column number alignment */
+.col-amt, .amt, td.col-amt, td.amt {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+
+/* FIX: Totals alignment (index-style clean layout) */
+.totals-box{
+  display:grid;
+  grid-template-columns: auto auto;
+  row-gap:4px;
+  column-gap:8px;
+  justify-content:end;
+  font-variant-numeric: tabular-nums;
+}
+.totals-box .label{
+  text-align:right;
+  font-size:11px;
+}
+.totals-box .value{
+  text-align:right;
+  min-width:90px;
+}
+
+
+/* FIX: Box only for Grand Total */
+.grand-box{
+  border:2px solid #000;
+  padding:6px 8px;
+  display:contents;
+}
+.grand-box .label,
+.grand-box .value{
+  font-weight:700;
+  font-size:14px;
+}
+
+</style>
     </head>
     <body onload="window.print()">
       <div class="top">
@@ -526,7 +608,47 @@ function openStatement(){
         th,td{border:1px solid #000;padding:6px}
         th{background:#eee}
         .r{text-align:right}
-      </style>
+      
+/* FIX: Amount column number alignment */
+.col-amt, .amt, td.col-amt, td.amt {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+
+/* FIX: Totals alignment (index-style clean layout) */
+.totals-box{
+  display:grid;
+  grid-template-columns: auto auto;
+  row-gap:4px;
+  column-gap:8px;
+  justify-content:end;
+  font-variant-numeric: tabular-nums;
+}
+.totals-box .label{
+  text-align:right;
+  font-size:11px;
+}
+.totals-box .value{
+  text-align:right;
+  min-width:90px;
+}
+
+
+/* FIX: Box only for Grand Total */
+.grand-box{
+  border:2px solid #000;
+  padding:6px 8px;
+  display:contents;
+}
+.grand-box .label,
+.grand-box .value{
+  font-weight:700;
+  font-size:14px;
+}
+
+</style>
     </head>
     <body onload="window.print()">
       <h2>Party Statement</h2>
@@ -616,7 +738,47 @@ function printFromLedger(p,i){
         table{width:100%;border-collapse:collapse}
         th,td{border:1px solid #000;padding:6px;font-size:12px}
         th{background:#eee}
-      </style>
+      
+/* FIX: Amount column number alignment */
+.col-amt, .amt, td.col-amt, td.amt {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+
+/* FIX: Totals alignment (index-style clean layout) */
+.totals-box{
+  display:grid;
+  grid-template-columns: auto auto;
+  row-gap:4px;
+  column-gap:8px;
+  justify-content:end;
+  font-variant-numeric: tabular-nums;
+}
+.totals-box .label{
+  text-align:right;
+  font-size:11px;
+}
+.totals-box .value{
+  text-align:right;
+  min-width:90px;
+}
+
+
+/* FIX: Box only for Grand Total */
+.grand-box{
+  border:2px solid #000;
+  padding:6px 8px;
+  display:contents;
+}
+.grand-box .label,
+.grand-box .value{
+  font-weight:700;
+  font-size:14px;
+}
+
+</style>
     </head>
     <body onload="window.print()">
       <h2 style="text-align:center">ESTIMATE</h2>
@@ -682,7 +844,47 @@ function printFromLedger(p,i){
           <style>
             body{font-family:Arial;padding:20px}
             ${document.querySelector("style").innerHTML}
-          </style>
+          
+/* FIX: Amount column number alignment */
+.col-amt, .amt, td.col-amt, td.amt {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+
+/* FIX: Totals alignment (index-style clean layout) */
+.totals-box{
+  display:grid;
+  grid-template-columns: auto auto;
+  row-gap:4px;
+  column-gap:8px;
+  justify-content:end;
+  font-variant-numeric: tabular-nums;
+}
+.totals-box .label{
+  text-align:right;
+  font-size:11px;
+}
+.totals-box .value{
+  text-align:right;
+  min-width:90px;
+}
+
+
+/* FIX: Box only for Grand Total */
+.grand-box{
+  border:2px solid #000;
+  padding:6px 8px;
+  display:contents;
+}
+.grand-box .label,
+.grand-box .value{
+  font-weight:700;
+  font-size:14px;
+}
+
+</style>
         </head>
         <body onload="window.print()">
           ${billHTML}
@@ -692,6 +894,14 @@ function printFromLedger(p,i){
     w.document.close();
   },200);
 }
+
+
+function updateLiveTime(){
+  const now = new Date();
+  document.getElementById("time").innerText = now.toLocaleTimeString();
+}
+updateLiveTime();
+setInterval(updateLiveTime, 1000);
 
 </script>
 </body>
