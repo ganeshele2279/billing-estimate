@@ -486,12 +486,25 @@ async function openLedger(){
       let out = "";
       partyMap[p].forEach(d=>{
         out += `
-          <div style="border-bottom:1px solid #ccc;padding:6px;font-size:13px">
-            Date: ${d.header?.date || ""} ${d.header?.time || ""}<br>
-            Estimate: ${d.header?.est || ""}<br>
-            Amount: ₹ ${d.totals?.grand || 0}
-          </div>
-        `;
+  <div style="border-bottom:1px solid #ccc;padding:6px;font-size:13px">
+    Date: ${d.header?.date || ""} ${d.header?.time || ""}<br>
+    Estimate: ${d.header?.est || ""}<br>
+    Amount: ₹ ${d.totals?.grand || 0}<br>
+    Status:
+    <b style="color:${d.paid ? 'green' : 'red'}">
+      ${d.paid ? 'PAID' : 'UNPAID'}
+    </b><br>
+
+    <button onclick="togglePaid('${d.header.est}', ${d.paid})">
+      Mark ${d.paid ? 'Unpaid' : 'Paid'}
+    </button>
+
+    <button onclick="deleteEstimate('${d.header.est}')">
+      ❌ Delete
+    </button>
+  </div>
+`;
+
       });
 
       box.innerHTML = out;
