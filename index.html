@@ -407,26 +407,37 @@ function calc(){
  document.getElementById("gstAmt").innerText=gstAmt.toFixed(2);
  document.getElementById("grand").innerText=(subT+gstAmt).toFixed(2);
 }
+async function saveEstimate(){
+ const name = cust.value.trim();
+ if(!name){ alert("Customer name required"); return; }
 
-function saveEstimate(){
- const name=cust.value.trim();
- if(!name){alert("Customer name required");return;}
- const snap={
-  header:{est:invNo.innerText,date:date.innerText,time:time.innerText,cust:name,gst:gstToggle.checked,gstPer:gstPer.value,notes:notes.value},
-  rows:[...body.children].map(tr=>({
+ const snap = {
+  header:{
+   est:invNo.innerText,
+   date:date.innerText,
+   time:time.innerText,
+   cust:name,
+   gst:gstToggle.checked,
+   gstPer:gstPer.value,
+   notes:notes.value
+  },
+  items:[...body.children].map(tr=>({
    item:tr.querySelector('.item').value,
    qty:tr.querySelector('.qty').value,
    rate:tr.querySelector('.rate').value,
    disc:tr.querySelector('.disc').value
   })),
-  totals:{grand:grand.innerText}
+  totals:{ grand:grand.innerText },
+  createdAt: firebase.firestore.FieldValue.serverTimestamp()
  };
- let store=JSON.parse(localStorage.getItem("PARTY_DATA")||"{}");
- if(!store[name])store[name]=[];
- store[name].push(snap);
- localStorage.setItem("PARTY_DATA",JSON.stringify(store));
- refreshCustomers();
- alert("Saved");
+
+ try{
+  await db.collection("estimates").add(snap);
+  alert("Saved to Firebase ☁️");
+ }catch(e){
+  alert("Firebase save error ❌");
+  console.error(e);
+ }
 }
 
 function refreshCustomers(){
@@ -1926,6 +1937,26 @@ background:#fff;border:2px solid #000;padding:10px;z-index:4000">
   </div>
 </div>
 
+  <!-- 🔥 FIREBASE START -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyAY4MfQ5zPh60EfYmY0JoKIDQkojqNU6hs",
+    authDomain: "ganeshbilling-bdada.firebaseapp.com",
+    projectId: "ganeshbilling-bdada",
+    storageBucket: "ganeshbilling-bdada.firebasestorage.app",
+    messagingSenderId: "351410373004",
+    appId: "1:351410373004:web:50be765037e463735a16a9"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+</script>
+<!-- 🔥 FIREBASE END -->
+
+  
 </body>
 </html>
 
