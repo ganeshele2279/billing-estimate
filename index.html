@@ -446,15 +446,34 @@ function refreshCustomers(){
  Object.keys(store).forEach(c=>{let o=document.createElement("option");o.value=c;custList.appendChild(o);});
 }
 
-function openLedger(){
- const store=JSON.parse(localStorage.getItem("PARTY_DATA")||"{}");
- ledgerContent.innerHTML=`
-  Party Name:<br>
-  <input id="ledgerParty" list="custList">
-  <button onclick="showLedger()">View</button>
-  <button onclick="openStatement()">Statement</button>
-  <div id="ledgerDetails"></div>`;
+async function openLedger(){
  ledgerBox.style.display="block";
+ ledgerContent.innerHTML="Loading from Firebase...";
+
+ try{
+  const snap = await db
+    .collection("estimates")
+    .orderBy("createdAt","desc")
+    .get();
+
+  let html = "";
+  snap.forEach(doc=>{
+   const d = doc.data();
+   html += `
+    <div style="border-bottom:1px solid #ccc;padding:6px;font-size:13px">
+     <b>${d.header?.cust || "No Name"}</b><br>
+     Date: ${d.header?.date || ""} ${d.header?.time || ""}<br>
+     Estimate: ${d.header?.est || ""}<br>
+     Amount: ₹ ${d.totals?.grand || 0}
+    </div>`;
+  });
+
+  ledgerContent.innerHTML = html || "No records";
+
+ }catch(e){
+  ledgerContent.innerHTML="Ledger load error ❌";
+  console.error(e);
+ }
 }
 
 function showLedger(){
