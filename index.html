@@ -484,8 +484,18 @@ async function openLedger(){
       if(!p){ box.innerHTML=""; return; }
 
       let out = "";
-      partyMap[p].forEach(d=>{
-        out += `
+      let totalBilled = 0;
+let totalPaid = 0;
+let totalPending = 0;
+  partyMap[p].forEach(d=>{
+    const amt = Number(d.totals?.grand || 0);
+totalBilled += amt;
+if(d.paid){
+  totalPaid += amt;
+}else{
+  totalPending += amt;
+}
+   out += `
   <div style="border-bottom:1px solid #ccc;padding:6px;font-size:13px">
     Date: ${d.header?.date || ""} ${d.header?.time || ""}<br>
     Estimate: ${d.header?.est || ""}<br>
@@ -507,8 +517,18 @@ async function openLedger(){
 `;
 
       });
+      
+const summaryHTML = `
+  <div style="border:2px solid #000;padding:8px;margin-bottom:10px;background:#f9f9f9">
+    <b>Party Summary</b><br>
+    Total Billed: ₹ ${totalBilled.toFixed(2)}<br>
+    Total Paid: ₹ ${totalPaid.toFixed(2)}<br>
+    Pending Amount: ₹ ${totalPending.toFixed(2)}
+  </div>
+`;
 
-      box.innerHTML = out;
+box.innerHTML = summaryHTML + out;
+
     };
 
   }catch(e){
