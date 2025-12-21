@@ -2036,6 +2036,39 @@ background:#fff;border:2px solid #000;padding:10px;z-index:4000">
 
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
+
+  // 🔥 GLOBAL FUNCTIONS FOR BUTTONS
+
+window.deleteEstimate = async function(docId){
+  console.log("DELETE CLICKED", docId);
+
+  if(!confirm("Delete this estimate?")) return;
+
+  try{
+    await db.collection("estimates").doc(docId).delete();
+    alert("Estimate deleted ✅");
+    openLedger();
+  }catch(e){
+    alert("Delete failed ❌");
+    console.error(e);
+  }
+};
+
+window.togglePaid = async function(docId,current){
+  console.log("TOGGLE CLICKED", docId, current);
+
+  try{
+    await db.collection("estimates")
+      .doc(docId)
+      .update({ paid: !current });
+
+    openLedger();
+  }catch(e){
+    alert("Status update failed ❌");
+    console.error(e);
+  }
+};
+
 </script>
 <!-- 🔥 FIREBASE END -->
 
