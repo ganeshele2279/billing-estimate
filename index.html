@@ -447,33 +447,62 @@ function refreshCustomers(){
 }
 
 async function openLedger(){
- ledgerBox.style.display="block";
- ledgerContent.innerHTML="Loading from Firebase...";
+  ledgerBox.style.display = "block";
+  ledgerContent.innerHTML = "Loading parties...";
 
- try{
-  const snap = await db
-    .collection("estimates")
-    .get();
+  try{
+    const snap = await db.collection("estimates").get();
 
-  let html = "";
-  snap.forEach(doc=>{
-   const d = doc.data();
-   html += `
-    <div style="border-bottom:1px solid #ccc;padding:6px;font-size:13px">
-     <b>${d.header?.cust || "No Name"}</b><br>
-     Date: ${d.header?.date || ""} ${d.header?.time || ""}<br>
-     Estimate: ${d.header?.est || ""}<br>
-     Amount: ₹ ${d.totals?.grand || 0}
-    </div>`;
-  });
+    if(snap.empty){
+      ledgerContent.innerHTML = "No estimates found";
+      return;
+    }
 
-  ledgerContent.innerHTML = html || "No records";
+    const partyMap = {};
+    snap.forEach(doc=>{
+      const d = doc.data();
+      const name = (d.header?.cust || "No Name").trim();
+      if(!partyMap[name]) partyMap[name] = [];
+      partyMap[name].push(d);
+    });
 
- }catch(e){
-  ledgerContent.innerHTML="Ledger load error ❌";
-  console.error(e);
- }
+    let html = `
+      <b>Select Party:</b>
+      <select id="partySelect">
+        <option value="">-- Select Party --</option>
+        ${Object.keys(partyMap).map(p=>`<option value="${p}">${p}</option>`).join("")}
+      </select>
+      <hr>
+      <div id="partyLedgerResult"></div>
+    `;
+
+    ledgerContent.innerHTML = html;
+
+    document.getElementById("partySelect").onchange = function(){
+      const p = this.value;
+      const box = document.getElementById("partyLedgerResult");
+      if(!p){ box.innerHTML=""; return; }
+
+      let out = "";
+      partyMap[p].forEach(d=>{
+        out += `
+          <div style="border-bottom:1px solid #ccc;padding:6px;font-size:13px">
+            Date: ${d.header?.date || ""} ${d.header?.time || ""}<br>
+            Estimate: ${d.header?.est || ""}<br>
+            Amount: ₹ ${d.totals?.grand || 0}
+          </div>
+        `;
+      });
+
+      box.innerHTML = out;
+    };
+
+  }catch(e){
+    ledgerContent.innerHTML = "Ledger error ❌";
+    console.error(e);
+  }
 }
+
 
 function showLedger(){
  const name=document.getElementById("ledgerParty").value.trim();
