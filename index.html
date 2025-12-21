@@ -463,7 +463,7 @@ async function openLedger(){
       const d = doc.data();
       const name = (d.header?.cust || "No Name").trim();
       if(!partyMap[name]) partyMap[name] = [];
-      partyMap[name].push(d);
+      partyMap[name].push({ id: doc.id, ...d });
     });
 
     let html = `
@@ -495,13 +495,14 @@ async function openLedger(){
       ${d.paid ? 'PAID' : 'UNPAID'}
     </b><br>
 
-    <button onclick="togglePaid('${d.header.est}', ${d.paid})">
-      Mark ${d.paid ? 'Unpaid' : 'Paid'}
-    </button>
+   <button onclick="togglePaid('${d.id}', ${d.paid})">
+  Mark ${d.paid ? 'Unpaid' : 'Paid'}
+</button>
 
-    <button onclick="deleteEstimate('${d.header.est}')">
-      ❌ Delete
-    </button>
+<button onclick="deleteEstimate('${d.id}')">
+  ❌ Delete
+</button>
+
   </div>
 `;
 
