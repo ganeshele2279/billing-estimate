@@ -1827,18 +1827,40 @@ function handleBackupFile(input){
 }
 
 
-function confirmDeleteAll(){
-  const msg = "⚠️ WARNING!\n\nThis will permanently delete:\n- All Parties\n- All Saved Data\n\nThis action CANNOT be undone.\n\nType DELETE to confirm.";
+async function confirmDeleteAll(){
+  const msg =
+    "⚠️ WARNING!\n\nThis will permanently delete ALL ESTIMATES from FIREBASE.\n\nThis action CANNOT be undone.\n\nType DELETE to confirm.";
+
   const res = prompt(msg);
-  if(res === "DELETE"){
-    localStorage.clear();
-    sessionStorage.clear();
-    alert("All data deleted permanently.");
-    location.reload();
-  }else if(res !== null){
-    alert("Delete cancelled. Exact word DELETE required.");
+  if(res !== "DELETE"){
+    if(res !== null) alert("Delete cancelled. Exact word DELETE required.");
+    return;
+  }
+
+  try{
+    const snap = await db.collection("estimates").get();
+
+    if(snap.empty){
+      alert("No Firebase data found");
+      return;
+    }
+
+    const batch = db.batch();
+    snap.forEach(doc=>{
+      batch.delete(doc.ref);
+    });
+
+    await batch.commit();
+
+    alert("🔥 All Firebase estimates deleted");
+    ledgerContent.innerHTML = "";
+
+  }catch(e){
+    alert("Firebase delete failed ❌");
+    console.error(e);
   }
 }
+
 
 
 function openSupport(){
