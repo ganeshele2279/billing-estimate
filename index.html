@@ -2095,16 +2095,6 @@ background:#fff;border:2px solid #000;padding:10px;z-index:4000">
   const db = firebase.firestore();
   const auth = firebase.auth();
 
-  function showRegister(){
-  document.getElementById("loginView").style.display = "none";
-  document.getElementById("registerView").style.display = "block";
-}
-
-function showLogin(){
-  document.getElementById("registerView").style.display = "none";
-  document.getElementById("loginView").style.display = "block";
-}
-
   // 🔁 Toggle Login / Register views
 function showRegister(){
   document.getElementById("loginView").style.display = "none";
