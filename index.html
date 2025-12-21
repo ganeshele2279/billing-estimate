@@ -2043,7 +2043,9 @@ background:#fff;border:2px solid #000;padding:10px;z-index:4000">
   <!-- 🔥 FIREBASE START -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
+  
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyAY4MfQ5zPh60EfYmY0JoKIDQkojqNU6hs",
@@ -2056,6 +2058,7 @@ background:#fff;border:2px solid #000;padding:10px;z-index:4000">
 
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
+  const auth = firebase.auth();
 
   // 🔥 GLOBAL FUNCTIONS FOR BUTTONS
 
@@ -2089,8 +2092,88 @@ window.togglePaid = async function(docId,current){
   }
 };
 
+function getEmailFromMobile(m){
+  return m + "@app.com";
+}
+
+// REGISTER
+function registerUser(){
+  const name = lg_name.value.trim();
+  const mobile = lg_mobile.value.trim();
+  const pass = lg_pass.value;
+
+  if(!name || !mobile || !pass){
+    lg_msg.innerText = "All fields required";
+    return;
+  }
+
+  const email = getEmailFromMobile(mobile);
+
+  auth.createUserWithEmailAndPassword(email, pass)
+    .then(res=>{
+      return db.collection("users").doc(res.user.uid).set({
+        name,
+        mobile,
+        role: "user",
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    })
+    .then(()=>{
+      lg_msg.style.color="green";
+      lg_msg.innerText="Registered successfully. Login now.";
+    })
+    .catch(e=>{
+      lg_msg.innerText = e.message;
+    });
+}
+
+// LOGIN
+function loginUser(){
+  const mobile = lg_mobile.value.trim();
+  const pass = lg_pass.value;
+
+  if(!mobile || !pass){
+    lg_msg.innerText = "Enter mobile & password";
+    return;
+  }
+
+  const email = getEmailFromMobile(mobile);
+
+  auth.signInWithEmailAndPassword(email, pass)
+    .then(res=>{
+      // ADMIN CHECK
+      if(mobile==="7073741650" && pass==="2279"){
+        window.isAdmin = true;
+      }else{
+        window.isAdmin = false;
+      }
+
+      document.getElementById("loginBox").style.display="none";
+    })
+    .catch(()=>{
+      lg_msg.innerText = "Invalid login";
+    });
+}
+
+  
 </script>
 <!-- 🔥 FIREBASE END -->
+
+<!-- 🔐 LOGIN BOX -->
+<div id="loginBox" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#f4f4f4;display:flex;align-items:center;justify-content:center;z-index:9999;">
+  <div style="background:#fff;padding:20px;border:1px solid #ccc;width:300px">
+    <h3>Login / Register</h3>
+
+    <input id="lg_name" placeholder="Name" style="width:100%;margin-bottom:6px"><br>
+    <input id="lg_mobile" placeholder="Mobile Number" style="width:100%;margin-bottom:6px"><br>
+    <input id="lg_pass" type="password" placeholder="Password" style="width:100%;margin-bottom:10px"><br>
+
+    <button onclick="registerUser()">Register</button>
+    <button onclick="loginUser()">Login</button>
+
+    <div id="lg_msg" style="color:red;margin-top:6px"></div>
+  </div>
+</div>
 
   
 </body>
