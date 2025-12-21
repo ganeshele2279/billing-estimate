@@ -211,46 +211,27 @@ button:hover{ filter:brightness(0.9); }
   <div style="background:#fff;padding:20px;border:1px solid #ccc;width:300px">
 
     <!-- LOGIN VIEW -->
-    <div id="loginView">
-      <h3>Login</h3>
+   <div id="loginView">
+  <input id="login_mobile" placeholder="Mobile Number"><br>
+  <input id="login_pass" type="password" placeholder="Password"><br>
 
-      <input id="login_mobile" placeholder="Mobile Number"
-        style="width:100%;margin-bottom:8px">
+  <button type="button" onclick="loginUser()">Login</button><br><br>
 
-      <input id="login_pass" type="password" placeholder="Password"
-        style="width:100%;margin-bottom:10px">
-
-      <button style="width:100%" onclick="loginUser()">Login</button>
-
-      <p style="margin-top:10px;font-size:12px">
-        New user?
-        <a href="#" onclick="showRegister()">Register here</a>
-      </p>
-    </div>
-
-    <!-- REGISTER VIEW -->
-    <div id="registerView" style="display:none">
-      <h3>Register</h3>
-
-      <input id="reg_name" placeholder="Name"
-        style="width:100%;margin-bottom:8px">
-
-      <input id="reg_mobile" placeholder="Mobile Number"
-        style="width:100%;margin-bottom:8px">
-
-      <input id="reg_pass" type="password" placeholder="Password"
-        style="width:100%;margin-bottom:10px">
-
-      <button style="width:100%" onclick="registerUser()">Register</button>
-
-      <p style="margin-top:10px;font-size:12px">
-        <a href="#" onclick="showLogin()">← Back to Login</a>
-      </p>
-    </div>
-
-    <div id="auth_msg" style="color:red;margin-top:8px"></div>
-  </div>
+  <a href="#" onclick="showRegister()">Register New User</a>
 </div>
+
+<div id="registerView" style="display:none">
+  <input id="reg_name" placeholder="Name"><br>
+  <input id="reg_mobile" placeholder="Mobile Number"><br>
+  <input id="reg_pass" type="password" placeholder="Password"><br>
+
+  <button type="button" onclick="registerUser()">Register</button><br><br>
+
+  <a href="#" onclick="showLogin()">Back to Login</a>
+</div>
+
+<div id="auth_msg" style="color:red;margin-top:6px"></div>
+
 <!-- 🔐 AUTH BOX END -->
 
 
@@ -2113,6 +2094,16 @@ background:#fff;border:2px solid #000;padding:10px;z-index:4000">
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
   const auth = firebase.auth();
+
+  function showRegister(){
+  document.getElementById("loginView").style.display = "none";
+  document.getElementById("registerView").style.display = "block";
+}
+
+function showLogin(){
+  document.getElementById("registerView").style.display = "none";
+  document.getElementById("loginView").style.display = "block";
+}
 
   // 🔁 Toggle Login / Register views
 function showRegister(){
