@@ -433,11 +433,12 @@ async function saveEstimate(){
 
  try{
   await db.collection("estimates").add(snap);
-  console.log("Saved to Firebase"); // optional (sirf console me)
-}catch(e){
-  console.error("Firebase save error:", e);
+  alert("Saved to Firebase ☁️");
+ }catch(e){
+  alert("Firebase save error ❌");
+  console.error(e);
+ }
 }
-
 
 function refreshCustomers(){
  custList.innerHTML="";
