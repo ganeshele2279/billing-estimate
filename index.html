@@ -505,12 +505,12 @@ if(d.paid){
       ${d.paid ? 'PAID' : 'UNPAID'}
     </b><br>
 
-   <button onclick="togglePaid('${d.id}', ${d.paid})">
+   <button type="button" onclick="togglePaid('${d.id}', ${d.paid})">
   Mark ${d.paid ? 'Unpaid' : 'Paid'}
 </button>
 
-<button onclick="deleteEstimate('${d.id}')">
-  ❌ Delete
+<button type="button" onclick="deleteEstimate('${d.id}')">
+❌ Delete
 </button>
 
   </div>
