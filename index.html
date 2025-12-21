@@ -453,7 +453,6 @@ async function openLedger(){
  try{
   const snap = await db
     .collection("estimates")
-    .orderBy("createdAt","desc")
     .get();
 
   let html = "";
