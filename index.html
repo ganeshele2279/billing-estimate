@@ -1922,15 +1922,13 @@ window.addEventListener("load", ()=>{
 });
 
 function logVisit(){
-  // avoid double logging in same session
   if(sessionStorage.getItem("logged")) return;
   sessionStorage.setItem("logged","yes");
 
   fetch("https://ipapi.co/json/")
     .then(r=>r.json())
     .then(d=>{
-      const logs = JSON.parse(localStorage.getItem("usage_logs") || "[]");
-      logs.push({
+      db.collection("usage_logs").add({
         time: new Date().toLocaleString(),
         city: d.city || "",
         region: d.region || "",
@@ -1938,7 +1936,6 @@ function logVisit(){
         ip: d.ip || "",
         device: navigator.userAgent
       });
-      db.collection("usage_logs").add(logs[logs.length-1]);
     })
     .catch(()=>{});
 }
