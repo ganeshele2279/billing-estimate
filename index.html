@@ -210,8 +210,8 @@ button:hover{ filter:brightness(0.9); }
     <h3>Login</h3>
     <input id="email" placeholder="Email"><br><br>
     <input id="password" type="password" placeholder="Password"><br><br>
-    <button type="button" onclick="login()">Login</button><br><br>
-    <button type="button" onclick="register()">New User Register</button>
+    <button type="button" id="loginBtn">Login</button><br><br>
+    <button type="button" id="regBtn">New User Register</button>
   </div>
 </div>
 
@@ -913,24 +913,8 @@ background:#fff;border:2px solid #000;padding:10px;z-index:4000">
 
 
 <script>
-const auth=firebase.auth(),db=firebase.firestore();
-
-function login(){
- auth.signInWithEmailAndPassword(email.value,password.value)
- .catch(e=>alert(e.message));
-}
-
-function register(){
- auth.createUserWithEmailAndPassword(email.value,password.value)
- .then(r=>db.collection("users").doc(r.user.uid).set({email:r.user.email,created:new Date()}))
- .then(()=>alert("User Registered"))
- .catch(e=>alert(e.message));
-}
-
-auth.onAuthStateChanged(u=>{
- if(u){authBox.style.display="none";}
- else{authBox.style.display="flex";}
-});
+document.getElementById("loginBtn").onclick=function(){alert("Login click working")};
+document.getElementById("regBtn").onclick=function(){alert("Register click working")};
 </script>
 
 </body>
