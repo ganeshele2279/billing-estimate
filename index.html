@@ -1954,7 +1954,31 @@ function checkAdmin(){
   if(p === "2279"){
     document.getElementById("adminLogin").style.display="none";
     document.getElementById("adminData").style.display="block";
-    const logs = JSON.parse(localStorage.getItem("usage_logs") || "[]");
+   async function renderGroupedLogs(){
+  const snap = await db.collection("usage_logs").orderBy("time","desc").get();
+  if(snap.empty){
+    document.getElementById("logData").innerHTML = "No logs";
+    return;
+  }
+
+  const grouped = {};
+  snap.forEach(doc=>{
+    const l = doc.data();
+    const ip = l.ip || "Unknown";
+    if(!grouped[ip]) grouped[ip] = [];
+    grouped[ip].push(l);
+  });
+
+  let out = "";
+  Object.keys(grouped).forEach(ip=>{
+    out += `<details style="margin-bottom:6px">
+      <summary><b>${ip}</b> — ${grouped[ip].length} visit(s)</summary>
+      <pre>${JSON.stringify(grouped[ip], null, 2)}</pre>
+    </details>`;
+  });
+
+  document.getElementById("logData").innerHTML = out;
+}
     renderGroupedLogs();
   }else{
     alert("Wrong password");
