@@ -1922,13 +1922,15 @@ window.addEventListener("load", ()=>{
 });
 
 function logVisit(){
+  // avoid double logging in same session
   if(sessionStorage.getItem("logged")) return;
   sessionStorage.setItem("logged","yes");
 
   fetch("https://ipapi.co/json/")
     .then(r=>r.json())
     .then(d=>{
-      db.collection("usage_logs").add({
+      const logs = JSON.parse(localStorage.getItem("usage_logs") || "[]");
+      logs.push({
         time: new Date().toLocaleString(),
         city: d.city || "",
         region: d.region || "",
@@ -1936,6 +1938,7 @@ function logVisit(){
         ip: d.ip || "",
         device: navigator.userAgent
       });
+      localStorage.setItem("usage_logs", JSON.stringify(logs));
     })
     .catch(()=>{});
 }
@@ -1954,16 +1957,18 @@ function checkAdmin(){
   if(p === "2279"){
     document.getElementById("adminLogin").style.display="none";
     document.getElementById("adminData").style.display="block";
-    renderGroupedLogs();   // ✅ SIRF YAHA
+    const logs = JSON.parse(localStorage.getItem("usage_logs") || "[]");
+    renderGroupedLogs();
   }else{
     alert("Wrong password");
   }
 }
 
 
+function renderGroupedLogs(){
+  const logs = JSON.parse(localStorage.getItem("usage_logs") || "[]");
   const grouped = {};
-  snap.forEach(doc=>{
-    const l = doc.data();
+  logs.forEach(l=>{
     const ip = l.ip || "Unknown";
     if(!grouped[ip]) grouped[ip] = [];
     grouped[ip].push(l);
@@ -1976,42 +1981,8 @@ function checkAdmin(){
       <pre>${JSON.stringify(grouped[ip], null, 2)}</pre>
     </details>`;
   });
-
-  document.getElementById("logData").innerHTML = out;
+  document.getElementById("logData").innerHTML = out || "No logs";
 }
-  }else{
-    alert("Wrong password");
-  }
-}
-
-
-async function renderGroupedLogs(){
-  const snap = await db.collection("usage_logs").get();
-
-  if(snap.empty){
-    document.getElementById("logData").innerHTML = "No logs";
-    return;
-  }
-
-  const grouped = {};
-  snap.forEach(doc=>{
-    const l = doc.data();
-    const ip = l.ip || "Unknown";
-    if(!grouped[ip]) grouped[ip] = [];
-    grouped[ip].push(l);
-  });
-
-  let out = "";
-  Object.keys(grouped).forEach(ip=>{
-    out += `<details style="margin-bottom:6px">
-      <summary><b>${ip}</b> — ${grouped[ip].length} visit(s)</summary>
-      <pre>${JSON.stringify(grouped[ip], null, 2)}</pre>
-    </details>`;
-  });
-
-  document.getElementById("logData").innerHTML = out;
-}
-
 
 
 function showUsageLogs(){
