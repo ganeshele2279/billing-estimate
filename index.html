@@ -205,13 +205,13 @@ button:hover{ filter:brightness(0.9); }
 </head>
 <body>
 
-<div id="authBox" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#eef1f4;display:flex;align-items:center;justify-content:center;z-index:99999">
-  <div style="background:#fff;padding:20px;border-radius:6px;width:300px;text-align:center">
+<div id="authBox" style="all:initial;position:fixed;inset:0;background:#eef1f4;display:flex;align-items:center;justify-content:center;z-index:2147483647;font-family:Arial">
+  <div style="background:#fff;padding:20px;border-radius:6px;width:320px;text-align:center;all:initial;font-family:Arial">
     <h3>Login</h3>
-    <input id="email" placeholder="Email" style="width:100%;margin-bottom:8px">
-    <input id="password" type="password" placeholder="Password" style="width:100%;margin-bottom:12px">
-    <button id="loginBtn" type="button" style="width:100%">Login</button><br><br>
-    <button id="regBtn" type="button" style="width:100%">New User Register</button>
+    <input id="email" placeholder="Email" style="width:100%;padding:6px;margin:6px 0">
+    <input id="password" type="password" placeholder="Password" style="width:100%;padding:6px;margin:6px 0">
+    <button id="loginBtn" style="width:100%;padding:8px;margin-top:6px">Login</button>
+    <button id="regBtn" style="width:100%;padding:8px;margin-top:6px">New User Register</button>
   </div>
 </div>
 
@@ -913,25 +913,13 @@ background:#fff;border:2px solid #000;padding:10px;z-index:4000">
 
 
 <script>
-const auth = firebase.auth();
-const db = firebase.firestore();
-
-document.getElementById("loginBtn").addEventListener("click", ()=>{
-  auth.signInWithEmailAndPassword(email.value, password.value)
-  .catch(e=>alert(e.message));
-});
-
-document.getElementById("regBtn").addEventListener("click", ()=>{
-  auth.createUserWithEmailAndPassword(email.value, password.value)
-  .then(r=>db.collection("users").doc(r.user.uid).set({email:r.user.email,created:new Date()}))
-  .then(()=>alert("User Registered"))
-  .catch(e=>alert(e.message));
-});
-
-auth.onAuthStateChanged(u=>{
-  if(u){document.getElementById("authBox").style.display="none";}
-  else{document.getElementById("authBox").style.display="flex";}
-});
+const auth=firebase.auth(),db=firebase.firestore();
+loginBtn.onclick=()=>auth.signInWithEmailAndPassword(email.value,password.value).catch(e=>alert(e.message));
+regBtn.onclick=()=>auth.createUserWithEmailAndPassword(email.value,password.value)
+.then(r=>db.collection("users").doc(r.user.uid).set({email:r.user.email,created:new Date()}))
+.then(()=>alert("User Registered"))
+.catch(e=>alert(e.message));
+auth.onAuthStateChanged(u=>{if(u)authBox.remove();});
 </script>
 
 </body>
