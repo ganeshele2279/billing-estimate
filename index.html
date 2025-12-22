@@ -1938,7 +1938,7 @@ function logVisit(){
         ip: d.ip || "",
         device: navigator.userAgent
       });
-      localStorage.setItem("usage_logs", JSON.stringify(logs));
+      db.collection("usage_logs").add(logs[logs.length-1]);
     })
     .catch(()=>{});
 }
