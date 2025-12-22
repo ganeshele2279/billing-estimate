@@ -1,13 +1,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-
-<script>
-// disable auto print on load
-window.__realPrint = window.print;
-window.print = function(){};
-</script>
-
 <meta charset="UTF-8">
 <title>ESTIMATE</title>
 <style>
@@ -209,30 +202,18 @@ button:hover{ filter:brightness(0.9); }
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-
-<style>
-body *{pointer-events:none}
-#authBox, #authBox *{pointer-events:auto}
-#authBox{position:fixed;inset:0;margin:auto;max-width:320px;height:fit-content;z-index:99999}
-</style>
-
 </head>
 <body>
 
-<style>
-#app{display:none}
-@media print{#authBox{display:none}}
-</style>
-
-<div id="authBox" style="max-width:320px;margin:40px auto;text-align:center">
-  <h3>Login</h3>
-  <input id="email" placeholder="Email"><br><br>
-  <input id="password" type="password" placeholder="Password"><br><br>
-  <button type="button" onclick="login()">Login</button><br><br>
-  <button type="button" onclick="register()">New User Register</button>
+<div id="authBox" style="position:fixed;inset:0;background:#eef1f4;display:flex;align-items:center;justify-content:center;z-index:9999">
+  <div style="background:#fff;padding:20px;border-radius:6px;min-width:300px;text-align:center">
+    <h3>Login</h3>
+    <input id="email" placeholder="Email"><br><br>
+    <input id="password" type="password" placeholder="Password"><br><br>
+    <button type="button" onclick="login()">Login</button><br><br>
+    <button type="button" onclick="register()">New User Register</button>
+  </div>
 </div>
-
-<div id="app">
 
 
 <div class="no-print" style="position:fixed;top:10px;left:10px;z-index:3000">
@@ -930,20 +911,25 @@ background:#fff;border:2px solid #000;padding:10px;z-index:4000">
   </div>
 </div>
 
-</div>
 
 <script>
 const auth=firebase.auth(),db=firebase.firestore();
-function login(){auth.signInWithEmailAndPassword(email.value,password.value).catch(e=>alert(e.message));}
+
+function login(){
+ auth.signInWithEmailAndPassword(email.value,password.value)
+ .catch(e=>alert(e.message));
+}
+
 function register(){
  auth.createUserWithEmailAndPassword(email.value,password.value)
  .then(r=>db.collection("users").doc(r.user.uid).set({email:r.user.email,created:new Date()}))
- .then(()=>alert("Registered"))
+ .then(()=>alert("User Registered"))
  .catch(e=>alert(e.message));
 }
+
 auth.onAuthStateChanged(u=>{
- if(u){authBox.style.display="none";app.style.display="block";}
- else{authBox.style.display="block";app.style.display="none";}
+ if(u){authBox.style.display="none";}
+ else{authBox.style.display="flex";}
 });
 </script>
 
