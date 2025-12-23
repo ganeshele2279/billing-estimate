@@ -12,9 +12,8 @@ body {
   background: #f1f5f9;
 }
 
-/* 🔥 FULLSCREEN LAYERS */
-#loginPage,
-#dashboardPage {
+/* FULLSCREEN LAYERS */
+#loginPage, #dashboardPage {
   position: fixed;
   inset: 0;
   display: none;
@@ -25,8 +24,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f1f5f9;
-  z-index: 10;
 }
 .login-box {
   background: #fff;
@@ -44,38 +41,60 @@ input, textarea {
 button {
   width: 100%;
   padding: 10px;
-  background: #2563eb;
-  color: #fff;
   border: none;
   border-radius: 5px;
   cursor: pointer;
 }
+.btn-primary { background: #2563eb; color: #fff; }
+.btn-danger { background: #dc2626; color: #fff; }
 
 /* DASHBOARD */
 #dashboardPage {
   display: flex;
-  background: #f1f5f9;
 }
 .sidebar {
-  width: 230px;
+  width: 220px;
   background: #0f172a;
   color: #fff;
   display: flex;
   flex-direction: column;
 }
 .menu {
-  padding: 12px;
+  padding: 14px;
   cursor: pointer;
 }
-.menu:hover { background: #1e293b; }
+.menu:hover,
+.menu.active {
+  background: #1e293b;
+}
 .profile {
   margin-top: auto;
-  padding: 12px;
+  padding: 14px;
   border-top: 1px solid #1e293b;
 }
+
+/* MAIN AREA */
 .main {
   flex: 1;
+  padding: 30px;
+  overflow-y: auto;
+}
+
+/* CONTENT CONTAINER (OFFICIAL LOOK) */
+.content {
+  max-width: 900px;
+  margin: 0 auto;
+  display: none;
+}
+.content.active {
+  display: block;
+}
+
+.card {
+  background: #fff;
   padding: 25px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0,0,0,.08);
 }
 </style>
 </head>
@@ -88,14 +107,16 @@ button {
     <h2>Login</h2>
     <input id="loginMobile" placeholder="Mobile Number">
     <input id="loginPassword" type="password" placeholder="Password">
-    <button onclick="login()">Login</button>
+    <button class="btn-primary" onclick="login()">Login</button>
   </div>
 </div>
 
 <!-- DASHBOARD -->
 <div id="dashboardPage">
   <div class="sidebar">
-    <div class="menu">👤 Personal Details</div>
+    <div class="menu active" onclick="showHome(this)">🏠 Dashboard</div>
+    <div class="menu" onclick="showPersonal(this)">👤 Personal Details</div>
+
     <div class="profile">
       <div id="userName">User</div>
       <small>Online</small>
@@ -103,32 +124,41 @@ button {
   </div>
 
   <div class="main">
-    <h2>Personal / Business Details</h2>
-    <input id="business" placeholder="Business Name">
-    <input id="mobile" placeholder="Mobile Number">
-    <input id="gst" placeholder="GST Number">
-    <input id="email" placeholder="Email">
-    <textarea id="address" placeholder="Address"></textarea>
-    <button onclick="saveProfile()">Save</button>
-    <br><br>
-    <button style="background:#dc2626" onclick="logout()">Logout</button>
+
+    <!-- HOME -->
+    <div id="home" class="content active">
+      <div class="card">
+        <h2>Welcome 👋</h2>
+        <p>Select an option from the left menu to continue.</p>
+      </div>
+    </div>
+
+    <!-- PERSONAL DETAILS -->
+    <div id="personal" class="content">
+      <div class="card">
+        <h2>Personal / Business Details</h2>
+
+        <input id="business" placeholder="Business Name">
+        <input id="mobile" placeholder="Mobile Number">
+        <input id="gst" placeholder="GST Number">
+        <input id="email" placeholder="Email">
+        <textarea id="address" placeholder="Address"></textarea>
+
+        <button class="btn-primary" onclick="saveProfile()">Save</button>
+        <br><br>
+        <button class="btn-danger" onclick="logout()">Logout</button>
+      </div>
+    </div>
+
   </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {
-  getAuth,
-  signInWithEmailAndPassword,
-  onAuthStateChanged,
-  signOut
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import {
-  getFirestore,
-  doc,
-  getDoc,
-  setDoc
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } 
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc } 
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const app = initializeApp({
   apiKey: "AIzaSyAY4MfQ5zPh60EfYmY0JoKIDQkojqNU6hs",
@@ -140,7 +170,7 @@ const auth = getAuth();
 const db = getFirestore();
 let uid = "";
 
-/* 🔥 SINGLE SOURCE OF TRUTH */
+/* AUTH */
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     uid = user.uid;
@@ -166,7 +196,7 @@ window.logout = async () => {
   await signOut(auth);
 };
 
-/* SAVE PROFILE */
+/* SAVE */
 window.saveProfile = async () => {
   await setDoc(doc(db, "profiles", uid), {
     business: business.value,
@@ -176,6 +206,24 @@ window.saveProfile = async () => {
     address: address.value
   });
   alert("Saved");
+};
+
+/* TAB SWITCH */
+function clearTabs() {
+  document.querySelectorAll(".menu").forEach(m => m.classList.remove("active"));
+  document.querySelectorAll(".content").forEach(c => c.classList.remove("active"));
+}
+
+window.showHome = (el) => {
+  clearTabs();
+  el.classList.add("active");
+  home.classList.add("active");
+};
+
+window.showPersonal = (el) => {
+  clearTabs();
+  el.classList.add("active");
+  personal.classList.add("active");
 };
 </script>
 
