@@ -52,7 +52,7 @@ button {
 <div class="card">
 <h2>Login / Register</h2>
 <input type="text" id="name" placeholder="Full Name (New User)">
-<input type="text" id="phone" placeholder="+91XXXXXXXXXX">
+<input type="text" id="phone" placeholder="Mobile Number">
 <button onclick="sendOTP()">Send OTP</button>
 
 <div class="otp-box" id="otpBox">
@@ -86,7 +86,15 @@ window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier(
 let confirmationResult;
 
 function sendOTP() {
-  const phone = document.getElementById("phone").value;
+  let phone = document.getElementById("phone").value.trim();
+
+  if (phone.length !== 10) {
+    alert("Enter valid 10 digit mobile number");
+    return;
+  }
+
+  phone = "+91" + phone;
+
   auth.signInWithPhoneNumber(phone, window.recaptchaVerifier)
     .then(result => {
       confirmationResult = result;
@@ -95,7 +103,7 @@ function sendOTP() {
     })
     .catch(err => alert(err.message));
 }
-
+  
 function verifyOTP() {
   const otp = document.getElementById("otp").value;
   const name = document.getElementById("name").value;
