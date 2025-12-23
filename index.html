@@ -1,79 +1,144 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Ganesh Billing Login</title>
+  <meta charset="UTF-8">
+  <title>Ganesh Billing - Login</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f4f7;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .box {
+      background: #fff;
+      padding: 25px;
+      width: 320px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,.1);
+      text-align: center;
+    }
+    h2 { margin-bottom: 15px; }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover { background: #0056b3; }
+    .link {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #007bff;
+      cursor: pointer;
+    }
+    .hidden { display: none; }
+  </style>
 </head>
 <body>
 
-<h2>Register</h2>
-<input id="r_name" placeholder="Name"><br>
-<input id="r_mobile" placeholder="Mobile"><br>
-<input id="r_password" type="password" placeholder="Password"><br>
-<button onclick="register()">Register</button>
+<div class="box" id="loginBox">
+  <h2>Login</h2>
+  <input type="text" id="loginMobile" placeholder="Mobile Number">
+  <input type="password" id="loginPassword" placeholder="Password">
+  <button onclick="login()">Login</button>
+  <div class="link" onclick="showRegister()">Register User</div>
+</div>
 
-<hr>
+<div class="box hidden" id="registerBox">
+  <h2>Register</h2>
+  <input type="text" id="regName" placeholder="Full Name">
+  <input type="text" id="regMobile" placeholder="Mobile Number">
+  <input type="password" id="regPassword" placeholder="Password">
+  <button onclick="register()">Create Account</button>
+  <div class="link" onclick="showLogin()">Back to Login</div>
+</div>
 
-<h2>Login</h2>
-<input id="l_mobile" placeholder="Mobile"><br>
-<input id="l_password" type="password" placeholder="Password"><br>
-<button onclick="login()">Login</button>
-
+<!-- Firebase -->
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } 
+    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, doc, setDoc } 
+    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyAY4MfQ5zPh60EfYmY0JoKIDQkojqNU6hs",
-  authDomain: "ganeshbilling-bdada.firebaseapp.com",
-  projectId: "ganeshbilling-bdada",
-  storageBucket: "ganeshbilling-bdada.firebasestorage.app",
-  messagingSenderId: "351410373004",
-  appId: "1:351410373004:web:50be765037e463735a16a9"
-};
+  const firebaseConfig = {
+    apiKey: "AIzaSyAY4MfQ5zPh60EfYmY0JoKIDQkojqNU6hs",
+    authDomain: "ganeshbilling-bdada.firebaseapp.com",
+    projectId: "ganeshbilling-bdada",
+    storageBucket: "ganeshbilling-bdada.firebasestorage.app",
+    messagingSenderId: "351410373004",
+    appId: "1:351410373004:web:50be765037e463735a16a9"
+  };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
-// REGISTER
-window.register = async function () {
-  const name = r_name.value;
-  const mobile = r_mobile.value;
-  const password = r_password.value;
+  window.showRegister = () => {
+    loginBox.classList.add("hidden");
+    registerBox.classList.remove("hidden");
+  };
 
-  if (!name || !mobile || !password) {
-    alert("All fields required");
-    return;
-  }
+  window.showLogin = () => {
+    registerBox.classList.add("hidden");
+    loginBox.classList.remove("hidden");
+  };
 
-  await setDoc(doc(db, "users", mobile), {
-    name,
-    mobile,
-    password
-  });
+  window.register = async () => {
+    const name = regName.value.trim();
+    const mobile = regMobile.value.trim();
+    const password = regPassword.value;
 
-  alert("Registered Successfully");
-};
+    if (!name || !mobile || !password) {
+      alert("All fields required");
+      return;
+    }
 
-// LOGIN
-window.login = async function () {
-  const mobile = l_mobile.value;
-  const password = l_password.value;
+    const email = mobile + "@mobile.local";
 
-  const userRef = doc(db, "users", mobile);
-  const userSnap = await getDoc(userRef);
+    try {
+      const userCred = await createUserWithEmailAndPassword(auth, email, password);
 
-  if (!userSnap.exists()) {
-    alert("User not found");
-    return;
-  }
+      await setDoc(doc(db, "users", userCred.user.uid), {
+        name,
+        mobile,
+        createdAt: new Date()
+      });
 
-  if (userSnap.data().password !== password) {
-    alert("Wrong password");
-    return;
-  }
+      alert("Account Created Successfully");
+      showLogin();
+    } catch (err) {
+      alert(err.message);
+    }
+  };
 
-  alert("Login Successful");
-};
+  window.login = async () => {
+    const mobile = loginMobile.value.trim();
+    const password = loginPassword.value;
+
+    const email = mobile + "@mobile.local";
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      alert("Login Successful");
+      // yaha dashboard redirect laga sakta hai
+    } catch (err) {
+      alert("Invalid Login Details");
+    }
+  };
 </script>
 
 </body>
