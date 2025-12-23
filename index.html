@@ -1,58 +1,40 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <title>Ganesh Billing</title>
-
-<!-- XLSX -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <style>
-*{box-sizing:border-box}
 body{margin:0;font-family:Arial;background:#f1f5f9}
+*{box-sizing:border-box}
 #loginPage,#dashboardPage{position:fixed;inset:0;display:none}
 
 /* LOGIN */
-#loginPage{display:flex;align-items:center;justify-content:center}
-.login-box{background:#fff;padding:25px;width:320px;border-radius:8px;box-shadow:0 0 10px #0002}
-input,textarea,select{width:100%;padding:10px;margin:6px 0;border:1px solid #ccc;border-radius:4px}
-button{padding:8px 12px;border:none;border-radius:4px;cursor:pointer}
-.btn-primary{background:#4f46e5;color:#fff}
-.btn-danger{background:#dc2626;color:#fff}
-.btn-outline{border:1px solid #4f46e5;background:#fff;color:#4f46e5}
-.btn-small{padding:5px 8px;font-size:12px}
+#loginPage{display:flex;justify-content:center;align-items:center}
+.login-box{background:#fff;padding:25px;width:320px;border-radius:8px}
 
 /* DASHBOARD */
 #dashboardPage{display:flex}
-.sidebar{width:230px;background:#0f172a;color:#fff;display:flex;flex-direction:column}
-.menu{padding:14px;cursor:pointer}
-.menu:hover,.menu.active{background:#1e293b}
-.submenu{padding:12px 30px;font-size:14px;cursor:pointer}
-.submenu:hover,.submenu.active{background:#1e293b}
-.profile{margin-top:auto;padding:14px;border-top:1px solid #1e293b}
+.sidebar{width:240px;background:#0f172a;color:#fff;display:flex;flex-direction:column}
+.menu,.submenu{padding:14px;cursor:pointer}
+.menu:hover,.submenu:hover,.active{background:#1e293b}
+.submenu{padding-left:40px;font-size:14px}
 
 .main{flex:1;padding:25px;overflow:auto}
-.content{max-width:1200px;margin:auto;display:none}
-.content.active{display:block}
-.card{background:#fff;padding:25px;border-radius:8px;box-shadow:0 0 10px #0001;margin-bottom:20px}
-
-.row{display:flex;gap:15px}
-.col{flex:1}
-.flex{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-
+.card{background:#fff;padding:20px;border-radius:8px;margin-bottom:15px}
+.flex{display:flex;gap:15px;align-items:center}
 .table{width:100%;border-collapse:collapse}
-.table th,.table td{border:1px solid #ddd;padding:8px;font-size:14px}
-.table th{background:#f3f4f6}
+.table th,.table td{border:1px solid #ddd;padding:8px}
+.badge{padding:4px 10px;border-radius:12px;font-size:12px}
+.paid{background:#dcfce7;color:#166534}
+.unpaid{background:#fee2e2;color:#991b1b}
+.btn{padding:8px 12px;border:none;border-radius:5px;cursor:pointer}
+.btn-primary{background:#4f46e5;color:#fff}
 
 /* MODAL */
-.modal{position:fixed;inset:0;background:#0007;display:none;align-items:center;justify-content:center;z-index:100}
-.modal-box{background:#fff;width:950px;max-height:90vh;overflow:auto;border-radius:8px;padding:20px}
-.modal-header{display:flex;justify-content:space-between;align-items:center}
-.modal-layout{display:flex}
-.modal-left{width:200px;border-right:1px solid #eee}
-.modal-menu{padding:12px;cursor:pointer}
-.modal-menu.active,.modal-menu:hover{background:#eef2ff;color:#4f46e5}
-.modal-right{flex:1;padding-left:20px}
+.modal{position:fixed;inset:0;background:#0006;display:none;justify-content:center;align-items:center}
+.modal-box{background:#fff;width:800px;padding:20px;border-radius:8px}
 </style>
 </head>
 
@@ -62,135 +44,100 @@ button{padding:8px 12px;border:none;border-radius:4px;cursor:pointer}
 <div id="loginPage">
   <div class="login-box">
     <h2>Login</h2>
-    <input id="loginMobile" placeholder="Mobile Number">
-    <input id="loginPassword" type="password" placeholder="Password">
-    <button class="btn-primary" style="width:100%" onclick="login()">Login</button>
+    <input id="loginMobile" placeholder="Mobile"><br><br>
+    <input id="loginPassword" type="password" placeholder="Password"><br><br>
+    <button class="btn btn-primary" onclick="login()">Login</button>
   </div>
 </div>
 
 <!-- DASHBOARD -->
 <div id="dashboardPage">
-  <div class="sidebar">
 
-    <div class="menu active" onclick="showTab('home',this)">🏠 Dashboard</div>
+<div class="sidebar">
+  <div class="menu active" onclick="show('home',this)">Dashboard</div>
 
-    <!-- PARTIES -->
-    <div class="menu" onclick="toggleMenu('partySub','partyArrow')">
-      👥 Parties <span style="float:right" id="partyArrow">▸</span>
-    </div>
-    <div id="partySub" style="display:none">
-      <div class="submenu" onclick="showTab('partyAdd',this)">➕ Add Party</div>
-      <div class="submenu" onclick="showTab('partyEdit',this)">✏️ Edit Party</div>
-    </div>
-
-    <!-- ITEMS -->
-    <div class="menu" onclick="toggleMenu('itemSub','itemArrow')">
-      📦 Items <span style="float:right" id="itemArrow">▸</span>
-    </div>
-    <div id="itemSub" style="display:none">
-      <div class="submenu" onclick="openItemModal()">➕ Create Item</div>
-      <div class="submenu" onclick="showTab('itemsList',this)">📋 Items List</div>
-    </div>
-
-    <div class="menu" onclick="showTab('personal',this)">👤 Personal Details</div>
-
-    <div class="profile">
-      <div id="userName">User</div>
-      <small>Online</small>
-    </div>
+  <div class="menu" onclick="toggle('salesSub')">Sales ▾</div>
+  <div id="salesSub" style="display:none">
+    <div class="submenu" onclick="show('salesInvoices',this)">Sales Invoices</div>
   </div>
 
-  <div class="main">
-
-    <div id="home" class="content active">
-      <div class="card"><h2>Welcome 👋</h2></div>
-    </div>
-
-    <!-- PERSONAL -->
-    <div id="personal" class="content">
-      <div class="card">
-        <h2>Personal / Business Details</h2>
-        <input id="business" placeholder="Business Name">
-        <input id="mobile" placeholder="Mobile Number">
-        <input id="gst" placeholder="GST Number">
-        <input id="email" placeholder="Email">
-        <textarea id="address" placeholder="Address"></textarea>
-        <button class="btn-primary" onclick="saveProfile()">Save</button>
-      </div>
-    </div>
-
-    <!-- ITEMS LIST -->
-    <div id="itemsList" class="content">
-      <div class="card">
-        <div class="flex" style="justify-content:space-between">
-          <input id="searchItem" placeholder="Search Item" onkeyup="filterItems()" style="max-width:300px">
-          <div class="flex">
-            <input type="file" id="excelFile" accept=".xlsx,.csv">
-            <button class="btn-outline" onclick="bulkUpload()">Bulk Upload</button>
-            <button class="btn-primary" onclick="openItemModal()">Create Item</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Item Name</th>
-              <th>Item Code</th>
-              <th>HSN</th>
-              <th>GST %</th>
-              <th>Sales Price</th>
-              <th>Purchase Price</th>
-              <th>MRP</th>
-            </tr>
-          </thead>
-          <tbody id="itemsTable"></tbody>
-        </table>
-      </div>
-    </div>
-
-  </div>
+  <div class="menu" onclick="show('items',this)">Items</div>
 </div>
 
-<!-- ITEM MODAL -->
-<div class="modal" id="itemModal">
+<div class="main">
+
+<!-- HOME -->
+<div id="home" class="page">
+  <div class="card"><h2>Welcome 👋</h2></div>
+</div>
+
+<!-- SALES INVOICES -->
+<div id="salesInvoices" class="page" style="display:none">
+
+  <!-- SUMMARY -->
+  <div class="flex">
+    <div class="card" style="flex:1">
+      <h4>Total Sales</h4>
+      <h2 id="totalSales">₹ 0</h2>
+    </div>
+    <div class="card" style="flex:1">
+      <h4>Paid</h4>
+      <h2 id="paidSales">₹ 0</h2>
+    </div>
+    <div class="card" style="flex:1">
+      <h4>Unpaid</h4>
+      <h2 id="unpaidSales">₹ 0</h2>
+    </div>
+  </div>
+
+  <!-- ACTION -->
+  <div class="card flex" style="justify-content:space-between">
+    <h3>Sales Invoices</h3>
+    <button class="btn btn-primary" onclick="openInvoice()">Create Sales Invoice</button>
+  </div>
+
+  <!-- LIST -->
+  <div class="card">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Invoice No</th>
+          <th>Party</th>
+          <th>Amount</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="invoiceTable"></tbody>
+    </table>
+  </div>
+
+</div>
+
+</div>
+</div>
+
+<!-- CREATE INVOICE MODAL -->
+<div class="modal" id="invoiceModal">
   <div class="modal-box">
-    <div class="modal-header">
-      <h3>Create New Item</h3>
-      <button onclick="closeItemModal()">✖</button>
-    </div>
-
-    <div class="modal-layout">
-      <div class="modal-left">
-        <div class="modal-menu active">Basic Details</div>
-      </div>
-
-      <div class="modal-right">
-        <input id="itemName" placeholder="Item Name *">
-        <input id="itemDesc" placeholder="Description">
-        <input id="itemCategory" placeholder="Category">
-        <input id="itemCode" placeholder="Item Code">
-        <input id="itemHSN" placeholder="HSN Code">
-        <input id="itemGST" placeholder="GST Tax Rate (%)">
-        <input id="salePrice" placeholder="Sales Price">
-        <select id="taxType">
-          <option>Exclusive</option>
-          <option>Inclusive</option>
-        </select>
-        <input id="purchasePrice" placeholder="Purchase Price">
-        <input id="itemMRP" placeholder="MRP">
-
-        <button class="btn-primary" onclick="saveItem()">Save Item</button>
-      </div>
-    </div>
+    <h3>Create Sales Invoice</h3>
+    <input id="invParty" placeholder="Party Name">
+    <input id="invAmount" placeholder="Amount">
+    <select id="invStatus">
+      <option>Paid</option>
+      <option>Unpaid</option>
+    </select><br><br>
+    <button class="btn btn-primary" onclick="saveInvoice()">Save</button>
+    <button class="btn" onclick="closeInvoice()">Cancel</button>
   </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, collection, addDoc, getDocs }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const app = initializeApp({
   apiKey:"AIzaSyAY4MfQ5zPh60EfYmY0JoKIDQkojqNU6hs",
@@ -198,127 +145,62 @@ const app = initializeApp({
   projectId:"ganeshbilling-bdada"
 });
 const auth=getAuth(), db=getFirestore();
-let uid="", allItems=[];
+let uid="";
 
 /* AUTH */
-onAuthStateChanged(auth,user=>{
-  if(user){
-    uid=user.uid;
-    loginPage.style.display="none";
-    dashboardPage.style.display="flex";
-    loadItems();
-  }else{
-    loginPage.style.display="flex";
-  }
+onAuthStateChanged(auth,u=>{
+  if(u){uid=u.uid;loginPage.style.display="none";dashboardPage.style.display="flex";loadInvoices()}
+  else loginPage.style.display="flex";
 });
 
-/* LOGIN */
-window.login=()=>signInWithEmailAndPassword(auth,loginMobile.value+"@mobile.local",loginPassword.value);
+window.login=()=>signInWithEmailAndPassword(auth,loginMobile.value+"@x.com",loginPassword.value);
 
-/* SIDEBAR */
-window.toggleMenu=(id,arrow)=>{
-  const el=document.getElementById(id);
-  const ar=document.getElementById(arrow);
-  el.style.display=el.style.display==="none"?"block":"none";
-  ar.innerText=el.style.display==="none"?"▸":"▾";
-};
-window.showTab=(id,el)=>{
-  document.querySelectorAll(".content").forEach(c=>c.classList.remove("active"));
+/* UI */
+window.show=(id,el)=>{
+  document.querySelectorAll(".page").forEach(p=>p.style.display="none");
   document.querySelectorAll(".menu,.submenu").forEach(m=>m.classList.remove("active"));
   el.classList.add("active");
-  document.getElementById(id).classList.add("active");
+  document.getElementById(id).style.display="block";
 };
+window.toggle=id=>document.getElementById(id).style.display=
+  document.getElementById(id).style.display=="none"?"block":"none";
 
-/* PROFILE */
-window.saveProfile=async()=>{
-  await setDoc(doc(db,"profiles",uid),{
-    business:business.value,mobile:mobile.value,gst:gst.value,email:email.value,address:address.value
+/* INVOICE */
+window.openInvoice=()=>invoiceModal.style.display="flex";
+window.closeInvoice=()=>invoiceModal.style.display="none";
+
+window.saveInvoice=async()=>{
+  await addDoc(collection(db,"sales",uid,"invoices"),{
+    party:invParty.value,
+    amount:+invAmount.value,
+    status:invStatus.value,
+    date:new Date().toLocaleDateString()
   });
-  alert("Saved");
+  closeInvoice();
+  loadInvoices();
 };
 
-/* ITEM MODAL */
-window.openItemModal=()=>itemModal.style.display="flex";
-window.closeItemModal=()=>itemModal.style.display="none";
-
-/* SAVE ITEM */
-window.saveItem=async()=>{
-  await addDoc(collection(db,"items",uid,"list"),{
-    name:itemName.value,
-    description:itemDesc.value,
-    category:itemCategory.value,
-    code:itemCode.value,
-    hsn:itemHSN.value,
-    gst:itemGST.value,
-    salePrice:salePrice.value,
-    taxType:taxType.value,
-    purchasePrice:purchasePrice.value,
-    mrp:itemMRP.value,
-    createdAt:new Date()
-  });
-  closeItemModal();
-  loadItems();
-};
-
-/* LOAD ITEMS */
-async function loadItems(){
-  const snap=await getDocs(collection(db,"items",uid,"list"));
-  allItems=[];
-  snap.forEach(d=>allItems.push(d.data()));
-  renderItems(allItems);
-}
-function renderItems(list){
-  itemsTable.innerHTML="";
-  list.forEach(i=>{
-    itemsTable.innerHTML+=`
+async function loadInvoices(){
+  const snap=await getDocs(collection(db,"sales",uid,"invoices"));
+  let total=0,paid=0,unpaid=0;
+  invoiceTable.innerHTML="";
+  snap.forEach(d=>{
+    const i=d.data();
+    total+=i.amount;
+    i.status=="Paid"?paid+=i.amount:unpaid+=i.amount;
+    invoiceTable.innerHTML+=`
       <tr>
-        <td>${i.name}</td>
-        <td>${i.code||""}</td>
-        <td>${i.hsn||""}</td>
-        <td>${i.gst||""}</td>
-        <td>${i.salePrice||""}</td>
-        <td>${i.purchasePrice||""}</td>
-        <td>${i.mrp||""}</td>
+        <td>${i.date}</td>
+        <td>${d.id.slice(0,6)}</td>
+        <td>${i.party}</td>
+        <td>₹ ${i.amount}</td>
+        <td><span class="badge ${i.status=="Paid"?"paid":"unpaid"}">${i.status}</span></td>
       </tr>`;
   });
+  totalSales.innerText="₹ "+total;
+  paidSales.innerText="₹ "+paid;
+  unpaidSales.innerText="₹ "+unpaid;
 }
-window.filterItems=()=>{
-  const q=searchItem.value.toLowerCase();
-  renderItems(allItems.filter(i=>i.name.toLowerCase().includes(q)));
-};
-
-/* BULK UPLOAD (EXACT EXCEL FORMAT) */
-window.bulkUpload=()=>{
-  const file=excelFile.files[0];
-  if(!file)return alert("Select Excel file");
-
-  const reader=new FileReader();
-  reader.onload=async e=>{
-    const wb=XLSX.read(e.target.result,{type:"binary"});
-    const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:""});
-
-    for(const r of rows){
-      if(!r["Item Name*"]) continue;
-
-      await addDoc(collection(db,"items",uid,"list"),{
-        name:r["Item Name*"],
-        description:r["Description"],
-        category:r["Category"],
-        code:r["Item code"],
-        hsn:r["HSN Code"],
-        gst:r["GST Tax Rate(%)"],
-        salePrice:r["Sales Price"],
-        taxType:r["Sales Tax inclusive"],
-        purchasePrice:r["Purchase Price"],
-        mrp:r["MRP"],
-        createdAt:new Date()
-      });
-    }
-    alert("Bulk Items Uploaded");
-    loadItems();
-  };
-  reader.readAsBinaryString(file);
-};
 </script>
 
 </body>
