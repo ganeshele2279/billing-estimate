@@ -5,97 +5,37 @@
 <title>Ganesh Billing</title>
 
 <style>
-* { box-sizing: border-box; }
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f1f5f9;
-}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial;background:#f1f5f9}
 
-/* FULLSCREEN LAYERS */
-#loginPage, #dashboardPage {
-  position: fixed;
-  inset: 0;
-  display: none;
-}
+/* FULLSCREEN */
+#loginPage,#dashboardPage{position:fixed;inset:0;display:none}
 
 /* LOGIN */
-#loginPage {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.login-box {
-  background: #fff;
-  padding: 25px;
-  width: 320px;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0,0,0,.1);
-  text-align: center;
-}
-input, textarea {
-  width: 100%;
-  padding: 10px;
-  margin: 8px 0;
-}
-button {
-  width: 100%;
-  padding: 10px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-.btn-primary { background: #2563eb; color: #fff; }
-.btn-danger { background: #dc2626; color: #fff; }
+#loginPage{display:flex;align-items:center;justify-content:center}
+.login-box{background:#fff;padding:25px;width:320px;border-radius:8px;box-shadow:0 0 10px #0002}
+input,textarea,select{width:100%;padding:10px;margin:8px 0;border:1px solid #ccc;border-radius:4px}
+button{padding:10px;border:none;border-radius:4px;cursor:pointer}
+.btn-primary{background:#4f46e5;color:#fff}
+.btn-outline{border:1px solid #4f46e5;background:#fff;color:#4f46e5}
+.btn-danger{background:#dc2626;color:#fff}
 
 /* DASHBOARD */
-#dashboardPage {
-  display: flex;
-}
-.sidebar {
-  width: 220px;
-  background: #0f172a;
-  color: #fff;
-  display: flex;
-  flex-direction: column;
-}
-.menu {
-  padding: 14px;
-  cursor: pointer;
-}
-.menu:hover,
-.menu.active {
-  background: #1e293b;
-}
-.profile {
-  margin-top: auto;
-  padding: 14px;
-  border-top: 1px solid #1e293b;
-}
+#dashboardPage{display:flex}
+.sidebar{width:220px;background:#0f172a;color:#fff;display:flex;flex-direction:column}
+.menu{padding:14px;cursor:pointer}
+.menu:hover,.menu.active{background:#1e293b}
+.profile{margin-top:auto;padding:14px;border-top:1px solid #1e293b}
 
-/* MAIN AREA */
-.main {
-  flex: 1;
-  padding: 30px;
-  overflow-y: auto;
-}
+.main{flex:1;padding:25px;overflow:auto}
+.content{max-width:1100px;margin:auto;display:none}
+.content.active{display:block}
+.card{background:#fff;padding:25px;border-radius:8px;box-shadow:0 0 10px #0001}
 
-/* CONTENT CONTAINER (OFFICIAL LOOK) */
-.content {
-  max-width: 900px;
-  margin: 0 auto;
-  display: none;
-}
-.content.active {
-  display: block;
-}
-
-.card {
-  background: #fff;
-  padding: 25px;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0,0,0,.08);
-}
+.row{display:flex;gap:15px}
+.col{flex:1}
+.header-row{display:flex;justify-content:space-between;align-items:center}
+.section-title{margin:20px 0 10px;font-weight:bold;color:#444}
 </style>
 </head>
 
@@ -107,15 +47,16 @@ button {
     <h2>Login</h2>
     <input id="loginMobile" placeholder="Mobile Number">
     <input id="loginPassword" type="password" placeholder="Password">
-    <button class="btn-primary" onclick="login()">Login</button>
+    <button class="btn-primary" style="width:100%" onclick="login()">Login</button>
   </div>
 </div>
 
 <!-- DASHBOARD -->
 <div id="dashboardPage">
   <div class="sidebar">
-    <div class="menu active" onclick="showHome(this)">🏠 Dashboard</div>
-    <div class="menu" onclick="showPersonal(this)">👤 Personal Details</div>
+    <div class="menu active" onclick="showTab('home',this)">🏠 Dashboard</div>
+    <div class="menu" onclick="showTab('personal',this)">👤 Personal Details</div>
+    <div class="menu" onclick="showTab('parties',this)">👥 Parties</div>
 
     <div class="profile">
       <div id="userName">User</div>
@@ -129,24 +70,79 @@ button {
     <div id="home" class="content active">
       <div class="card">
         <h2>Welcome 👋</h2>
-        <p>Select an option from the left menu to continue.</p>
+        <p>Select an option from sidebar.</p>
       </div>
     </div>
 
-    <!-- PERSONAL DETAILS -->
+    <!-- PERSONAL -->
     <div id="personal" class="content">
       <div class="card">
         <h2>Personal / Business Details</h2>
-
         <input id="business" placeholder="Business Name">
         <input id="mobile" placeholder="Mobile Number">
         <input id="gst" placeholder="GST Number">
         <input id="email" placeholder="Email">
         <textarea id="address" placeholder="Address"></textarea>
-
         <button class="btn-primary" onclick="saveProfile()">Save</button>
         <br><br>
         <button class="btn-danger" onclick="logout()">Logout</button>
+      </div>
+    </div>
+
+    <!-- PARTIES -->
+    <div id="parties" class="content">
+      <div class="card">
+
+        <div class="header-row">
+          <h2>Create Party</h2>
+          <button class="btn-primary" onclick="saveParty()">Save</button>
+        </div>
+
+        <div class="section-title">General Details</div>
+        <div class="row">
+          <div class="col"><input id="partyName" placeholder="Party Name *"></div>
+          <div class="col"><input id="partyMobile" placeholder="Mobile Number"></div>
+          <div class="col"><input id="partyEmail" placeholder="Email"></div>
+          <div class="col"><input id="openingBalance" placeholder="₹ Opening Balance"></div>
+        </div>
+
+        <div class="row">
+          <div class="col"><input id="gstin" placeholder="GSTIN"></div>
+          <div class="col"><input id="pan" placeholder="PAN Number"></div>
+        </div>
+
+        <div class="row">
+          <div class="col">
+            <select id="partyType">
+              <option>Customer</option>
+              <option>Supplier</option>
+            </select>
+          </div>
+          <div class="col">
+            <select id="partyCategory">
+              <option>Select Category</option>
+              <option>Regular</option>
+              <option>Wholesale</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="section-title">Address</div>
+        <div class="row">
+          <div class="col">
+            <textarea id="billingAddress" placeholder="Billing Address"></textarea>
+          </div>
+          <div class="col">
+            <textarea id="shippingAddress" placeholder="Shipping Address"></textarea>
+          </div>
+        </div>
+
+        <div class="section-title">Credit</div>
+        <div class="row">
+          <div class="col"><input id="creditPeriod" placeholder="Credit Period (Days)"></div>
+          <div class="col"><input id="creditLimit" placeholder="₹ Credit Limit"></div>
+        </div>
+
       </div>
     </div>
 
@@ -157,73 +153,82 @@ button {
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } 
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc } 
+import { getFirestore, doc, setDoc, getDoc, collection, addDoc } 
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const app = initializeApp({
-  apiKey: "AIzaSyAY4MfQ5zPh60EfYmY0JoKIDQkojqNU6hs",
-  authDomain: "ganeshbilling-bdada.firebaseapp.com",
-  projectId: "ganeshbilling-bdada"
+  apiKey:"AIzaSyAY4MfQ5zPh60EfYmY0JoKIDQkojqNU6hs",
+  authDomain:"ganeshbilling-bdada.firebaseapp.com",
+  projectId:"ganeshbilling-bdada"
 });
-
 const auth = getAuth();
 const db = getFirestore();
-let uid = "";
+let uid="";
 
 /* AUTH */
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    uid = user.uid;
-    loginPage.style.display = "none";
-    dashboardPage.style.display = "flex";
-
-    const snap = await getDoc(doc(db, "users", uid));
-    if (snap.exists()) userName.innerText = snap.data().name;
-  } else {
-    dashboardPage.style.display = "none";
-    loginPage.style.display = "flex";
+onAuthStateChanged(auth, async user=>{
+  if(user){
+    uid=user.uid;
+    loginPage.style.display="none";
+    dashboardPage.style.display="flex";
+    const snap=await getDoc(doc(db,"users",uid));
+    if(snap.exists()) userName.innerText=snap.data().name;
+  }else{
+    dashboardPage.style.display="none";
+    loginPage.style.display="flex";
   }
 });
 
 /* LOGIN */
-window.login = async () => {
-  const email = loginMobile.value + "@mobile.local";
-  await signInWithEmailAndPassword(auth, email, loginPassword.value);
+window.login=async()=>{
+  await signInWithEmailAndPassword(
+    auth,
+    loginMobile.value+"@mobile.local",
+    loginPassword.value
+  );
 };
 
 /* LOGOUT */
-window.logout = async () => {
-  await signOut(auth);
+window.logout=async()=>{await signOut(auth)};
+
+/* TABS */
+window.showTab=(id,el)=>{
+  document.querySelectorAll(".menu").forEach(m=>m.classList.remove("active"));
+  document.querySelectorAll(".content").forEach(c=>c.classList.remove("active"));
+  el.classList.add("active");
+  document.getElementById(id).classList.add("active");
 };
 
-/* SAVE */
-window.saveProfile = async () => {
-  await setDoc(doc(db, "profiles", uid), {
-    business: business.value,
-    mobile: mobile.value,
-    gst: gst.value,
-    email: email.value,
-    address: address.value
+/* SAVE PERSONAL */
+window.saveProfile=async()=>{
+  await setDoc(doc(db,"profiles",uid),{
+    business:business.value,
+    mobile:mobile.value,
+    gst:gst.value,
+    email:email.value,
+    address:address.value
   });
   alert("Saved");
 };
 
-/* TAB SWITCH */
-function clearTabs() {
-  document.querySelectorAll(".menu").forEach(m => m.classList.remove("active"));
-  document.querySelectorAll(".content").forEach(c => c.classList.remove("active"));
-}
-
-window.showHome = (el) => {
-  clearTabs();
-  el.classList.add("active");
-  home.classList.add("active");
-};
-
-window.showPersonal = (el) => {
-  clearTabs();
-  el.classList.add("active");
-  personal.classList.add("active");
+/* SAVE PARTY */
+window.saveParty=async()=>{
+  await addDoc(collection(db,"parties",uid,"list"),{
+    partyName:partyName.value,
+    mobile:partyMobile.value,
+    email:partyEmail.value,
+    openingBalance:openingBalance.value,
+    gstin:gstin.value,
+    pan:pan.value,
+    partyType:partyType.value,
+    category:partyCategory.value,
+    billingAddress:billingAddress.value,
+    shippingAddress:shippingAddress.value,
+    creditPeriod:creditPeriod.value,
+    creditLimit:creditLimit.value,
+    createdAt:new Date()
+  });
+  alert("Party Saved");
 };
 </script>
 
