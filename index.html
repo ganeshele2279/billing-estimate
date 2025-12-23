@@ -32,10 +32,13 @@ button{padding:8px 12px;border:none;border-radius:4px;cursor:pointer}
 .content.active{display:block}
 .card{background:#fff;padding:25px;border-radius:8px;box-shadow:0 0 10px #0001;margin-bottom:20px}
 
+.row{display:flex;gap:15px}
+.col{flex:1}
+
 .table{width:100%;border-collapse:collapse}
 .table th,.table td{border:1px solid #ddd;padding:8px;font-size:14px}
 .table th{background:#f3f4f6}
-.flex{display:flex;gap:10px;align-items:center}
+.flex{display:flex;gap:8px}
 </style>
 </head>
 
@@ -54,6 +57,7 @@ button{padding:8px 12px;border:none;border-radius:4px;cursor:pointer}
 <!-- DASHBOARD -->
 <div id="dashboardPage">
   <div class="sidebar">
+
     <div class="menu active" onclick="showTab('home',this)">🏠 Dashboard</div>
 
     <div class="menu" onclick="toggleParties(this)">
@@ -64,6 +68,8 @@ button{padding:8px 12px;border:none;border-radius:4px;cursor:pointer}
       <div class="submenu" onclick="showTab('partyEdit',this)">✏️ Edit Party</div>
     </div>
 
+    <div class="menu" onclick="showTab('personal',this)">👤 Personal Details</div>
+
     <div class="profile">
       <div id="userName">User</div>
       <small>Online</small>
@@ -72,19 +78,73 @@ button{padding:8px 12px;border:none;border-radius:4px;cursor:pointer}
 
   <div class="main">
 
+    <!-- HOME -->
     <div id="home" class="content active">
-      <div class="card"><h2>Welcome 👋</h2></div>
+      <div class="card">
+        <h2>Welcome 👋</h2>
+        <p>Select option from sidebar.</p>
+      </div>
+    </div>
+
+    <!-- PERSONAL DETAILS -->
+    <div id="personal" class="content">
+      <div class="card">
+        <h2>Personal / Business Details</h2>
+        <input id="business" placeholder="Business Name">
+        <input id="mobile" placeholder="Mobile Number">
+        <input id="gst" placeholder="GST Number">
+        <input id="email" placeholder="Email">
+        <textarea id="address" placeholder="Address"></textarea>
+        <button class="btn-primary" onclick="saveProfile()">Save</button>
+      </div>
     </div>
 
     <!-- ADD PARTY -->
     <div id="partyAdd" class="content">
       <div class="card">
         <h2>Create Party</h2>
-        <input id="pName" placeholder="Party Name">
-        <input id="pMobile" placeholder="Mobile">
-        <input id="pEmail" placeholder="Email">
-        <select id="pType"><option>Customer</option><option>Supplier</option></select>
-        <input id="pOpening" placeholder="Opening Balance">
+
+        <h4>General Details</h4>
+        <div class="row">
+          <div class="col"><input id="pName" placeholder="Party Name *"></div>
+          <div class="col"><input id="pMobile" placeholder="Mobile Number"></div>
+          <div class="col"><input id="pEmail" placeholder="Email"></div>
+          <div class="col"><input id="pOpening" placeholder="₹ Opening Balance"></div>
+        </div>
+
+        <div class="row">
+          <div class="col"><input id="pGstin" placeholder="GSTIN"></div>
+          <div class="col"><input id="pPan" placeholder="PAN Number"></div>
+        </div>
+
+        <div class="row">
+          <div class="col">
+            <select id="pType">
+              <option>Customer</option>
+              <option>Supplier</option>
+            </select>
+          </div>
+          <div class="col">
+            <select id="pCategory">
+              <option>Select Category</option>
+              <option>Retail</option>
+              <option>Wholesale</option>
+            </select>
+          </div>
+        </div>
+
+        <h4>Address</h4>
+        <div class="row">
+          <div class="col"><textarea id="pBilling" placeholder="Billing Address"></textarea></div>
+          <div class="col"><textarea id="pShipping" placeholder="Shipping Address"></textarea></div>
+        </div>
+
+        <h4>Credit</h4>
+        <div class="row">
+          <div class="col"><input id="pCreditPeriod" placeholder="Credit Period (Days)"></div>
+          <div class="col"><input id="pCreditLimit" placeholder="₹ Credit Limit"></div>
+        </div>
+
         <button class="btn-primary" onclick="saveParty()">Save Party</button>
       </div>
     </div>
@@ -92,12 +152,10 @@ button{padding:8px 12px;border:none;border-radius:4px;cursor:pointer}
     <!-- EDIT PARTY -->
     <div id="partyEdit" class="content">
 
-      <!-- SEARCH -->
       <div class="card">
         <input id="searchParty" placeholder="Search party by name or mobile" onkeyup="filterParties()">
       </div>
 
-      <!-- PARTY LIST -->
       <div class="card">
         <table class="table">
           <thead>
@@ -109,7 +167,6 @@ button{padding:8px 12px;border:none;border-radius:4px;cursor:pointer}
         </table>
       </div>
 
-      <!-- LEDGER -->
       <div class="card" id="ledgerCard" style="display:none">
         <h3>Party Ledger</h3>
         <table class="table">
@@ -129,104 +186,118 @@ button{padding:8px 12px;border:none;border-radius:4px;cursor:pointer}
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } 
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } 
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, setDoc } 
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const app=initializeApp({
- apiKey:"AIzaSyAY4MfQ5zPh60EfYmY0JoKIDQkojqNU6hs",
- authDomain:"ganeshbilling-bdada.firebaseapp.com",
- projectId:"ganeshbilling-bdada"
+const app = initializeApp({
+  apiKey:"AIzaSyAY4MfQ5zPh60EfYmY0JoKIDQkojqNU6hs",
+  authDomain:"ganeshbilling-bdada.firebaseapp.com",
+  projectId:"ganeshbilling-bdada"
 });
 const auth=getAuth(), db=getFirestore();
 let uid="", allParties=[];
 
 /* AUTH */
 onAuthStateChanged(auth,user=>{
- if(user){uid=user.uid;loginPage.style.display="none";dashboardPage.style.display="flex";loadParties()}
- else{loginPage.style.display="flex"}
+  if(user){
+    uid=user.uid;
+    loginPage.style.display="none";
+    dashboardPage.style.display="flex";
+    loadParties();
+  }else{
+    dashboardPage.style.display="none";
+    loginPage.style.display="flex";
+  }
 });
 
 /* LOGIN */
 window.login=()=>signInWithEmailAndPassword(auth,loginMobile.value+"@mobile.local",loginPassword.value);
 
-/* TABS */
-window.showTab=(id,el)=>{
- document.querySelectorAll(".content").forEach(c=>c.classList.remove("active"));
- document.querySelectorAll(".menu,.submenu").forEach(m=>m.classList.remove("active"));
- el.classList.add("active");
- document.getElementById(id).classList.add("active");
-};
-
-/* ACCORDION */
+/* SIDEBAR */
 window.toggleParties=()=>{
- const sub=partySubMenu, arr=partyArrow;
- sub.style.display=sub.style.display==="none"?"block":"none";
- arr.innerText=sub.style.display==="none"?"▸":"▾";
+  partySubMenu.style.display = partySubMenu.style.display==="none"?"block":"none";
+  partyArrow.innerText = partySubMenu.style.display==="none"?"▸":"▾";
 };
 
-/* SAVE PARTY */
+window.showTab=(id,el)=>{
+  document.querySelectorAll(".content").forEach(c=>c.classList.remove("active"));
+  document.querySelectorAll(".menu,.submenu").forEach(m=>m.classList.remove("active"));
+  el.classList.add("active");
+  document.getElementById(id).classList.add("active");
+};
+
+/* PERSONAL */
+window.saveProfile=async()=>{
+  await setDoc(doc(db,"profiles",uid),{
+    business:business.value,mobile:mobile.value,gst:gst.value,email:email.value,address:address.value
+  });
+  alert("Saved");
+};
+
+/* PARTY */
 window.saveParty=async()=>{
- await addDoc(collection(db,"parties",uid,"list"),{
-   partyName:pName.value,mobile:pMobile.value,email:pEmail.value,
-   partyType:pType.value,openingBalance:pOpening.value
- });
- alert("Party Added"); pName.value=pMobile.value=pEmail.value=pOpening.value="";
- loadParties();
+  await addDoc(collection(db,"parties",uid,"list"),{
+    partyName:pName.value,
+    mobile:pMobile.value,
+    email:pEmail.value,
+    openingBalance:pOpening.value,
+    gstin:pGstin.value,
+    pan:pPan.value,
+    partyType:pType.value,
+    category:pCategory.value,
+    billingAddress:pBilling.value,
+    shippingAddress:pShipping.value,
+    creditPeriod:pCreditPeriod.value,
+    creditLimit:pCreditLimit.value,
+    createdAt:new Date()
+  });
+  alert("Party Saved");
+  loadParties();
 };
 
 /* LOAD + SEARCH */
 async function loadParties(){
- const snap=await getDocs(collection(db,"parties",uid,"list"));
- allParties=[];
- snap.forEach(d=>allParties.push({id:d.id,...d.data()}));
- renderParties(allParties);
+  const snap=await getDocs(collection(db,"parties",uid,"list"));
+  allParties=[];
+  snap.forEach(d=>allParties.push({id:d.id,...d.data()}));
+  renderParties(allParties);
 }
 
 function renderParties(list){
- partyList.innerHTML="";
- list.forEach(p=>{
-   partyList.innerHTML+=`
-    <tr>
-      <td>${p.partyName}</td>
-      <td>${p.mobile||""}</td>
-      <td>${p.partyType}</td>
-      <td class="flex">
-        <button class="btn-small btn-primary" onclick="openLedger('${p.id}')">Ledger</button>
-        <button class="btn-small btn-danger" onclick="deleteParty('${p.id}')">Delete</button>
-      </td>
-    </tr>`;
- });
+  partyList.innerHTML="";
+  list.forEach(p=>{
+    partyList.innerHTML+=`
+      <tr>
+        <td>${p.partyName}</td>
+        <td>${p.mobile||""}</td>
+        <td>${p.partyType}</td>
+        <td class="flex">
+          <button class="btn-small btn-primary" onclick="openLedger('${p.id}')">Ledger</button>
+          <button class="btn-small btn-danger" onclick="deleteParty('${p.id}')">Delete</button>
+        </td>
+      </tr>`;
+  });
 }
 
 window.filterParties=()=>{
- const q=searchParty.value.toLowerCase();
- renderParties(allParties.filter(p=>
-   p.partyName.toLowerCase().includes(q) || (p.mobile||"").includes(q)
- ));
+  const q=searchParty.value.toLowerCase();
+  renderParties(allParties.filter(p=>p.partyName.toLowerCase().includes(q)||(p.mobile||"").includes(q)));
 };
 
-/* DELETE */
 window.deleteParty=async(id)=>{
- if(!confirm("Delete this party?"))return;
- await deleteDoc(doc(db,"parties",uid,"list",id));
- loadParties();
+  if(!confirm("Delete this party?"))return;
+  await deleteDoc(doc(db,"parties",uid,"list",id));
+  loadParties();
 };
 
-/* LEDGER */
 window.openLedger=async(pid)=>{
- ledgerBody.innerHTML="";
- ledgerCard.style.display="block";
- const snap=await getDocs(collection(db,"ledgers",uid,pid));
- snap.forEach(d=>{
-   const l=d.data();
-   ledgerBody.innerHTML+=`
-    <tr>
-      <td>${l.date||""}</td>
-      <td>${l.description||""}</td>
-      <td>${l.debit||""}</td>
-      <td>${l.credit||""}</td>
-    </tr>`;
- });
+  ledgerBody.innerHTML="";
+  ledgerCard.style.display="block";
+  const snap=await getDocs(collection(db,"ledgers",uid,pid));
+  snap.forEach(d=>{
+    const l=d.data();
+    ledgerBody.innerHTML+=`<tr><td>${l.date||""}</td><td>${l.description||""}</td><td>${l.debit||""}</td><td>${l.credit||""}</td></tr>`;
+  });
 };
 </script>
 
