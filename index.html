@@ -18,180 +18,311 @@ input,textarea,select{width:100%;padding:10px;margin:6px 0;border:1px solid #ccc
 button{padding:8px 12px;border:none;border-radius:4px;cursor:pointer}
 .btn-primary{background:#4f46e5;color:#fff}
 .btn-danger{background:#dc2626;color:#fff}
-.btn-small{padding:4px 6px;font-size:12px}
+.btn-outline{border:1px solid #4f46e5;background:#fff;color:#4f46e5}
+.btn-small{padding:5px 8px;font-size:12px}
 
 /* DASHBOARD */
 #dashboardPage{display:flex}
-.sidebar{width:230px;background:#0f172a;color:#fff}
-.menu,.submenu{padding:14px;cursor:pointer}
-.menu:hover,.submenu:hover,.active{background:#1e293b}
+.sidebar{width:230px;background:#0f172a;color:#fff;display:flex;flex-direction:column}
+.menu{padding:14px;cursor:pointer}
+.menu:hover,.menu.active{background:#1e293b}
+.submenu{padding:12px 30px;font-size:14px;cursor:pointer}
+.submenu:hover,.submenu.active{background:#1e293b}
+.profile{margin-top:auto;padding:14px;border-top:1px solid #1e293b}
+
 .main{flex:1;padding:25px;overflow:auto}
-.card{background:#fff;padding:20px;border-radius:8px;margin-bottom:20px}
+.content{max-width:1200px;margin:auto;display:none}
+.content.active{display:block}
+.card{background:#fff;padding:25px;border-radius:8px;box-shadow:0 0 10px #0001;margin-bottom:20px}
 
 .table{width:100%;border-collapse:collapse}
-.table th,.table td{border:1px solid #ddd;padding:8px}
+.table th,.table td{border:1px solid #ddd;padding:8px;font-size:14px}
+.table th{background:#f3f4f6}
 
 /* MODAL */
-.modal{position:fixed;inset:0;background:#0007;display:none;align-items:center;justify-content:center}
-.modal-box{background:#fff;width:600px;padding:20px;border-radius:8px}
+.modal{position:fixed;inset:0;background:#0007;display:none;align-items:center;justify-content:center;z-index:100}
+.modal-box{background:#fff;width:900px;max-height:90vh;overflow:auto;border-radius:8px;padding:20px}
+.modal-header{display:flex;justify-content:space-between;align-items:center}
 </style>
 </head>
 
 <body>
 
+<!-- LOGIN -->
 <div id="loginPage">
   <div class="login-box">
     <h2>Login</h2>
-    <input id="loginMobile" placeholder="Mobile">
+    <input id="loginMobile" placeholder="Mobile Number">
     <input id="loginPassword" type="password" placeholder="Password">
-    <button class="btn-primary" onclick="login()">Login</button>
+    <button class="btn-primary" style="width:100%" onclick="login()">Login</button>
   </div>
 </div>
 
+<!-- DASHBOARD -->
 <div id="dashboardPage">
   <div class="sidebar">
-    <div class="menu active" onclick="showTab('items')">📦 Items</div>
+
+    <div class="menu active" onclick="showTab('home',this)">🏠 Dashboard</div>
+
+    <div class="menu" onclick="toggleMenu('partySub','partyArrow')">
+      👥 Parties <span style="float:right" id="partyArrow">▸</span>
+    </div>
+    <div id="partySub" style="display:none">
+      <div class="submenu">➕ Add Party</div>
+      <div class="submenu">✏️ Edit Party</div>
+    </div>
+
+    <div class="menu" onclick="toggleMenu('itemSub','itemArrow')">
+      📦 Items <span style="float:right" id="itemArrow">▸</span>
+    </div>
+    <div id="itemSub" style="display:none">
+      <div class="submenu" onclick="openItemModal()">➕ Create Item</div>
+      <div class="submenu" onclick="showTab('itemsList',this)">📋 Items List</div>
+    </div>
+
+    <div class="menu" onclick="showTab('personal',this)">👤 Personal Details</div>
+
+    <div class="profile">
+      <div id="userName">User</div>
+      <small>Online</small>
+    </div>
   </div>
 
   <div class="main">
-    <div id="items" class="card">
-      <div style="display:flex;justify-content:space-between">
-        <input id="searchItem" placeholder="Search" onkeyup="filterItems()">
-        <div>
-          <input type="file" id="excelFile">
-          <button onclick="bulkUpload()">Bulk Upload</button>
-          <button class="btn-primary" onclick="openItemModal()">Add Item</button>
+    <div id="home" class="content active">
+      <div class="card"><h2>Welcome 👋</h2></div>
+    </div>
+
+    <div id="personal" class="content">
+      <div class="card">
+        <h2>Personal / Business Details</h2>
+        <input id="business" placeholder="Business Name">
+        <input id="mobile" placeholder="Mobile Number">
+        <input id="gst" placeholder="GST Number">
+        <input id="email" placeholder="Email">
+        <textarea id="address" placeholder="Address"></textarea>
+        <button class="btn-primary" onclick="saveProfile()">Save</button>
+      </div>
+    </div>
+
+    <div id="itemsList" class="content">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between">
+          <input id="searchItem" placeholder="Search Item" onkeyup="filterItems()">
+          <div>
+            <input type="file" id="excelFile">
+            <button class="btn-outline" onclick="bulkUpload()">Bulk Upload</button>
+            <button class="btn-primary" onclick="openItemModal()">Create Item</button>
+          </div>
         </div>
       </div>
 
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Name</th><th>HSN</th><th>GST%</th>
-            <th>Sale</th><th>Purchase</th><th>MRP</th><th>Action</th>
-          </tr>
-        </thead>
-        <tbody id="itemsTable"></tbody>
-      </table>
+      <div class="card">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Name</th><th>Code</th><th>HSN</th><th>GST%</th>
+              <th>Sale</th><th>Purchase</th><th>MRP</th><th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="itemsTable"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>
 
+<!-- ITEM MODAL -->
 <div class="modal" id="itemModal">
   <div class="modal-box">
-    <h3>Item</h3>
-    <input id="itemName" placeholder="Item Name*">
-    <input id="itemHSN" placeholder="HSN">
+    <div class="modal-header">
+      <h3>Create / Edit Item</h3>
+      <button onclick="closeItemModal()">✖</button>
+    </div>
+
+    <input id="itemName" placeholder="Item Name *">
+    <input id="itemDesc" placeholder="Description">
+    <input id="itemCategory" placeholder="Category">
+    <input id="itemCode" placeholder="Item Code">
+    <input id="itemHSN" placeholder="HSN Code">
     <input id="itemGST" placeholder="GST %">
-    <input id="salePrice" placeholder="Sale Price">
-    <input id="purchasePrice" placeholder="Purchase Price">
-    <input id="itemMRP" placeholder="MRP">
+    <input id="salePrice" placeholder="Sales Price">
     <select id="taxType">
       <option>Exclusive</option>
       <option>Inclusive</option>
     </select>
-    <button class="btn-primary" onclick="saveItem()">Save</button>
-    <button onclick="closeItemModal()">Cancel</button>
+    <input id="purchasePrice" placeholder="Purchase Price">
+    <input id="itemMRP" placeholder="MRP">
+
+    <button class="btn-primary" onclick="saveItem()">Save Item</button>
   </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, setDoc, doc, deleteDoc, updateDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const app = initializeApp({
   apiKey:"AIzaSyAY4MfQ5zPh60EfYmY0JoKIDQkojqNU6hs",
   authDomain:"ganeshbilling-bdada.firebaseapp.com",
   projectId:"ganeshbilling-bdada"
 });
-
 const auth=getAuth(), db=getFirestore();
-let uid="", items=[], editId=null;
 
+let uid="", allItems=[], editId=null;
+
+/* AUTH */
 onAuthStateChanged(auth,u=>{
   if(u){uid=u.uid;loginPage.style.display="none";dashboardPage.style.display="flex";loadItems();}
   else loginPage.style.display="flex";
 });
 
+/* LOGIN */
 window.login=async()=>{
-  if(!loginMobile.value||loginPassword.value.length<6) return alert("Invalid login");
+  if(!loginMobile.value||loginPassword.value.length<6)
+    return alert("Invalid login");
   try{
     await signInWithEmailAndPassword(auth,loginMobile.value+"@mobile.local",loginPassword.value);
   }catch(e){alert(e.message)}
 };
 
-window.openItemModal=()=>{editId=null;document.querySelectorAll("#itemModal input").forEach(i=>i.value="");itemModal.style.display="flex";}
+/* SIDEBAR */
+window.toggleMenu=(id,arrow)=>{
+  const el=document.getElementById(id);
+  const ar=document.getElementById(arrow);
+  el.style.display=el.style.display==="none"?"block":"none";
+  ar.innerText=el.style.display==="none"?"▸":"▾";
+};
+window.showTab=(id,el)=>{
+  document.querySelectorAll(".content").forEach(c=>c.classList.remove("active"));
+  document.querySelectorAll(".menu,.submenu").forEach(m=>m.classList.remove("active"));
+  el.classList.add("active");
+  document.getElementById(id).classList.add("active");
+};
+
+/* PROFILE */
+window.saveProfile=async()=>{
+  try{
+    await setDoc(doc(db,"profiles",uid),{
+      business:business.value,mobile:mobile.value,gst:gst.value,email:email.value,address:address.value
+    });
+    alert("Saved");
+  }catch(e){alert(e.message)}
+};
+
+/* MODAL */
+window.openItemModal=()=>{
+  resetForm();
+  itemModal.style.display="flex";
+};
 window.closeItemModal=()=>itemModal.style.display="none";
 
+function resetForm(){
+  editId=null;
+  document.querySelectorAll("#itemModal input").forEach(i=>i.value="");
+}
+
+/* SAVE ITEM */
 window.saveItem=async()=>{
   if(!itemName.value.trim()) return alert("Item name required");
   const data={
     name:itemName.value.trim(),
+    description:itemDesc.value,
+    category:itemCategory.value,
+    code:itemCode.value,
     hsn:itemHSN.value,
     gst:Number(itemGST.value||0),
-    sale:Number(salePrice.value||0),
-    purchase:Number(purchasePrice.value||0),
-    mrp:Number(itemMRP.value||0),
-    taxType:taxType.value
+    salePrice:Number(salePrice.value||0),
+    taxType:taxType.value,
+    purchasePrice:Number(purchasePrice.value||0),
+    mrp:Number(itemMRP.value||0)
   };
   try{
-    if(editId) await updateDoc(doc(db,"users",uid,"items",editId),data);
-    else await addDoc(collection(db,"users",uid,"items"),data);
+    if(editId)
+      await updateDoc(doc(db,"items",uid,"list",editId),data);
+    else
+      await addDoc(collection(db,"items",uid,"list"),{...data,createdAt:new Date()});
     closeItemModal();loadItems();
   }catch(e){alert(e.message)}
 };
 
+/* LOAD */
 async function loadItems(){
-  items=[];itemsTable.innerHTML="";
-  const snap=await getDocs(collection(db,"users",uid,"items"));
-  snap.forEach(d=>items.push({id:d.id,...d.data()}));
-  render(items);
+  allItems=[];
+  const s=await getDocs(collection(db,"items",uid,"list"));
+  s.forEach(d=>allItems.push({id:d.id,...d.data()}));
+  render(allItems);
 }
 
+/* RENDER */
 function render(list){
   itemsTable.innerHTML="";
   list.forEach(i=>{
     itemsTable.innerHTML+=`
     <tr>
-      <td>${i.name}</td><td>${i.hsn||""}</td><td>${i.gst}</td>
-      <td>${i.sale}</td><td>${i.purchase}</td><td>${i.mrp}</td>
+      <td>${i.name}</td><td>${i.code||""}</td><td>${i.hsn||""}</td>
+      <td>${i.gst||0}</td><td>${i.salePrice||0}</td>
+      <td>${i.purchasePrice||0}</td><td>${i.mrp||0}</td>
       <td>
-        <button onclick="editItem('${i.id}')">✏️</button>
-        <button class="btn-danger" onclick="delItem('${i.id}')">🗑</button>
+        <button onclick="editItem('${i.id}')" class="btn-small">✏️</button>
+        <button onclick="deleteItem('${i.id}')" class="btn-small btn-danger">🗑</button>
       </td>
     </tr>`;
   });
 }
 
 window.editItem=id=>{
-  const i=items.find(x=>x.id===id);
+  const i=allItems.find(x=>x.id===id);
+  if(!i) return;
   editId=id;
-  itemName.value=i.name;itemHSN.value=i.hsn;itemGST.value=i.gst;
-  salePrice.value=i.sale;purchasePrice.value=i.purchase;itemMRP.value=i.mrp;
+  itemName.value=i.name;itemDesc.value=i.description;
+  itemCategory.value=i.category;itemCode.value=i.code;
+  itemHSN.value=i.hsn;itemGST.value=i.gst;
+  salePrice.value=i.salePrice;purchasePrice.value=i.purchasePrice;
+  itemMRP.value=i.mrp;taxType.value=i.taxType;
   openItemModal();
 };
 
-window.delItem=async id=>{
-  if(confirm("Delete?")) await deleteDoc(doc(db,"users",uid,"items",id)),loadItems();
+window.deleteItem=async id=>{
+  if(confirm("Delete item?")){
+    await deleteDoc(doc(db,"items",uid,"list",id));
+    loadItems();
+  }
 };
 
-window.filterItems=()=>render(items.filter(i=>(i.name||"").toLowerCase().includes(searchItem.value.toLowerCase())));
+/* SEARCH */
+window.filterItems=()=>{
+  const q=searchItem.value.toLowerCase();
+  render(allItems.filter(i=>(i.name||"").toLowerCase().includes(q)));
+};
 
-window.bulkUpload=async()=>{
-  const f=excelFile.files[0]; if(!f) return;
+/* BULK UPLOAD */
+window.bulkUpload=()=>{
+  const f=excelFile.files[0];
+  if(!f) return alert("Select Excel");
   const r=new FileReader();
   r.onload=async e=>{
     const wb=XLSX.read(e.target.result,{type:"binary"});
-    const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+    const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:""});
     const b=writeBatch(db);
     rows.forEach(r=>{
       if(!r["Item Name*"]) return;
-      b.set(doc(collection(db,"users",uid,"items")),{
-        name:r["Item Name*"],gst:Number(r["GST Tax Rate(%)"]||0),sale:Number(r["Sales Price"]||0)
+      b.set(doc(collection(db,"items",uid,"list")),{
+        name:r["Item Name*"],
+        description:r["Description"],
+        category:r["Category"],
+        code:r["Item code"],
+        hsn:r["HSN Code"],
+        gst:Number(r["GST Tax Rate(%)"]||0),
+        salePrice:Number(r["Sales Price"]||0),
+        taxType:r["Sales Tax inclusive"]||"Exclusive",
+        purchasePrice:Number(r["Purchase Price"]||0),
+        mrp:Number(r["MRP"]||0),
+        createdAt:new Date()
       });
     });
-    await b.commit();loadItems();
+    await b.commit();loadItems();alert("Bulk upload done");
   };
   r.readAsBinaryString(f);
 };
