@@ -11,21 +11,8 @@ body {
   background: #f1f5f9;
 }
 
-/* LOGIN BOX */
-.center {
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.box {
-  background: #fff;
-  padding: 25px;
-  width: 320px;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0,0,0,.1);
-  text-align: center;
-}
+/* COMMON */
+.hidden { display: none; }
 input, textarea {
   width: 100%;
   padding: 10px;
@@ -48,30 +35,106 @@ button {
   color: #2563eb;
   cursor: pointer;
 }
-.hidden { display: none; }
+
+/* LOGIN */
+.center {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.box {
+  background: #fff;
+  padding: 25px;
+  width: 320px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0,0,0,.1);
+  text-align: center;
+}
 
 /* DASHBOARD */
 .dashboard {
   display: flex;
   height: 100vh;
 }
+
+/* SIDEBAR */
 .sidebar {
-  width: 220px;
   background: #0f172a;
   color: #fff;
-  padding: 15px;
+  width: 220px;
+  transition: width .3s;
+  display: flex;
+  flex-direction: column;
 }
-.sidebar h2 {
-  font-size: 18px;
-  margin-bottom: 20px;
+.sidebar.collapsed {
+  width: 70px;
 }
-.menu {
+
+.top {
   padding: 10px;
-  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.toggle {
+  font-size: 22px;
   cursor: pointer;
 }
-.menu:hover { background: #1e293b; }
 
+.logo {
+  font-size: 16px;
+  font-weight: bold;
+  white-space: nowrap;
+}
+.sidebar.collapsed .logo {
+  display: none;
+}
+
+.menu {
+  padding: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.menu:hover {
+  background: #1e293b;
+}
+.menu span {
+  white-space: nowrap;
+}
+.sidebar.collapsed .menu span {
+  display: none;
+}
+
+/* PROFILE BOTTOM */
+.profile {
+  margin-top: auto;
+  padding: 12px;
+  border-top: 1px solid #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.avatar {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background: #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+.profile-info {
+  white-space: nowrap;
+}
+.sidebar.collapsed .profile-info {
+  display: none;
+}
+
+/* MAIN */
 .main {
   flex: 1;
   padding: 25px;
@@ -113,10 +176,24 @@ button {
 
 <!-- DASHBOARD -->
 <div class="dashboard hidden" id="dashboard">
-  <div class="sidebar">
-    <h2>Ganesh Billing</h2>
-    <div class="menu">👤 Personal Details</div>
-    <div class="menu" onclick="logout()">🚪 Logout</div>
+
+  <div class="sidebar" id="sidebar">
+    <div class="top">
+      <div class="toggle" onclick="toggleSidebar()">☰</div>
+      <div class="logo">Ganesh Billing</div>
+    </div>
+
+    <div class="menu">🏠 <span>Dashboard</span></div>
+    <div class="menu">👤 <span>Personal Details</span></div>
+    <div class="menu" onclick="logout()">🚪 <span>Logout</span></div>
+
+    <div class="profile">
+      <div class="avatar" id="avatar">U</div>
+      <div class="profile-info">
+        <div id="pname">User</div>
+        <small id="pmobile"></small>
+      </div>
+    </div>
   </div>
 
   <div class="main">
@@ -130,6 +207,7 @@ button {
       <button onclick="saveProfile()">Save Details</button>
     </div>
   </div>
+
 </div>
 
 <!-- FIREBASE -->
@@ -137,7 +215,7 @@ button {
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } 
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, doc, setDoc } 
+import { getFirestore, doc, setDoc, getDoc } 
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -152,55 +230,53 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const db = getFirestore();
-
 let uid = "";
 
-/* AUTH STATE */
-onAuthStateChanged(auth, (user) => {
+/* AUTH */
+onAuthStateChanged(auth, async (user) => {
   if (user) {
     uid = user.uid;
     showDashboard();
+
+    const snap = await getDoc(doc(db, "users", uid));
+    if (snap.exists()) {
+      pname.innerText = snap.data().name;
+      pmobile.innerText = snap.data().mobile;
+      avatar.innerText = snap.data().name.charAt(0).toUpperCase();
+    }
   }
 });
 
-/* UI SWITCH */
-window.showRegister = () => {
-  loginBox.classList.add("hidden");
-  registerBox.classList.remove("hidden");
-};
-window.showLogin = () => {
-  registerBox.classList.add("hidden");
-  loginBox.classList.remove("hidden");
-};
+/* UI */
+window.showRegister = () => { loginBox.classList.add("hidden"); registerBox.classList.remove("hidden"); };
+window.showLogin = () => { registerBox.classList.add("hidden"); loginBox.classList.remove("hidden"); };
 function showDashboard() {
   loginBox.classList.add("hidden");
   registerBox.classList.add("hidden");
   dashboard.classList.remove("hidden");
 }
+window.toggleSidebar = () => {
+  sidebar.classList.toggle("collapsed");
+};
 
-/* REGISTER */
+/* AUTH ACTIONS */
 window.register = async () => {
   const email = regMobile.value + "@mobile.local";
-  const pass = regPassword.value;
-
-  const user = await createUserWithEmailAndPassword(auth, email, pass);
+  const user = await createUserWithEmailAndPassword(auth, email, regPassword.value);
   await setDoc(doc(db, "users", user.user.uid), {
     name: regName.value,
     mobile: regMobile.value
   });
-
   alert("Account Created");
   showLogin();
 };
 
-/* LOGIN */
 window.login = async () => {
   const email = loginMobile.value + "@mobile.local";
   await signInWithEmailAndPassword(auth, email, loginPassword.value);
   alert("Login Successful");
 };
 
-/* SAVE PROFILE */
 window.saveProfile = async () => {
   await setDoc(doc(db, "profiles", uid), {
     business: business.value,
@@ -213,7 +289,6 @@ window.saveProfile = async () => {
   alert("Details Saved");
 };
 
-/* LOGOUT */
 window.logout = async () => {
   await signOut(auth);
   location.reload();
