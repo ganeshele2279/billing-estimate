@@ -82,13 +82,16 @@ button{padding:8px 12px;border:none;border-radius:4px;cursor:pointer}
 
     <div class="menu" onclick="showTab('personal',this)">👤 Personal Details</div>
 
+    <!-- PROFILE + LOGOUT -->
     <div class="profile">
       <div id="userName">User</div>
-      <small>Online</small>
+      <small>Online</small><br><br>
+      <button class="btn-danger" style="width:100%" onclick="logout()">Logout</button>
     </div>
   </div>
 
   <div class="main">
+
     <div id="home" class="content active">
       <div class="card"><h2>Welcome 👋</h2></div>
     </div>
@@ -121,14 +124,21 @@ button{padding:8px 12px;border:none;border-radius:4px;cursor:pointer}
         <table class="table">
           <thead>
             <tr>
-              <th>Name</th><th>Code</th><th>HSN</th><th>GST%</th>
-              <th>Sale</th><th>Purchase</th><th>MRP</th><th>Action</th>
+              <th>Name</th>
+              <th>Code</th>
+              <th>HSN</th>
+              <th>GST%</th>
+              <th>Sale</th>
+              <th>Purchase</th>
+              <th>MRP</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody id="itemsTable"></tbody>
         </table>
       </div>
     </div>
+
   </div>
 </div>
 
@@ -160,9 +170,10 @@ button{padding:8px 12px;border:none;border-radius:4px;cursor:pointer}
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, collection, addDoc, getDocs, setDoc, doc, deleteDoc, updateDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+/* FIREBASE INIT */
 const app = initializeApp({
   apiKey:"AIzaSyAY4MfQ5zPh60EfYmY0JoKIDQkojqNU6hs",
   authDomain:"ganeshbilling-bdada.firebaseapp.com",
@@ -173,9 +184,17 @@ const auth=getAuth(), db=getFirestore();
 let uid="", allItems=[], editId=null;
 
 /* AUTH */
-onAuthStateChanged(auth,u=>{
-  if(u){uid=u.uid;loginPage.style.display="none";dashboardPage.style.display="flex";loadItems();}
-  else loginPage.style.display="flex";
+onAuthStateChanged(auth,user=>{
+  if(user){
+    uid=user.uid;
+    userName.innerText=user.email || "User";
+    loginPage.style.display="none";
+    dashboardPage.style.display="flex";
+    loadItems();
+  }else{
+    loginPage.style.display="flex";
+    dashboardPage.style.display="none";
+  }
 });
 
 /* LOGIN */
@@ -185,6 +204,17 @@ window.login=async()=>{
   try{
     await signInWithEmailAndPassword(auth,loginMobile.value+"@mobile.local",loginPassword.value);
   }catch(e){alert(e.message)}
+};
+
+/* LOGOUT */
+window.logout=async()=>{
+  try{
+    await signOut(auth);
+    allItems=[];
+    itemsTable.innerHTML="";
+  }catch(e){
+    alert("Logout failed: "+e.message);
+  }
 };
 
 /* SIDEBAR */
@@ -205,7 +235,11 @@ window.showTab=(id,el)=>{
 window.saveProfile=async()=>{
   try{
     await setDoc(doc(db,"profiles",uid),{
-      business:business.value,mobile:mobile.value,gst:gst.value,email:email.value,address:address.value
+      business:business.value,
+      mobile:mobile.value,
+      gst:gst.value,
+      email:email.value,
+      address:address.value
     });
     alert("Saved");
   }catch(e){alert(e.message)}
@@ -247,28 +281,32 @@ window.saveItem=async()=>{
   }catch(e){alert(e.message)}
 };
 
-/* LOAD */
+/* LOAD ITEMS */
 async function loadItems(){
   allItems=[];
-  const s=await getDocs(collection(db,"items",uid,"list"));
-  s.forEach(d=>allItems.push({id:d.id,...d.data()}));
-  render(allItems);
+  const snap=await getDocs(collection(db,"items",uid,"list"));
+  snap.forEach(d=>allItems.push({id:d.id,...d.data()}));
+  renderItems(allItems);
 }
 
 /* RENDER */
-function render(list){
+function renderItems(list){
   itemsTable.innerHTML="";
   list.forEach(i=>{
     itemsTable.innerHTML+=`
-    <tr>
-      <td>${i.name}</td><td>${i.code||""}</td><td>${i.hsn||""}</td>
-      <td>${i.gst||0}</td><td>${i.salePrice||0}</td>
-      <td>${i.purchasePrice||0}</td><td>${i.mrp||0}</td>
-      <td>
-        <button onclick="editItem('${i.id}')" class="btn-small">✏️</button>
-        <button onclick="deleteItem('${i.id}')" class="btn-small btn-danger">🗑</button>
-      </td>
-    </tr>`;
+      <tr>
+        <td>${i.name}</td>
+        <td>${i.code||""}</td>
+        <td>${i.hsn||""}</td>
+        <td>${i.gst||0}</td>
+        <td>${i.salePrice||0}</td>
+        <td>${i.purchasePrice||0}</td>
+        <td>${i.mrp||0}</td>
+        <td>
+          <button onclick="editItem('${i.id}')" class="btn-small">✏️</button>
+          <button onclick="deleteItem('${i.id}')" class="btn-small btn-danger">🗑</button>
+        </td>
+      </tr>`;
   });
 }
 
@@ -276,11 +314,16 @@ window.editItem=id=>{
   const i=allItems.find(x=>x.id===id);
   if(!i) return;
   editId=id;
-  itemName.value=i.name;itemDesc.value=i.description;
-  itemCategory.value=i.category;itemCode.value=i.code;
-  itemHSN.value=i.hsn;itemGST.value=i.gst;
-  salePrice.value=i.salePrice;purchasePrice.value=i.purchasePrice;
-  itemMRP.value=i.mrp;taxType.value=i.taxType;
+  itemName.value=i.name;
+  itemDesc.value=i.description;
+  itemCategory.value=i.category;
+  itemCode.value=i.code;
+  itemHSN.value=i.hsn;
+  itemGST.value=i.gst;
+  salePrice.value=i.salePrice;
+  purchasePrice.value=i.purchasePrice;
+  itemMRP.value=i.mrp;
+  taxType.value=i.taxType;
   openItemModal();
 };
 
@@ -294,7 +337,7 @@ window.deleteItem=async id=>{
 /* SEARCH */
 window.filterItems=()=>{
   const q=searchItem.value.toLowerCase();
-  render(allItems.filter(i=>(i.name||"").toLowerCase().includes(q)));
+  renderItems(allItems.filter(i=>(i.name||"").toLowerCase().includes(q)));
 };
 
 /* BULK UPLOAD */
@@ -305,10 +348,10 @@ window.bulkUpload=()=>{
   r.onload=async e=>{
     const wb=XLSX.read(e.target.result,{type:"binary"});
     const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:""});
-    const b=writeBatch(db);
+    const batch=writeBatch(db);
     rows.forEach(r=>{
       if(!r["Item Name*"]) return;
-      b.set(doc(collection(db,"items",uid,"list")),{
+      batch.set(doc(collection(db,"items",uid,"list")),{
         name:r["Item Name*"],
         description:r["Description"],
         category:r["Category"],
@@ -322,7 +365,9 @@ window.bulkUpload=()=>{
         createdAt:new Date()
       });
     });
-    await b.commit();loadItems();alert("Bulk upload done");
+    await batch.commit();
+    loadItems();
+    alert("Bulk upload done");
   };
   r.readAsBinaryString(f);
 };
