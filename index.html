@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>Ganesh Billing</title>
 
-<!-- XLSX -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <style>
@@ -20,39 +19,28 @@ button{padding:8px 12px;border:none;border-radius:4px;cursor:pointer}
 .btn-primary{background:#4f46e5;color:#fff}
 .btn-danger{background:#dc2626;color:#fff}
 .btn-outline{border:1px solid #4f46e5;background:#fff;color:#4f46e5}
-.btn-small{padding:5px 8px;font-size:12px}
 
 /* DASHBOARD */
 #dashboardPage{display:flex}
 .sidebar{width:230px;background:#0f172a;color:#fff;display:flex;flex-direction:column}
-.menu{padding:14px;cursor:pointer}
-.menu:hover,.menu.active{background:#1e293b}
-.submenu{padding:12px 30px;font-size:14px;cursor:pointer}
-.submenu:hover,.submenu.active{background:#1e293b}
+.menu,.submenu{padding:14px;cursor:pointer}
+.menu:hover,.submenu:hover,.menu.active,.submenu.active{background:#1e293b}
+.submenu{padding-left:30px;font-size:14px}
 .profile{margin-top:auto;padding:14px;border-top:1px solid #1e293b}
 
 .main{flex:1;padding:25px;overflow:auto}
-.content{max-width:1200px;margin:auto;display:none}
+.content{display:none;max-width:1200px;margin:auto}
 .content.active{display:block}
-.card{background:#fff;padding:25px;border-radius:8px;box-shadow:0 0 10px #0001;margin-bottom:20px}
-
-.row{display:flex;gap:15px}
-.col{flex:1}
+.card{background:#fff;padding:20px;border-radius:8px;box-shadow:0 0 10px #0001;margin-bottom:20px}
 .flex{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 
 .table{width:100%;border-collapse:collapse}
-.table th,.table td{border:1px solid #ddd;padding:8px;font-size:14px}
+.table th,.table td{border:1px solid #ddd;padding:8px}
 .table th{background:#f3f4f6}
 
 /* MODAL */
 .modal{position:fixed;inset:0;background:#0007;display:none;align-items:center;justify-content:center;z-index:100}
 .modal-box{background:#fff;width:950px;max-height:90vh;overflow:auto;border-radius:8px;padding:20px}
-.modal-header{display:flex;justify-content:space-between;align-items:center}
-.modal-layout{display:flex}
-.modal-left{width:200px;border-right:1px solid #eee}
-.modal-menu{padding:12px;cursor:pointer}
-.modal-menu.active,.modal-menu:hover{background:#eef2ff;color:#4f46e5}
-.modal-right{flex:1;padding-left:20px}
 </style>
 </head>
 
@@ -74,46 +62,28 @@ button{padding:8px 12px;border:none;border-radius:4px;cursor:pointer}
 
     <div class="menu active" onclick="showTab('home',this)">🏠 Dashboard</div>
 
-    <!-- SETTINGS -->
-    <div class="menu" onclick="toggleMenu('settingsSub','settingsArrow')">
-      ⚙️ Settings <span style="float:right" id="settingsArrow">▸</span>
+    <div class="menu" onclick="toggleMenu('settingsSub','sArrow')">
+      ⚙️ Settings <span id="sArrow" style="float:right">▸</span>
     </div>
-
     <div id="settingsSub" style="display:none">
       <div class="submenu" onclick="showTab('manageBusiness',this)">Manage Business</div>
       <div class="submenu" onclick="showTab('fontSettings',this)">Font Style</div>
+      <div class="submenu" onclick="logout()" style="color:#fca5a5">Logout</div>
     </div>
 
-    <!-- SALES -->
-    <div class="menu" onclick="toggleMenu('salesSub','salesArrow')">
-      🧾 Sales <span style="float:right" id="salesArrow">▸</span>
+    <div class="menu" onclick="toggleMenu('salesSub','saleArrow')">
+      🧾 Sales <span id="saleArrow" style="float:right">▸</span>
     </div>
     <div id="salesSub" style="display:none">
       <div class="submenu" onclick="showTab('salesInvoices',this)">Sales Invoices</div>
-      <div class="submenu">Quotation / Estimate</div>
-      <div class="submenu">Payment In</div>
-      <div class="submenu">Sales Return</div>
-      <div class="submenu">Credit Note</div>
-      <div class="submenu">Delivery Challan</div>
-      <div class="submenu">Proforma Invoice</div>
     </div>
 
-    <!-- PARTIES -->
-    <div class="menu" onclick="toggleMenu('partySub','partyArrow')">
-      👥 Parties <span style="float:right" id="partyArrow">▸</span>
-    </div>
-    <div id="partySub" style="display:none">
-      <div class="submenu" onclick="showTab('partyAdd',this)">➕ Add Party</div>
-      <div class="submenu" onclick="showTab('partyEdit',this)">✏️ Edit Party</div>
-    </div>
-
-    <!-- ITEMS -->
     <div class="menu" onclick="toggleMenu('itemSub','itemArrow')">
-      📦 Items <span style="float:right" id="itemArrow">▸</span>
+      📦 Items <span id="itemArrow" style="float:right">▸</span>
     </div>
     <div id="itemSub" style="display:none">
-      <div class="submenu" onclick="openItemModal()">➕ Create Item</div>
-      <div class="submenu" onclick="showTab('itemsList',this)">📋 Items List</div>
+      <div class="submenu" onclick="openItemModal()">Create Item</div>
+      <div class="submenu" onclick="showTab('itemsList',this)">Items List</div>
     </div>
 
     <div class="menu" onclick="showTab('personal',this)">👤 Personal Details</div>
@@ -130,76 +100,58 @@ button{padding:8px 12px;border:none;border-radius:4px;cursor:pointer}
       <div class="card"><h2>Welcome 👋</h2></div>
     </div>
 
-    <!-- MANAGE BUSINESS -->
     <div id="manageBusiness" class="content">
       <h2>Business Settings</h2>
       <div class="card">
         <input id="bizName" placeholder="Business Name">
-        <input id="bizPhone" placeholder="Phone Number">
+        <input id="bizPhone" placeholder="Phone">
         <input id="bizEmail" placeholder="Email">
-        <textarea id="bizAddress" placeholder="Billing Address"></textarea>
-        <div class="flex">
-          <input id="bizCity" placeholder="City">
-          <input id="bizState" placeholder="State">
-          <input id="bizPincode" placeholder="Pincode">
-        </div>
-        <input id="bizGST" placeholder="GSTIN">
-        <button class="btn-primary" onclick="saveBusiness()">Save Changes</button>
+        <textarea id="bizAddress" placeholder="Address"></textarea>
+        <button class="btn-primary" onclick="saveBusiness()">Save</button>
       </div>
     </div>
 
-    <!-- FONT SETTINGS -->
     <div id="fontSettings" class="content">
       <h2>Font Style</h2>
       <div class="card">
-        <select id="fontSelect" onchange="applyFont(this.value)">
-          <option value="system-ui">Default</option>
+        <select onchange="applyFont(this.value)">
           <option value="Arial">Arial</option>
           <option value="Poppins">Poppins</option>
           <option value="Roboto">Roboto</option>
-          <option value="Georgia">Georgia</option>
         </select>
-
-        <!-- ✅ ONLY ADD -->
         <br><br>
-        <label>Font Size</label>
-        <input type="range" min="12" max="22" value="14"
-               onchange="applyFontSize(this.value)">
+        <label>Font Size</label><br>
+        <input type="range" min="12" max="22" value="14" onchange="applyFontSize(this.value)">
         <span id="fontSizeLabel">14px</span>
-        <!-- ✅ END -->
       </div>
     </div>
 
-    <!-- PERSONAL -->
     <div id="personal" class="content">
       <div class="card">
-        <h2>Personal / Business Details</h2>
+        <h2>Personal Details</h2>
         <input id="business" placeholder="Business Name">
-        <input id="mobile" placeholder="Mobile Number">
-        <input id="gst" placeholder="GST Number">
+        <input id="mobile" placeholder="Mobile">
+        <input id="gst" placeholder="GST">
         <input id="email" placeholder="Email">
         <textarea id="address" placeholder="Address"></textarea>
         <button class="btn-primary" onclick="saveProfile()">Save</button>
       </div>
     </div>
 
-    <!-- SALES INVOICES -->
-    <div id="salesInvoices" class="content">
-      <div class="card flex" style="justify-content:space-between">
-        <h3>Sales Invoices</h3>
-        <button class="btn-primary" onclick="openInvoice()">Create Sales Invoice</button>
-      </div>
+    <div id="itemsList" class="content">
       <div class="card">
         <table class="table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Invoice No</th>
-              <th>Party Name</th>
-              <th>Amount</th>
-              <th>Status</th>
-            </tr>
-          </thead>
+          <thead><tr><th>Name</th><th>Code</th><th>Price</th></tr></thead>
+          <tbody id="itemsTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="salesInvoices" class="content">
+      <div class="card">
+        <button class="btn-primary" onclick="openInvoice()">Create Invoice</button>
+        <table class="table">
+          <thead><tr><th>Date</th><th>Party</th><th>Amount</th><th>Status</th></tr></thead>
           <tbody id="invoiceTable"></tbody>
         </table>
       </div>
@@ -208,25 +160,9 @@ button{padding:8px 12px;border:none;border-radius:4px;cursor:pointer}
   </div>
 </div>
 
-<!-- SALES INVOICE MODAL -->
-<div class="modal" id="invoiceModal">
-  <div class="modal-box">
-    <h3>Create Sales Invoice</h3>
-    <input id="invParty" placeholder="Party Name">
-    <input id="invAmount" placeholder="Invoice Amount">
-    <select id="invStatus">
-      <option>Paid</option>
-      <option>Unpaid</option>
-    </select>
-    <br><br>
-    <button class="btn-primary" onclick="saveInvoice()">Save Invoice</button>
-    <button onclick="closeInvoice()">Cancel</button>
-  </div>
-</div>
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, collection, addDoc, getDocs, setDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const app = initializeApp({
@@ -237,30 +173,25 @@ const app = initializeApp({
 const auth=getAuth(), db=getFirestore();
 let uid="";
 
-/* AUTH */
 onAuthStateChanged(auth,user=>{
   if(user){
     uid=user.uid;
     loginPage.style.display="none";
     dashboardPage.style.display="flex";
     loadItems();
-    loadParties();
     loadInvoices();
-    loadBusiness();
   }else{
     loginPage.style.display="flex";
   }
 });
 
-/* LOGIN */
 window.login=()=>signInWithEmailAndPassword(auth,loginMobile.value+"@mobile.local",loginPassword.value);
+window.logout=async()=>{await signOut(auth);location.reload()};
 
-/* SIDEBAR */
-window.toggleMenu=(id,arrow)=>{
-  const el=document.getElementById(id);
-  const ar=document.getElementById(arrow);
-  el.style.display=el.style.display==="none"?"block":"none";
-  ar.innerText=el.style.display==="none"?"▸":"▾";
+window.toggleMenu=(id,a)=>{
+  const e=document.getElementById(id);
+  e.style.display=e.style.display==="none"?"block":"none";
+  document.getElementById(a).innerText=e.style.display==="none"?"▸":"▾";
 };
 window.showTab=(id,el)=>{
   document.querySelectorAll(".content").forEach(c=>c.classList.remove("active"));
@@ -269,95 +200,32 @@ window.showTab=(id,el)=>{
   document.getElementById(id).classList.add("active");
 };
 
-/* PROFILE */
-window.saveProfile=async()=>{
-  await setDoc(doc(db,"profiles",uid),{
-    business:business.value,mobile:mobile.value,gst:gst.value,email:email.value,address:address.value
-  });
-  alert("Saved");
-};
+window.applyFont=f=>{document.body.style.fontFamily=f;localStorage.setItem("appFont",f)}
+window.applyFontSize=s=>{document.body.style.fontSize=s+"px";fontSizeLabel.innerText=s+"px";localStorage.setItem("appFontSize",s)}
+const f=localStorage.getItem("appFont"),fs=localStorage.getItem("appFontSize");
+if(f)document.body.style.fontFamily=f;
+if(fs){document.body.style.fontSize=fs+"px";fontSizeLabel.innerText=fs+"px";}
 
-/* SALES */
-window.openInvoice=()=>invoiceModal.style.display="flex";
-window.closeInvoice=()=>invoiceModal.style.display="none";
-window.saveInvoice=async()=>{
-  await addDoc(collection(db,"sales",uid,"invoices"),{
-    party:invParty.value,
-    amount:Number(invAmount.value),
-    status:invStatus.value,
-    date:new Date().toLocaleDateString()
-  });
-  closeInvoice();
-  loadInvoices();
-};
-async function loadInvoices(){
-  invoiceTable.innerHTML="";
-  const snap=await getDocs(collection(db,"sales",uid,"invoices"));
-  snap.forEach(d=>{
+window.saveProfile=()=>setDoc(doc(db,"profiles",uid),{
+  business:business.value,mobile:mobile.value,gst:gst.value,email:email.value,address:address.value
+});
+
+async function loadItems(){
+  const s=await getDocs(collection(db,"items",uid,"list"));
+  itemsTable.innerHTML="";
+  s.forEach(d=>{
     const i=d.data();
-    invoiceTable.innerHTML+=`
-      <tr>
-        <td>${i.date}</td>
-        <td>${d.id.slice(0,6)}</td>
-        <td>${i.party}</td>
-        <td>₹ ${i.amount}</td>
-        <td>${i.status}</td>
-      </tr>`;
+    itemsTable.innerHTML+=`<tr><td>${i.name}</td><td>${i.code||""}</td><td>${i.salePrice||""}</td></tr>`;
   });
 }
 
-/* BUSINESS */
-async function loadBusiness(){
-  const ref=doc(db,"settings",uid);
-  const snap=await getDoc(ref);
-  if(snap.exists()){
-    const d=snap.data();
-    bizName.value=d.name||"";
-    bizPhone.value=d.phone||"";
-    bizEmail.value=d.email||"";
-    bizAddress.value=d.address||"";
-    bizCity.value=d.city||"";
-    bizState.value=d.state||"";
-    bizPincode.value=d.pincode||"";
-    bizGST.value=d.gst||"";
-  }
-}
-window.saveBusiness=async()=>{
-  await setDoc(doc(db,"settings",uid),{
-    name:bizName.value,
-    phone:bizPhone.value,
-    email:bizEmail.value,
-    address:bizAddress.value,
-    city:bizCity.value,
-    state:bizState.value,
-    pincode:bizPincode.value,
-    gst:bizGST.value
+async function loadInvoices(){
+  const s=await getDocs(collection(db,"sales",uid,"invoices"));
+  invoiceTable.innerHTML="";
+  s.forEach(d=>{
+    const i=d.data();
+    invoiceTable.innerHTML+=`<tr><td>${i.date}</td><td>${i.party}</td><td>${i.amount}</td><td>${i.status}</td></tr>`;
   });
-  alert("Business details updated");
-};
-
-/* FONT */
-window.applyFont=(font)=>{
-  document.body.style.fontFamily=font;
-  localStorage.setItem("appFont",font);
-};
-
-/* ✅ ONLY ADD */
-window.applyFontSize=(size)=>{
-  document.body.style.fontSize=size+"px";
-  fontSizeLabel.innerText=size+"px";
-  localStorage.setItem("appFontSize",size);
-};
-
-const savedFont=localStorage.getItem("appFont");
-if(savedFont) document.body.style.fontFamily=savedFont;
-
-const savedFontSize=localStorage.getItem("appFontSize");
-if(savedFontSize){
-  document.body.style.fontSize=savedFontSize+"px";
-  if(document.getElementById("fontSizeLabel")){
-    fontSizeLabel.innerText=savedFontSize+"px";
-  }
 }
 </script>
 
