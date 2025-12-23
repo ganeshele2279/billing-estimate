@@ -1,70 +1,121 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8">
 <title>Ganesh Billing</title>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <style>
 *{box-sizing:border-box}
 body{
   margin:0;
-  font-family:system-ui;
+  font-family:system-ui, Arial, sans-serif;
   background:#f5f7fb;
 }
 .hidden{display:none}
 .flex{display:flex;gap:10px}
-.btn-primary{
-  background:#4f46e5;color:#fff;
-  border:none;padding:10px 15px;
-  border-radius:6px;cursor:pointer
-}
-.badge.paid{background:#d1fae5;color:#065f46;padding:4px 8px;border-radius:6px}
-.badge.unpaid{background:#fee2e2;color:#991b1b;padding:4px 8px;border-radius:6px}
 .card{
-  background:#fff;padding:15px;
-  border-radius:10px;margin-bottom:15px
+  background:#fff;
+  padding:16px;
+  border-radius:10px;
+  margin-bottom:16px;
 }
-.table{width:100%;border-collapse:collapse}
-.table th,.table td{border-bottom:1px solid #ddd;padding:8px;text-align:left}
+input,select,textarea{
+  width:100%;
+  padding:10px;
+  margin-bottom:10px;
+}
+button{
+  padding:10px 14px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
+.btn-primary{background:#4f46e5;color:#fff}
+.btn-outline{border:1px solid #4f46e5;background:#fff;color:#4f46e5}
 
-.sidebar{
-  width:230px;background:#0f172a;
-  color:#fff;height:100vh;
-  position:fixed;padding:10px
+/* LOGIN */
+#loginPage{
+  height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
-.menu{padding:10px;cursor:pointer}
+
+/* DASHBOARD */
+#dashboardPage{
+  display:flex;
+  min-height:100vh;
+}
+.sidebar{
+  width:230px;
+  background:#0f172a;
+  color:#fff;
+  position:fixed;
+  top:0;left:0;bottom:0;
+  padding:12px;
+}
+.menu{
+  padding:10px;
+  cursor:pointer;
+  border-radius:6px;
+}
 .menu:hover{background:#1e293b}
 .submenu{
-  padding:8px 25px;
-  cursor:pointer;font-size:14px
+  padding:8px 28px;
+  font-size:14px;
+  cursor:pointer;
 }
 .submenu:hover{background:#334155}
 .main{
   margin-left:230px;
-  padding:20px
+  padding:20px;
+  width:calc(100% - 230px);
 }
 .content{display:none}
-input,select,textarea{
-  width:100%;padding:10px;
-  margin-bottom:10px
+
+/* TABLE */
+.table{
+  width:100%;
+  border-collapse:collapse;
 }
+.table th,.table td{
+  border-bottom:1px solid #ddd;
+  padding:8px;
+  text-align:left;
+}
+.badge{
+  padding:4px 10px;
+  border-radius:12px;
+  font-size:12px;
+}
+.paid{background:#dcfce7;color:#166534}
+.unpaid{background:#fee2e2;color:#991b1b}
+
+/* MODAL */
 .modal{
-  position:fixed;inset:0;
+  position:fixed;
+  inset:0;
   background:rgba(0,0,0,.5);
-  display:none;align-items:center;justify-content:center
+  display:none;
+  align-items:center;
+  justify-content:center;
 }
 .modal-box{
-  background:#fff;padding:20px;
-  width:400px;border-radius:10px
+  background:#fff;
+  padding:20px;
+  width:420px;
+  border-radius:10px;
 }
 </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
-<div id="loginPage" class="flex" style="height:100vh;align-items:center;justify-content:center">
-  <div class="card" style="width:300px">
+<!-- LOGIN PAGE -->
+<div id="loginPage">
+  <div class="card" style="width:320px">
     <h2>Login</h2>
     <input id="loginMobile" placeholder="Mobile Number">
     <input id="loginPassword" type="password" placeholder="Password">
@@ -88,7 +139,6 @@ input,select,textarea{
 
     <div class="menu" onclick="toggleMenu('itemSub')">Items ▸</div>
     <div id="itemSub" class="hidden">
-      <div class="submenu" onclick="showTab('addItem')">Create Item</div>
       <div class="submenu" onclick="showTab('itemList')">Items List</div>
     </div>
 
@@ -120,7 +170,7 @@ input,select,textarea{
 
     <!-- ADD PARTY -->
     <div id="addParty" class="content card">
-      <h2>Create Party</h2>
+      <h2>Add Party</h2>
       <input id="pName" placeholder="Party Name">
       <input id="pMobile" placeholder="Mobile">
       <button class="btn-primary" onclick="saveParty()">Save Party</button>
@@ -129,19 +179,10 @@ input,select,textarea{
     <!-- PARTY LIST -->
     <div id="partyList" class="content card">
       <h2>Party List</h2>
-      <input placeholder="Search">
       <table class="table"><tbody id="partyTable"></tbody></table>
     </div>
 
-    <!-- ADD ITEM -->
-    <div id="addItem" class="content card">
-      <h2>Create Item</h2>
-      <input id="iName" placeholder="Item Name">
-      <input id="iPrice" placeholder="Price">
-      <button class="btn-primary" onclick="saveItem()">Save Item</button>
-    </div>
-
-    <!-- ITEM LIST -->
+    <!-- ITEMS -->
     <div id="itemList" class="content card">
       <h2>Items</h2>
       <table class="table"><tbody id="itemTable"></tbody></table>
@@ -160,7 +201,7 @@ input,select,textarea{
 
     <!-- SETTINGS -->
     <div id="manageBusiness" class="content card">
-      <h2>Business Settings</h2>
+      <h2>Manage Business</h2>
       <input id="bizName" placeholder="Business Name">
       <input id="bizPhone" placeholder="Phone">
       <input id="bizGST" placeholder="GST">
@@ -183,10 +224,13 @@ input,select,textarea{
 <!-- INVOICE MODAL -->
 <div id="invoiceModal" class="modal">
   <div class="modal-box">
-    <h3>New Invoice</h3>
-    <input id="invParty" placeholder="Party">
+    <h3>Create Invoice</h3>
+    <input id="invParty" placeholder="Party Name">
     <input id="invAmount" placeholder="Amount">
-    <select id="invStatus"><option>Paid</option><option>Unpaid</option></select>
+    <select id="invStatus">
+      <option>Paid</option>
+      <option>Unpaid</option>
+    </select>
     <button class="btn-primary" onclick="saveInvoice()">Save</button>
     <button onclick="closeInvoice()">Cancel</button>
   </div>
@@ -197,69 +241,111 @@ import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase
 import {getAuth,signInWithEmailAndPassword,onAuthStateChanged,signOut} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {getFirestore,collection,addDoc,getDocs,setDoc,doc} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const app=initializeApp({
- apiKey:"AIzaSyAY4MfQ5zPh60EfYmY0JoKIDQkojqNU6hs",
- authDomain:"ganeshbilling-bdada.firebaseapp.com",
- projectId:"ganeshbilling-bdada"
+const app = initializeApp({
+  apiKey:"AIzaSyAY4MfQ5zPh60EfYmY0JoKIDQkojqNU6hs",
+  authDomain:"ganeshbilling-bdada.firebaseapp.com",
+  projectId:"ganeshbilling-bdada"
 });
-const auth=getAuth(),db=getFirestore();
+const auth=getAuth(), db=getFirestore();
 let uid="";
 
-onAuthStateChanged(auth,u=>{
- if(u){
-  uid=u.uid;
-  loginPage.classList.add("hidden");
-  dashboardPage.classList.remove("hidden");
-  showTab("personal");
-  loadItems();loadInvoices();
- }
+/* AUTH – LOCKED */
+onAuthStateChanged(auth,user=>{
+  if(user){
+    uid=user.uid;
+    loginPage.style.display="none";
+    dashboardPage.classList.remove("hidden");
+    showTab("personal");
+    loadItems();
+    loadInvoices();
+  }else{
+    dashboardPage.classList.add("hidden");
+    loginPage.style.display="flex";
+  }
 });
 
-window.login=()=>signInWithEmailAndPassword(auth,loginMobile.value+"@mobile.local",loginPassword.value);
+/* AUTH ACTIONS */
+window.login=()=>signInWithEmailAndPassword(
+  auth,
+  loginMobile.value+"@mobile.local",
+  loginPassword.value
+);
 window.logout=()=>signOut(auth);
 
+/* UI */
 window.showTab=id=>{
- document.querySelectorAll(".content").forEach(d=>d.style.display="none");
- document.getElementById(id).style.display="block";
+  document.querySelectorAll(".content").forEach(c=>c.style.display="none");
+  document.getElementById(id).style.display="block";
 };
 window.toggleMenu=id=>{
- const e=document.getElementById(id);
- e.classList.toggle("hidden");
+  document.getElementById(id).classList.toggle("hidden");
 };
 
-window.saveItem=async()=>addDoc(collection(db,"items",uid,"list"),{name:iName.value,price:iPrice.value});
+/* PARTIES */
+window.saveParty=async()=>{
+  await addDoc(collection(db,"parties",uid,"list"),{
+    name:pName.value,
+    mobile:pMobile.value
+  });
+};
+
+/* ITEMS */
 async function loadItems(){
- const s=await getDocs(collection(db,"items",uid,"list"));
- itemTable.innerHTML="";
- s.forEach(d=>itemTable.innerHTML+=`<tr><td>${d.data().name}</td><td>${d.data().price}</td></tr>`);
+  const s=await getDocs(collection(db,"items",uid,"list"));
+  itemTable.innerHTML="";
+  s.forEach(d=>{
+    itemTable.innerHTML+=`<tr><td>${d.data().name||""}</td></tr>`;
+  });
 }
 
+/* SALES */
 window.openInvoice=()=>invoiceModal.style.display="flex";
 window.closeInvoice=()=>invoiceModal.style.display="none";
+
 window.saveInvoice=async()=>{
- await addDoc(collection(db,"sales",uid,"invoices"),{
-  party:invParty.value,
-  amount:Number(invAmount.value),
-  status:invStatus.value
- });
- closeInvoice();loadInvoices();
+  await addDoc(collection(db,"sales",uid,"invoices"),{
+    party:invParty.value,
+    amount:Number(invAmount.value),
+    status:invStatus.value
+  });
+  closeInvoice();
+  loadInvoices();
 };
+
 async function loadInvoices(){
- const s=await getDocs(collection(db,"sales",uid,"invoices"));
- let t=0,p=0,u=0;invoiceTable.innerHTML="";
- s.forEach(d=>{
-  const i=d.data();t+=i.amount;
-  i.status=="Paid"?p+=i.amount:u+=i.amount;
-  invoiceTable.innerHTML+=`<tr><td>${i.party}</td><td>₹${i.amount}</td><td>${i.status}</td></tr>`;
- });
- totalSales.innerText=t;paidSales.innerText=p;unpaidSales.innerText=u;
+  const s=await getDocs(collection(db,"sales",uid,"invoices"));
+  let t=0,p=0,u=0;
+  invoiceTable.innerHTML="";
+  s.forEach(d=>{
+    const i=d.data();
+    t+=i.amount;
+    i.status==="Paid"?p+=i.amount:u+=i.amount;
+    invoiceTable.innerHTML+=`
+      <tr>
+        <td>${i.party}</td>
+        <td>₹ ${i.amount}</td>
+        <td><span class="badge ${i.status==="Paid"?"paid":"unpaid"}">${i.status}</span></td>
+      </tr>`;
+  });
+  totalSales.innerText=t;
+  paidSales.innerText=p;
+  unpaidSales.innerText=u;
 }
 
-window.applyFont=f=>{
- document.body.style.fontFamily=f;
- localStorage.setItem("font",f);
+/* SETTINGS */
+window.saveBusiness=async()=>{
+  await setDoc(doc(db,"settings",uid),{
+    name:bizName.value,
+    phone:bizPhone.value,
+    gst:bizGST.value
+  });
 };
-const f=localStorage.getItem("font");if(f)document.body.style.fontFamily=f;
+window.applyFont=f=>{
+  document.body.style.fontFamily=f;
+  localStorage.setItem("appFont",f);
+};
+const f=localStorage.getItem("appFont");
+if(f) document.body.style.fontFamily=f;
 </script>
 
 </body>
