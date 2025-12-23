@@ -5,28 +5,30 @@
 <title>Ganesh Billing</title>
 
 <style>
+* { box-sizing: border-box; }
 body {
   margin: 0;
   font-family: Arial, sans-serif;
   background: #f1f5f9;
 }
 
-/* 🔥 HIDE EVERYTHING INITIALLY */
-body.loading #loginPage,
-body.loading #dashboardPage {
+/* 🔥 FULLSCREEN LAYERS */
+#loginPage,
+#dashboardPage {
+  position: fixed;
+  inset: 0;
   display: none;
 }
 
-.hidden { display: none; }
-
 /* LOGIN */
-.center {
-  height: 100vh;
+#loginPage {
   display: flex;
   align-items: center;
   justify-content: center;
+  background: #f1f5f9;
+  z-index: 10;
 }
-.box {
+.login-box {
   background: #fff;
   padding: 25px;
   width: 320px;
@@ -38,8 +40,6 @@ input, textarea {
   width: 100%;
   padding: 10px;
   margin: 8px 0;
-  border-radius: 5px;
-  border: 1px solid #ccc;
 }
 button {
   width: 100%;
@@ -52,9 +52,9 @@ button {
 }
 
 /* DASHBOARD */
-.dashboard {
+#dashboardPage {
   display: flex;
-  height: 100vh;
+  background: #f1f5f9;
 }
 .sidebar {
   width: 230px;
@@ -62,18 +62,12 @@ button {
   color: #fff;
   display: flex;
   flex-direction: column;
-  transition: .3s;
-}
-.sidebar.collapsed {
-  width: 70px;
 }
 .menu {
   padding: 12px;
   cursor: pointer;
 }
-.menu:hover {
-  background: #1e293b;
-}
+.menu:hover { background: #1e293b; }
 .profile {
   margin-top: auto;
   padding: 12px;
@@ -83,18 +77,14 @@ button {
   flex: 1;
   padding: 25px;
 }
-.toggle {
-  font-size: 20px;
-  cursor: pointer;
-}
 </style>
 </head>
 
-<body class="loading">
+<body>
 
 <!-- LOGIN -->
-<div class="center hidden" id="loginPage">
-  <div class="box">
+<div id="loginPage">
+  <div class="login-box">
     <h2>Login</h2>
     <input id="loginMobile" placeholder="Mobile Number">
     <input id="loginPassword" type="password" placeholder="Password">
@@ -103,11 +93,9 @@ button {
 </div>
 
 <!-- DASHBOARD -->
-<div class="dashboard hidden" id="dashboardPage">
-  <div class="sidebar" id="sidebar">
-    <div class="menu toggle" onclick="toggleSidebar()">☰</div>
+<div id="dashboardPage">
+  <div class="sidebar">
     <div class="menu">👤 Personal Details</div>
-
     <div class="profile">
       <div id="userName">User</div>
       <small>Online</small>
@@ -152,20 +140,18 @@ const auth = getAuth();
 const db = getFirestore();
 let uid = "";
 
-/* 🔥 AUTH GATE (NO FLICKER) */
+/* 🔥 SINGLE SOURCE OF TRUTH */
 onAuthStateChanged(auth, async (user) => {
-  document.body.classList.remove("loading");
-
   if (user) {
     uid = user.uid;
-    loginPage.classList.add("hidden");
-    dashboardPage.classList.remove("hidden");
+    loginPage.style.display = "none";
+    dashboardPage.style.display = "flex";
 
     const snap = await getDoc(doc(db, "users", uid));
     if (snap.exists()) userName.innerText = snap.data().name;
   } else {
-    dashboardPage.classList.add("hidden");
-    loginPage.classList.remove("hidden");
+    dashboardPage.style.display = "none";
+    loginPage.style.display = "flex";
   }
 });
 
@@ -190,10 +176,6 @@ window.saveProfile = async () => {
     address: address.value
   });
   alert("Saved");
-};
-
-window.toggleSidebar = () => {
-  sidebar.classList.toggle("collapsed");
 };
 </script>
 
