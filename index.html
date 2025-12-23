@@ -74,6 +74,17 @@ button{padding:8px 12px;border:none;border-radius:4px;cursor:pointer}
 
     <div class="menu active" onclick="showTab('home',this)">🏠 Dashboard</div>
 
+    <!-- SETTINGS -->
+<div class="menu" onclick="toggleMenu('settingsSub','settingsArrow')">
+  ⚙️ Settings <span style="float:right" id="settingsArrow">▸</span>
+</div>
+
+<div id="settingsSub" style="display:none">
+  <div class="submenu" onclick="showTab('manageBusiness',this)">Manage Business</div>
+  <div class="submenu" onclick="showTab('fontSettings',this)">Font Style</div>
+</div>
+
+
     <!-- SALES -->
 <div class="menu" onclick="toggleMenu('salesSub','salesArrow')">
   🧾 Sales <span style="float:right" id="salesArrow">▸</span>
@@ -120,6 +131,49 @@ button{padding:8px 12px;border:none;border-radius:4px;cursor:pointer}
     <div id="home" class="content active">
       <div class="card"><h2>Welcome 👋</h2></div>
     </div>
+
+    <!-- MANAGE BUSINESS -->
+<div id="manageBusiness" class="content">
+
+  <h2>Business Settings</h2>
+
+  <div class="card">
+    <input id="bizName" placeholder="Business Name">
+    <input id="bizPhone" placeholder="Phone Number">
+    <input id="bizEmail" placeholder="Email">
+
+    <textarea id="bizAddress" placeholder="Billing Address"></textarea>
+
+    <div class="flex">
+      <input id="bizCity" placeholder="City">
+      <input id="bizState" placeholder="State">
+      <input id="bizPincode" placeholder="Pincode">
+    </div>
+
+    <input id="bizGST" placeholder="GSTIN">
+
+    <button class="btn-primary" onclick="saveBusiness()">Save Changes</button>
+  </div>
+
+</div>
+
+    <!-- FONT SETTINGS -->
+<div id="fontSettings" class="content">
+
+  <h2>Font Style</h2>
+
+  <div class="card">
+    <select id="fontSelect" onchange="applyFont(this.value)">
+      <option value="system-ui">Default</option>
+      <option value="Arial">Arial</option>
+      <option value="Poppins">Poppins</option>
+      <option value="Roboto">Roboto</option>
+      <option value="Georgia">Georgia</option>
+    </select>
+  </div>
+
+</div>
+
 
     <!-- PERSONAL -->
     <div id="personal" class="content">
@@ -264,6 +318,7 @@ onAuthStateChanged(auth,user=>{
     dashboardPage.style.display="flex";
     loadItems();
     loadInvoices();
+    loadBusiness();
   }else{
     loginPage.style.display="flex";
   }
@@ -431,6 +486,55 @@ async function loadInvoices(){
   totalSales.innerText = "₹ " + total;
   paidSales.innerText = "₹ " + paid;
   unpaidSales.innerText = "₹ " + unpaid;
+}
+
+  /* ======================
+   BUSINESS SETTINGS
+====================== */
+
+async function loadBusiness(){
+  const ref = doc(db,"settings",uid);
+  const snap = await getDoc(ref);
+
+  if(snap.exists()){
+    const d = snap.data();
+    bizName.value = d.name || "";
+    bizPhone.value = d.phone || "";
+    bizEmail.value = d.email || "";
+    bizAddress.value = d.address || "";
+    bizCity.value = d.city || "";
+    bizState.value = d.state || "";
+    bizPincode.value = d.pincode || "";
+    bizGST.value = d.gst || "";
+  }
+}
+
+window.saveBusiness = async () => {
+  await setDoc(doc(db,"settings",uid),{
+    name: bizName.value,
+    phone: bizPhone.value,
+    email: bizEmail.value,
+    address: bizAddress.value,
+    city: bizCity.value,
+    state: bizState.value,
+    pincode: bizPincode.value,
+    gst: bizGST.value
+  });
+  alert("Business details updated");
+};
+
+/* ======================
+   FONT SETTINGS
+====================== */
+
+window.applyFont = (font) => {
+  document.body.style.fontFamily = font;
+  localStorage.setItem("appFont", font);
+};
+
+const savedFont = localStorage.getItem("appFont");
+if(savedFont){
+  document.body.style.fontFamily = savedFont;
 }
 
 
