@@ -65,6 +65,12 @@ button{padding:8px 12px;border:none;border-radius:4px;cursor:pointer}
     <div class="menu active" onclick="showTab('home',this)">🏠 Dashboard</div>
 
     <div class="menu" onclick="toggleMenu('partySub','partyArrow')">
+
+      <!-- NEW: SALES INVOICE -->
+  <div class="menu" onclick="showTab('salesInvoice', this)">
+    🧾 Create Sales Invoice
+  </div>
+      
       👥 Parties <span style="float:right" id="partyArrow">▸</span>
     </div>
     <div id="partySub" style="display:none">
@@ -139,6 +145,119 @@ button{padding:8px 12px;border:none;border-radius:4px;cursor:pointer}
       </div>
     </div>
 
+
+    <!-- SALES INVOICE PAGE -->
+<div id="salesInvoice" class="content">
+
+  <!-- HEADER -->
+  <div class="card">
+    <h2>🧾 Create Sales Invoice</h2>
+  </div>
+
+  <!-- TOP SECTION -->
+  <div class="card" style="display:flex;gap:20px">
+
+    <!-- LEFT: BILL TO -->
+    <div style="flex:1">
+      <h3>Bill To</h3>
+
+      <div style="border:2px dashed #4f46e5;padding:30px;text-align:center;border-radius:6px;cursor:pointer">
+        + Add Party
+      </div>
+    </div>
+
+    <!-- RIGHT: INVOICE DETAILS -->
+    <div style="width:300px">
+      <label>Sales Invoice No</label>
+      <input id="invNumber" placeholder="Auto">
+
+      <label>Invoice Date</label>
+     <input type="date" id="invDate">
+      
+      <div style="margin:10px 0;border:2px dashed #4f46e5;padding:10px;text-align:center;border-radius:6px;cursor:pointer">
+        + Add Due Date
+      </div>
+
+      <label>E-Way Bill No</label>
+      <input id="ewayBill">
+
+      <label>Vehicle No</label>
+      <input id="vehicleNo">
+    </div>
+
+  </div>
+
+  <!-- ITEMS SECTION -->
+  <div class="card">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Items / Services</th>
+          <th>HSN / SAC</th>
+          <th>Qty</th>
+          <th>Price (₹)</th>
+          <th>Discount</th>
+          <th>Tax</th>
+          <th>Amount (₹)</th>
+        </tr>
+      </thead>
+      <tbody id="invoiceItemsBody">
+      <tr onclick="addInvoiceRow()">
+
+        <tr onclick="addInvoiceRow()">
+  <td colspan="8" style="text-align:center;border:2px dashed #4f46e5;padding:15px;cursor:pointer">
+    + Add Item
+  </td>
+</tr>
+
+
+      </tbody>
+    </table>
+  </div>
+
+  <!-- BOTTOM SECTION -->
+  <div class="card" style="display:flex;gap:20px">
+
+    <!-- LEFT -->
+    <div style="flex:1">
+      <a href="#">+ Add Notes</a>
+
+      <h4 style="margin-top:20px">Terms and Conditions</h4>
+      <textarea rows="4">
+1. Goods once sold will not be taken back.
+2. Subject to local jurisdiction.
+      </textarea>
+
+      <h4 style="margin-top:20px">Bank Details</h4>
+      <p>
+        Account Name: Ganesh Enterprises<br>
+        Bank: Axis Bank<br>
+        IFSC: UTIB0001447
+      </p>
+    </div>
+
+    <!-- RIGHT -->
+    <div style="width:300px">
+    <p>Subtotal: ₹ <span id="invSubtotal">0</span></p>
+<p>Tax: ₹ <span id="invTax">0</span></p>
+<p>Discount: ₹ <span id="invDiscount">0</span></p>
+<hr>
+<h3>Total Amount: ₹ <span id="invTotal">0</span></h3>
+
+      <button class="btn-primary"
+        style="width:100%;margin-top:15px"
+        onclick="saveSalesInvoice()">
+  Save Sales Invoice
+</button>
+
+    </div>
+
+  </div>
+
+</div>
+
+    
   </div>
 </div>
 
@@ -173,6 +292,39 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, collection, addDoc, getDocs, setDoc, doc, deleteDoc, updateDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+  function calculateInvoiceTotals() {
+  let subtotal = 0;
+  let totalTax = 0;
+  let totalDiscount = 0;
+
+  const rows = document.querySelectorAll("#invoiceItemsBody tr");
+
+  rows.forEach(tr => {
+    const inputs = tr.querySelectorAll("input");
+    if (inputs.length === 0) return;
+
+    const qty = Number(inputs[3]?.value || 0);
+    const price = Number(inputs[4]?.value || 0);
+    const discount = Number(inputs[5]?.value || 0);
+    const gst = Number(inputs[6]?.value || 0);
+
+    const rowBase = qty * price;
+    const rowAfterDiscount = rowBase - discount;
+    const rowTax = rowAfterDiscount * gst / 100;
+
+    subtotal += rowAfterDiscount;
+    totalTax += rowTax;
+    totalDiscount += discount;
+  });
+
+  invSubtotal.innerText = subtotal.toFixed(2);
+  invTax.innerText = totalTax.toFixed(2);
+  invDiscount.innerText = totalDiscount.toFixed(2);
+  invTotal.innerText = (subtotal + totalTax).toFixed(2);
+}
+
+  
+  
 /* FIREBASE INIT */
 const app = initializeApp({
   apiKey:"AIzaSyAY4MfQ5zPh60EfYmY0JoKIDQkojqNU6hs",
@@ -281,6 +433,17 @@ window.saveItem=async()=>{
   }catch(e){alert(e.message)}
 };
 
+  function createItemSearchInput(rowId) {
+  return `
+    <input type="text"
+      placeholder="Search item..."
+      onkeyup="searchItem(this, '${rowId}')"
+      style="width:100%">
+    <div class="item-suggestions" style="position:relative"></div>
+  `;
+}
+
+
 /* LOAD ITEMS */
 async function loadItems(){
   allItems=[];
@@ -334,6 +497,89 @@ window.deleteItem=async id=>{
   }
 };
 
+
+
+  window.addInvoiceRow = () => {
+  const rowId = "row_" + Date.now();
+
+  const tr = document.createElement("tr");
+  tr.innerHTML = `
+    <td>#</td>
+    <td>${createItemSearchInput(rowId)}</td>
+    <td><input disabled></td>
+    <td><input type="number" value="1" min="1" oninput="recalculateRow(this)"></td>
+    <td><input type="number" value="0" oninput="recalculateRow(this)"></td>
+    <td><input type="number" value="0" oninput="recalculateRow(this)"></td>
+    <td><input disabled></td>
+    <td><input disabled></td>
+  `;
+
+  invoiceItemsBody.insertBefore(tr, invoiceItemsBody.lastElementChild);
+};
+
+
+  window.searchItem = (input, rowId) => {
+  const query = input.value.toLowerCase();
+  const box = input.nextElementSibling;
+  box.innerHTML = "";
+
+  if (!query) return;
+
+  const matches = allItems.filter(i =>
+    (i.name || "").toLowerCase().includes(query)
+  );
+
+  matches.forEach(i => {
+    const div = document.createElement("div");
+    div.style.border = "1px solid #ccc";
+    div.style.padding = "5px";
+    div.style.cursor = "pointer";
+    div.innerText = i.name;
+
+    div.onclick = () => selectItem(i, input);
+    box.appendChild(div);
+  });
+
+  if (matches.length === 0) {
+    const div = document.createElement("div");
+    div.style.padding = "5px";
+    div.style.cursor = "pointer";
+    div.innerText = "+ Create New Item";
+    div.onclick = () => openItemModal();
+    box.appendChild(div);
+  }
+};
+
+
+  function selectItem(item, input) {
+  const tr = input.closest("tr");
+
+  input.value = item.name;
+  tr.children[2].querySelector("input").value = item.hsn || "";
+  tr.children[4].querySelector("input").value = item.salePrice || 0;
+  tr.children[6].querySelector("input").value = item.gst || 0;
+
+  input.nextElementSibling.innerHTML = "";
+  recalculateRow(tr);
+}
+
+  window.recalculateRow = (el) => {
+  const tr = el.closest("tr");
+
+  const qty = Number(tr.children[3].querySelector("input").value || 0);
+  const price = Number(tr.children[4].querySelector("input").value || 0);
+  const discount = Number(tr.children[5].querySelector("input").value || 0);
+  const gst = Number(tr.children[6].querySelector("input").value || 0);
+
+  const base = qty * price - discount;
+  const tax = base * gst / 100;
+  const total = base + tax;
+
+  tr.children[7].querySelector("input").value = total.toFixed(2);
+    calculateInvoiceTotals();
+};
+
+
 /* SEARCH */
 window.filterItems=()=>{
   const q=searchItem.value.toLowerCase();
@@ -371,6 +617,95 @@ window.bulkUpload=()=>{
   };
   r.readAsBinaryString(f);
 };
+
+
+  function collectInvoiceItems() {
+  const rows = document.querySelectorAll("#invoiceItemsBody tr");
+  const items = [];
+
+  rows.forEach(tr => {
+    const inputs = tr.querySelectorAll("input");
+    if (inputs.length === 0) return;
+
+    items.push({
+      name: inputs[0].value,
+      hsn: inputs[1].value,
+      qty: Number(inputs[3].value || 0),
+      price: Number(inputs[4].value || 0),
+      discount: Number(inputs[5].value || 0),
+      gst: Number(inputs[6].value || 0),
+      amount: Number(inputs[7].value || 0)
+    });
+  });
+
+  return items;
+}
+
+window.saveSalesInvoice = async () => {
+
+  const items = collectInvoiceItems();
+  if (items.length === 0) {
+    alert("Please add at least one item");
+    return;
+  }
+
+  if (!invDate.value) {
+    alert("Invoice date required");
+    return;
+  }
+
+  const invoiceData = {
+    invoiceNo: invNumber.value || ("INV-" + Date.now()),
+    invoiceDate: invDate.value,
+    ewayBill: ewayBill.value,
+    vehicleNo: vehicleNo.value,
+
+    items: items,
+
+    subtotal: Number(invSubtotal.innerText),
+    tax: Number(invTax.innerText),
+    discount: Number(invDiscount.innerText),
+    total: Number(invTotal.innerText),
+
+    createdAt: new Date()
+  };
+
+  try {
+    await addDoc(
+      collection(db, "salesInvoices", uid, "list"),
+      invoiceData
+    );
+
+    alert("Sales Invoice Saved Successfully ✅");
+    resetInvoicePage();
+
+  } catch (e) {
+    alert("Error: " + e.message);
+  }
+};
+
+function resetInvoicePage() {
+  invoiceItemsBody.innerHTML = `
+    <tr onclick="addInvoiceRow()">
+      <td colspan="8"
+          style="text-align:center;border:2px dashed #4f46e5;padding:15px;cursor:pointer">
+        + Add Item
+      </td>
+    </tr>`;
+
+  invNumber.value = "";
+  invDate.value = "";
+  ewayBill.value = "";
+  vehicleNo.value = "";
+
+  invSubtotal.innerText = "0";
+  invTax.innerText = "0";
+  invDiscount.innerText = "0";
+  invTotal.innerText = "0";
+}
+
+
+  
 </script>
 
 </body>
