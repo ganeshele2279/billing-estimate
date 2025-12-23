@@ -10,6 +10,13 @@ body {
   font-family: Arial, sans-serif;
   background: #f1f5f9;
 }
+
+/* 🔥 HIDE EVERYTHING INITIALLY */
+body.loading #loginPage,
+body.loading #dashboardPage {
+  display: none;
+}
+
 .hidden { display: none; }
 
 /* LOGIN */
@@ -83,10 +90,10 @@ button {
 </style>
 </head>
 
-<body>
+<body class="loading">
 
-<!-- LOGIN PAGE -->
-<div class="center" id="loginPage">
+<!-- LOGIN -->
+<div class="center hidden" id="loginPage">
   <div class="box">
     <h2>Login</h2>
     <input id="loginMobile" placeholder="Mobile Number">
@@ -109,20 +116,17 @@ button {
 
   <div class="main">
     <h2>Personal / Business Details</h2>
-
     <input id="business" placeholder="Business Name">
     <input id="mobile" placeholder="Mobile Number">
     <input id="gst" placeholder="GST Number">
     <input id="email" placeholder="Email">
     <textarea id="address" placeholder="Address"></textarea>
-
-    <button onclick="saveProfile()">Save Details</button>
+    <button onclick="saveProfile()">Save</button>
     <br><br>
     <button style="background:#dc2626" onclick="logout()">Logout</button>
   </div>
 </div>
 
-<!-- FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
@@ -134,35 +138,31 @@ import {
 import {
   getFirestore,
   doc,
-  setDoc,
-  getDoc
+  getDoc,
+  setDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* FIREBASE CONFIG */
-const firebaseConfig = {
+const app = initializeApp({
   apiKey: "AIzaSyAY4MfQ5zPh60EfYmY0JoKIDQkojqNU6hs",
   authDomain: "ganeshbilling-bdada.firebaseapp.com",
   projectId: "ganeshbilling-bdada"
-};
+});
 
-const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const db = getFirestore();
-
 let uid = "";
 
-/* 🔥 AUTH STATE CONTROLLER (MAIN KEY) */
+/* 🔥 AUTH GATE (NO FLICKER) */
 onAuthStateChanged(auth, async (user) => {
+  document.body.classList.remove("loading");
+
   if (user) {
     uid = user.uid;
-
     loginPage.classList.add("hidden");
     dashboardPage.classList.remove("hidden");
 
     const snap = await getDoc(doc(db, "users", uid));
-    if (snap.exists()) {
-      userName.innerText = snap.data().name || "User";
-    }
+    if (snap.exists()) userName.innerText = snap.data().name;
   } else {
     dashboardPage.classList.add("hidden");
     loginPage.classList.remove("hidden");
@@ -171,17 +171,13 @@ onAuthStateChanged(auth, async (user) => {
 
 /* LOGIN */
 window.login = async () => {
-  try {
-    const email = loginMobile.value + "@mobile.local";
-    await signInWithEmailAndPassword(
-      auth,
-      email,
-      loginPassword.value
-    );
-    // redirect ki zarurat nahi
-  } catch (e) {
-    alert("Invalid login details");
-  }
+  const email = loginMobile.value + "@mobile.local";
+  await signInWithEmailAndPassword(auth, email, loginPassword.value);
+};
+
+/* LOGOUT */
+window.logout = async () => {
+  await signOut(auth);
 };
 
 /* SAVE PROFILE */
@@ -191,18 +187,11 @@ window.saveProfile = async () => {
     mobile: mobile.value,
     gst: gst.value,
     email: email.value,
-    address: address.value,
-    updatedAt: new Date()
+    address: address.value
   });
-  alert("Details saved");
+  alert("Saved");
 };
 
-/* LOGOUT */
-window.logout = async () => {
-  await signOut(auth);
-};
-
-/* SIDEBAR */
 window.toggleSidebar = () => {
   sidebar.classList.toggle("collapsed");
 };
