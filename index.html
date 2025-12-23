@@ -5,53 +5,98 @@
 <title>Ganesh Billing</title>
 
 <style>
-body{margin:0;font-family:Arial;background:#f1f5f9}
-.hidden{display:none}
-input,textarea,button{width:100%;padding:10px;margin:8px 0}
-button{background:#2563eb;color:#fff;border:none;border-radius:5px;cursor:pointer}
-.center{height:100vh;display:flex;align-items:center;justify-content:center}
-.box{background:#fff;padding:25px;width:320px;border-radius:8px;box-shadow:0 0 10px #0002;text-align:center}
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f1f5f9;
+}
+.hidden { display: none; }
+
+/* LOGIN */
+.center {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.box {
+  background: #fff;
+  padding: 25px;
+  width: 320px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0,0,0,.1);
+  text-align: center;
+}
+input, textarea {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+button {
+  width: 100%;
+  padding: 10px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
 
 /* DASHBOARD */
-.dashboard{display:flex;height:100vh}
-.sidebar{width:230px;background:#0f172a;color:#fff;display:flex;flex-direction:column;transition:.3s}
-.sidebar.collapsed{width:70px}
-.menu{padding:12px;cursor:pointer}
-.menu:hover{background:#1e293b}
-.profile{margin-top:auto;padding:12px;border-top:1px solid #1e293b}
-.main{flex:1;padding:25px}
-.toggle{cursor:pointer;font-size:20px}
+.dashboard {
+  display: flex;
+  height: 100vh;
+}
+.sidebar {
+  width: 230px;
+  background: #0f172a;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  transition: .3s;
+}
+.sidebar.collapsed {
+  width: 70px;
+}
+.menu {
+  padding: 12px;
+  cursor: pointer;
+}
+.menu:hover {
+  background: #1e293b;
+}
+.profile {
+  margin-top: auto;
+  padding: 12px;
+  border-top: 1px solid #1e293b;
+}
+.main {
+  flex: 1;
+  padding: 25px;
+}
+.toggle {
+  font-size: 20px;
+  cursor: pointer;
+}
 </style>
 </head>
 
 <body>
 
-<!-- STEP 1: LOGIN -->
-<div class="center" id="loginStep">
+<!-- LOGIN PAGE -->
+<div class="center" id="loginPage">
   <div class="box">
     <h2>Login</h2>
     <input id="loginMobile" placeholder="Mobile Number">
-    <input id="loginPass" type="password" placeholder="Password">
+    <input id="loginPassword" type="password" placeholder="Password">
     <button onclick="login()">Login</button>
-    <div style="color:#2563eb;cursor:pointer" onclick="goRegister()">Register User</div>
   </div>
 </div>
 
-<!-- STEP 2: REGISTER -->
-<div class="center hidden" id="registerStep">
-  <div class="box">
-    <h2>Register</h2>
-    <input id="regName" placeholder="Full Name">
-    <input id="regMobile" placeholder="Mobile Number">
-    <input id="regPass" type="password" placeholder="Password">
-    <button onclick="register()">Create Account</button>
-    <div style="color:#2563eb;cursor:pointer" onclick="goLogin()">Back to Login</div>
-  </div>
-</div>
-
-<!-- STEP 3: DASHBOARD -->
-<div class="dashboard hidden" id="dashboardStep">
-
+<!-- DASHBOARD -->
+<div class="dashboard hidden" id="dashboardPage">
   <div class="sidebar" id="sidebar">
     <div class="menu toggle" onclick="toggleSidebar()">☰</div>
     <div class="menu">👤 Personal Details</div>
@@ -64,12 +109,14 @@ button{background:#2563eb;color:#fff;border:none;border-radius:5px;cursor:pointe
 
   <div class="main">
     <h2>Personal / Business Details</h2>
+
     <input id="business" placeholder="Business Name">
-    <input id="mobile" placeholder="Mobile">
+    <input id="mobile" placeholder="Mobile Number">
     <input id="gst" placeholder="GST Number">
     <input id="email" placeholder="Email">
     <textarea id="address" placeholder="Address"></textarea>
-    <button onclick="saveProfile()">Save</button>
+
+    <button onclick="saveProfile()">Save Details</button>
     <br><br>
     <button style="background:#dc2626" onclick="logout()">Logout</button>
   </div>
@@ -78,80 +125,87 @@ button{background:#2563eb;color:#fff;border:none;border-radius:5px;cursor:pointe
 <!-- FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,onAuthStateChanged,signOut }
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore,doc,setDoc,getDoc }
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  getDoc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const firebaseConfig={
- apiKey:"AIzaSyAY4MfQ5zPh60EfYmY0JoKIDQkojqNU6hs",
- authDomain:"ganeshbilling-bdada.firebaseapp.com",
- projectId:"ganeshbilling-bdada"
+/* FIREBASE CONFIG */
+const firebaseConfig = {
+  apiKey: "AIzaSyAY4MfQ5zPh60EfYmY0JoKIDQkojqNU6hs",
+  authDomain: "ganeshbilling-bdada.firebaseapp.com",
+  projectId: "ganeshbilling-bdada"
 };
 
-const app=initializeApp(firebaseConfig);
-const auth=getAuth();
-const db=getFirestore();
-let uid="";
+const app = initializeApp(firebaseConfig);
+const auth = getAuth();
+const db = getFirestore();
 
-/* AUTH CHECK */
-onAuthStateChanged(auth,async(user)=>{
- if(user){
-   uid=user.uid;
-   showDashboard();
-   const snap=await getDoc(doc(db,"users",uid));
-   if(snap.exists()) userName.innerText=snap.data().name;
- }
+let uid = "";
+
+/* 🔥 AUTH STATE CONTROLLER (MAIN KEY) */
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    uid = user.uid;
+
+    loginPage.classList.add("hidden");
+    dashboardPage.classList.remove("hidden");
+
+    const snap = await getDoc(doc(db, "users", uid));
+    if (snap.exists()) {
+      userName.innerText = snap.data().name || "User";
+    }
+  } else {
+    dashboardPage.classList.add("hidden");
+    loginPage.classList.remove("hidden");
+  }
 });
 
-/* NAVIGATION */
-window.goRegister=()=>{loginStep.classList.add("hidden");registerStep.classList.remove("hidden")}
-window.goLogin=()=>{registerStep.classList.add("hidden");loginStep.classList.remove("hidden")}
-function showDashboard(){
- loginStep.classList.add("hidden");
- registerStep.classList.add("hidden");
- dashboardStep.classList.remove("hidden");
-}
-
-/* SIDEBAR */
-window.toggleSidebar=()=>sidebar.classList.toggle("collapsed");
-
-/* REGISTER */
-window.register=async()=>{
- const email=regMobile.value+"@mobile.local";
- const user=await createUserWithEmailAndPassword(auth,email,regPass.value);
- await setDoc(doc(db,"users",user.user.uid),{
-   name:regName.value,
-   mobile:regMobile.value
- });
- alert("Account Created");
- goLogin();
-}
-
 /* LOGIN */
-window.login=async()=>{
- const email=loginMobile.value+"@mobile.local";
- await signInWithEmailAndPassword(auth,email,loginPass.value);
-}
+window.login = async () => {
+  try {
+    const email = loginMobile.value + "@mobile.local";
+    await signInWithEmailAndPassword(
+      auth,
+      email,
+      loginPassword.value
+    );
+    // redirect ki zarurat nahi
+  } catch (e) {
+    alert("Invalid login details");
+  }
+};
 
 /* SAVE PROFILE */
-window.saveProfile=async()=>{
- await setDoc(doc(db,"profiles",uid),{
-   business:business.value,
-   mobile:mobile.value,
-   gst:gst.value,
-   email:email.value,
-   address:address.value,
-   updatedAt:new Date()
- });
- alert("Saved");
-}
+window.saveProfile = async () => {
+  await setDoc(doc(db, "profiles", uid), {
+    business: business.value,
+    mobile: mobile.value,
+    gst: gst.value,
+    email: email.value,
+    address: address.value,
+    updatedAt: new Date()
+  });
+  alert("Details saved");
+};
 
 /* LOGOUT */
-window.logout=async()=>{
- await signOut(auth);
- location.reload();
-}
+window.logout = async () => {
+  await signOut(auth);
+};
+
+/* SIDEBAR */
+window.toggleSidebar = () => {
+  sidebar.classList.toggle("collapsed");
+};
 </script>
 
 </body>
