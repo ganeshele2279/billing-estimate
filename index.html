@@ -1,70 +1,27 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<title>Login | Ganesh Billing</title>
-
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
-<style>
-body {
-  margin: 0;
-  height: 100vh;
-  background: #f4f6f8;
-  font-family: Arial, sans-serif;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.card {
-  width: 360px;
-  background: #fff;
-  padding: 30px;
-  border-radius: 10px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-  text-align: center;
-}
-h2 { margin-bottom: 20px; }
-input {
-  width: 100%;
-  padding: 12px;
-  margin-bottom: 12px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-}
-button {
-  width: 100%;
-  padding: 12px;
-  background: #2563eb;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-.otp-box { display: none; }
-.small { font-size: 13px; color: #666; margin-top: 10px; }
-</style>
+  <title>Ganesh Billing Login</title>
 </head>
 <body>
 
-<div class="card">
-<h2>Login / Register</h2>
-<input type="text" id="name" placeholder="Full Name (New User)">
-<input type="text" id="phone" placeholder="Mobile Number">
-<button onclick="sendOTP()">Send OTP</button>
+<h2>Register</h2>
+<input id="r_name" placeholder="Name"><br>
+<input id="r_mobile" placeholder="Mobile"><br>
+<input id="r_password" type="password" placeholder="Password"><br>
+<button onclick="register()">Register</button>
 
-<div class="otp-box" id="otpBox">
-<input type="text" id="otp" placeholder="Enter OTP">
-<button onclick="verifyOTP()">Verify & Login</button>
-</div>
+<hr>
 
-<div id="recaptcha-container"></div>
-<div class="small">Powered by Ganesh Billing</div>
-</div>
+<h2>Login</h2>
+<input id="l_mobile" placeholder="Mobile"><br>
+<input id="l_password" type="password" placeholder="Password"><br>
+<button onclick="login()">Login</button>
 
-<script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
 const firebaseConfig = {
   apiKey: "AIzaSyAY4MfQ5zPh60EfYmY0JoKIDQkojqNU6hs",
   authDomain: "ganeshbilling-bdada.firebaseapp.com",
@@ -74,53 +31,49 @@ const firebaseConfig = {
   appId: "1:351410373004:web:50be765037e463735a16a9"
 };
 
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier(
-  'recaptcha-container',
-  { size: 'normal' }
-);
+// REGISTER
+window.register = async function () {
+  const name = r_name.value;
+  const mobile = r_mobile.value;
+  const password = r_password.value;
 
-let confirmationResult;
-
-function sendOTP() {
-  let phone = document.getElementById("phone").value.trim();
-
-  if (phone.length !== 10) {
-    alert("Enter valid 10 digit mobile number");
+  if (!name || !mobile || !password) {
+    alert("All fields required");
     return;
   }
 
-  phone = "+91" + phone;
+  await setDoc(doc(db, "users", mobile), {
+    name,
+    mobile,
+    password
+  });
 
-  auth.signInWithPhoneNumber(phone, window.recaptchaVerifier)
-    .then(result => {
-      confirmationResult = result;
-      document.getElementById("otpBox").style.display = "block";
-      alert("OTP sent");
-    })
-    .catch(err => alert(err.message));
-}
-  
-function verifyOTP() {
-  const otp = document.getElementById("otp").value;
-  const name = document.getElementById("name").value;
+  alert("Registered Successfully");
+};
 
-  confirmationResult.confirm(otp)
-    .then(res => {
-      const user = res.user;
-      db.collection("users").doc(user.uid).set({
-        name: name || "User",
-        phone: user.phoneNumber,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      }, { merge: true });
+// LOGIN
+window.login = async function () {
+  const mobile = l_mobile.value;
+  const password = l_password.value;
 
-      alert("Login Successful");
-    })
-    .catch(() => alert("Invalid OTP"));
-}
+  const userRef = doc(db, "users", mobile);
+  const userSnap = await getDoc(userRef);
+
+  if (!userSnap.exists()) {
+    alert("User not found");
+    return;
+  }
+
+  if (userSnap.data().password !== password) {
+    alert("Wrong password");
+    return;
+  }
+
+  alert("Login Successful");
+};
 </script>
 
 </body>
