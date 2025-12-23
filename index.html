@@ -243,6 +243,8 @@ onAuthStateChanged(auth,user=>{
     uid=user.uid;
     loginPage.style.display="none";
     dashboardPage.style.display="flex";
+    loadItems();
+    loadParties();
     loadInvoices();
     loadBusiness();
   }else{
