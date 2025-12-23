@@ -5,15 +5,21 @@
 <title>Ganesh Billing</title>
 
 <style>
+* {
+  box-sizing: border-box;
+}
 body {
   margin: 0;
   font-family: Arial, sans-serif;
   background: #f1f5f9;
+  overflow: hidden;
 }
-.hidden { display: none; }
+.hidden {
+  display: none !important;
+}
 
-/* LOGIN / REGISTER */
-.center {
+/* AUTH SCREENS */
+.auth {
   height: 100vh;
   display: flex;
   align-items: center;
@@ -70,11 +76,13 @@ button {
   border-radius: 5px;
   cursor: pointer;
 }
-.menu:hover { background: #1e293b; }
-
+.menu:hover {
+  background: #1e293b;
+}
 .main {
   flex: 1;
   padding: 25px;
+  overflow-y: auto;
 }
 .card {
   background: #fff;
@@ -89,7 +97,7 @@ button {
 <body>
 
 <!-- LOGIN -->
-<div class="center" id="loginBox">
+<div class="auth" id="loginBox">
   <div class="box">
     <h2>Login</h2>
     <input id="loginMobile" placeholder="Mobile Number">
@@ -100,7 +108,7 @@ button {
 </div>
 
 <!-- REGISTER -->
-<div class="center hidden" id="registerBox">
+<div class="auth hidden" id="registerBox">
   <div class="box">
     <h2>Register</h2>
     <input id="regName" placeholder="Full Name">
@@ -134,115 +142,4 @@ button {
 
 <!-- FIREBASE -->
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  onAuthStateChanged,
-  signOut
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyAY4MfQ5zPh60EfYmY0JoKIDQkojqNU6hs",
-  authDomain: "ganeshbilling-bdada.firebaseapp.com",
-  projectId: "ganeshbilling-bdada",
-  storageBucket: "ganeshbilling-bdada.firebasestorage.app",
-  messagingSenderId: "351410373004",
-  appId: "1:351410373004:web:50be765037e463735a16a9"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth();
-const db = getFirestore();
-
-let uid = "";
-
-/* AUTO FILL SAVED LOGIN */
-loginMobile.value = localStorage.getItem("mobile") || "";
-loginPassword.value = localStorage.getItem("password") || "";
-
-/* AUTH STATE */
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    uid = user.uid;
-    showDashboard();
-  }
-});
-
-/* UI SWITCH */
-window.showRegister = () => {
-  loginBox.classList.add("hidden");
-  registerBox.classList.remove("hidden");
-};
-window.showLogin = () => {
-  registerBox.classList.add("hidden");
-  loginBox.classList.remove("hidden");
-};
-function showDashboard() {
-  loginBox.classList.add("hidden");
-  registerBox.classList.add("hidden");
-  dashboard.classList.remove("hidden");
-}
-
-/* REGISTER */
-window.register = async () => {
-  try {
-    const email = regMobile.value + "@mobile.local";
-    const user = await createUserWithEmailAndPassword(auth, email, regPassword.value);
-
-    await setDoc(doc(db, "users", user.user.uid), {
-      name: regName.value,
-      mobile: regMobile.value
-    });
-
-    alert("Account Created Successfully");
-    showLogin();
-  } catch (e) {
-    alert(e.message);
-  }
-};
-
-/* LOGIN */
-window.login = async () => {
-  const mobile = loginMobile.value;
-  const pass = loginPassword.value;
-  const email = mobile + "@mobile.local";
-
-  try {
-    await signInWithEmailAndPassword(auth, email, pass);
-
-    // 🔐 REMEMBER LOGIN
-    localStorage.setItem("mobile", mobile);
-    localStorage.setItem("password", pass);
-
-    alert("Login Successful");
-  } catch (e) {
-    alert(e.message); // 🔥 WRONG PASSWORD POPUP
-  }
-};
-
-/* SAVE PROFILE */
-window.saveProfile = async () => {
-  await setDoc(doc(db, "profiles", uid), {
-    business: business.value,
-    mobile: mobile.value,
-    gst: gst.value,
-    email: email.value,
-    address: address.value,
-    updatedAt: new Date()
-  });
-  alert("Details Saved");
-};
-
-/* LOGOUT */
-window.logout = async () => {
-  await signOut(auth);
-  alert("Logged Out (Login Saved)");
-  location.reload();
-};
-</script>
-
-</body>
-</html>
+import { initializeApp } from "https://www
