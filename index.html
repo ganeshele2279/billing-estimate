@@ -7,18 +7,16 @@
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial;background:#f1f5f9}
-
-/* FULLSCREEN */
 #loginPage,#dashboardPage{position:fixed;inset:0;display:none}
 
 /* LOGIN */
 #loginPage{display:flex;align-items:center;justify-content:center}
 .login-box{background:#fff;padding:25px;width:320px;border-radius:8px;box-shadow:0 0 10px #0002}
-input,textarea,select{width:100%;padding:10px;margin:8px 0;border:1px solid #ccc;border-radius:4px}
+input,textarea,select{width:100%;padding:10px;margin:6px 0;border:1px solid #ccc;border-radius:4px}
 button{padding:10px;border:none;border-radius:4px;cursor:pointer}
 .btn-primary{background:#4f46e5;color:#fff}
-.btn-outline{border:1px solid #4f46e5;background:#fff;color:#4f46e5}
 .btn-danger{background:#dc2626;color:#fff}
+.btn-small{padding:6px 10px;font-size:12px}
 
 /* DASHBOARD */
 #dashboardPage{display:flex}
@@ -26,16 +24,15 @@ button{padding:10px;border:none;border-radius:4px;cursor:pointer}
 .menu{padding:14px;cursor:pointer}
 .menu:hover,.menu.active{background:#1e293b}
 .profile{margin-top:auto;padding:14px;border-top:1px solid #1e293b}
-
 .main{flex:1;padding:25px;overflow:auto}
 .content{max-width:1100px;margin:auto;display:none}
 .content.active{display:block}
-.card{background:#fff;padding:25px;border-radius:8px;box-shadow:0 0 10px #0001}
-
+.card{background:#fff;padding:25px;border-radius:8px;box-shadow:0 0 10px #0001;margin-bottom:20px}
 .row{display:flex;gap:15px}
 .col{flex:1}
-.header-row{display:flex;justify-content:space-between;align-items:center}
-.section-title{margin:20px 0 10px;font-weight:bold;color:#444}
+.table{width:100%;border-collapse:collapse;margin-top:10px}
+.table th,.table td{border:1px solid #ddd;padding:8px;font-size:14px}
+.table th{background:#f3f4f6}
 </style>
 </head>
 
@@ -57,7 +54,6 @@ button{padding:10px;border:none;border-radius:4px;cursor:pointer}
     <div class="menu active" onclick="showTab('home',this)">🏠 Dashboard</div>
     <div class="menu" onclick="showTab('personal',this)">👤 Personal Details</div>
     <div class="menu" onclick="showTab('parties',this)">👥 Parties</div>
-
     <div class="profile">
       <div id="userName">User</div>
       <small>Online</small>
@@ -70,7 +66,6 @@ button{padding:10px;border:none;border-radius:4px;cursor:pointer}
     <div id="home" class="content active">
       <div class="card">
         <h2>Welcome 👋</h2>
-        <p>Select an option from sidebar.</p>
       </div>
     </div>
 
@@ -91,59 +86,41 @@ button{padding:10px;border:none;border-radius:4px;cursor:pointer}
 
     <!-- PARTIES -->
     <div id="parties" class="content">
+
+      <!-- CREATE / EDIT -->
       <div class="card">
+        <h2 id="partyFormTitle">Create Party</h2>
+        <input id="partyName" placeholder="Party Name *">
+        <input id="partyMobile" placeholder="Mobile Number">
+        <input id="partyEmail" placeholder="Email">
+        <input id="gstin" placeholder="GSTIN">
+        <input id="pan" placeholder="PAN">
+        <select id="partyType">
+          <option>Customer</option>
+          <option>Supplier</option>
+        </select>
+        <textarea id="billingAddress" placeholder="Billing Address"></textarea>
+        <textarea id="shippingAddress" placeholder="Shipping Address"></textarea>
 
-        <div class="header-row">
-          <h2>Create Party</h2>
-          <button class="btn-primary" onclick="saveParty()">Save</button>
-        </div>
-
-        <div class="section-title">General Details</div>
-        <div class="row">
-          <div class="col"><input id="partyName" placeholder="Party Name *"></div>
-          <div class="col"><input id="partyMobile" placeholder="Mobile Number"></div>
-          <div class="col"><input id="partyEmail" placeholder="Email"></div>
-          <div class="col"><input id="openingBalance" placeholder="₹ Opening Balance"></div>
-        </div>
-
-        <div class="row">
-          <div class="col"><input id="gstin" placeholder="GSTIN"></div>
-          <div class="col"><input id="pan" placeholder="PAN Number"></div>
-        </div>
-
-        <div class="row">
-          <div class="col">
-            <select id="partyType">
-              <option>Customer</option>
-              <option>Supplier</option>
-            </select>
-          </div>
-          <div class="col">
-            <select id="partyCategory">
-              <option>Select Category</option>
-              <option>Regular</option>
-              <option>Wholesale</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="section-title">Address</div>
-        <div class="row">
-          <div class="col">
-            <textarea id="billingAddress" placeholder="Billing Address"></textarea>
-          </div>
-          <div class="col">
-            <textarea id="shippingAddress" placeholder="Shipping Address"></textarea>
-          </div>
-        </div>
-
-        <div class="section-title">Credit</div>
-        <div class="row">
-          <div class="col"><input id="creditPeriod" placeholder="Credit Period (Days)"></div>
-          <div class="col"><input id="creditLimit" placeholder="₹ Credit Limit"></div>
-        </div>
-
+        <button class="btn-primary" onclick="saveParty()">Save Party</button>
       </div>
+
+      <!-- PARTY LIST -->
+      <div class="card">
+        <h3>Party List</h3>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Mobile</th>
+              <th>Type</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="partyList"></tbody>
+        </table>
+      </div>
+
     </div>
 
   </div>
@@ -153,7 +130,7 @@ button{padding:10px;border:none;border-radius:4px;cursor:pointer}
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } 
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, collection, addDoc } 
+import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, updateDoc } 
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const app = initializeApp({
@@ -161,9 +138,8 @@ const app = initializeApp({
   authDomain:"ganeshbilling-bdada.firebaseapp.com",
   projectId:"ganeshbilling-bdada"
 });
-const auth = getAuth();
-const db = getFirestore();
-let uid="";
+const auth=getAuth(), db=getFirestore();
+let uid="", editPartyId=null;
 
 /* AUTH */
 onAuthStateChanged(auth, async user=>{
@@ -171,6 +147,7 @@ onAuthStateChanged(auth, async user=>{
     uid=user.uid;
     loginPage.style.display="none";
     dashboardPage.style.display="flex";
+    loadParties();
     const snap=await getDoc(doc(db,"users",uid));
     if(snap.exists()) userName.innerText=snap.data().name;
   }else{
@@ -181,11 +158,7 @@ onAuthStateChanged(auth, async user=>{
 
 /* LOGIN */
 window.login=async()=>{
-  await signInWithEmailAndPassword(
-    auth,
-    loginMobile.value+"@mobile.local",
-    loginPassword.value
-  );
+  await signInWithEmailAndPassword(auth,loginMobile.value+"@mobile.local",loginPassword.value);
 };
 
 /* LOGOUT */
@@ -202,34 +175,73 @@ window.showTab=(id,el)=>{
 /* SAVE PERSONAL */
 window.saveProfile=async()=>{
   await setDoc(doc(db,"profiles",uid),{
-    business:business.value,
-    mobile:mobile.value,
-    gst:gst.value,
-    email:email.value,
-    address:address.value
+    business:business.value,mobile:mobile.value,gst:gst.value,email:email.value,address:address.value
   });
   alert("Saved");
 };
 
-/* SAVE PARTY */
+/* SAVE / UPDATE PARTY */
 window.saveParty=async()=>{
-  await addDoc(collection(db,"parties",uid,"list"),{
+  const data={
     partyName:partyName.value,
     mobile:partyMobile.value,
     email:partyEmail.value,
-    openingBalance:openingBalance.value,
     gstin:gstin.value,
     pan:pan.value,
     partyType:partyType.value,
-    category:partyCategory.value,
     billingAddress:billingAddress.value,
-    shippingAddress:shippingAddress.value,
-    creditPeriod:creditPeriod.value,
-    creditLimit:creditLimit.value,
-    createdAt:new Date()
-  });
-  alert("Party Saved");
+    shippingAddress:shippingAddress.value
+  };
+
+  if(editPartyId){
+    await updateDoc(doc(db,"parties",uid,"list",editPartyId),data);
+    editPartyId=null;
+    partyFormTitle.innerText="Create Party";
+  }else{
+    await addDoc(collection(db,"parties",uid,"list"),data);
+  }
+
+  clearPartyForm();
+  loadParties();
 };
+
+/* LOAD PARTIES */
+async function loadParties(){
+  partyList.innerHTML="";
+  const snap=await getDocs(collection(db,"parties",uid,"list"));
+  snap.forEach(docu=>{
+    const p=docu.data();
+    partyList.innerHTML+=`
+      <tr>
+        <td>${p.partyName}</td>
+        <td>${p.mobile||""}</td>
+        <td>${p.partyType}</td>
+        <td><button class="btn-small btn-primary" onclick="editParty('${docu.id}')">Edit</button></td>
+      </tr>`;
+  });
+}
+
+/* EDIT */
+window.editParty=async(id)=>{
+  const snap=await getDoc(doc(db,"parties",uid,"list",id));
+  if(!snap.exists())return;
+  const p=snap.data();
+  partyName.value=p.partyName||"";
+  partyMobile.value=p.mobile||"";
+  partyEmail.value=p.email||"";
+  gstin.value=p.gstin||"";
+  pan.value=p.pan||"";
+  partyType.value=p.partyType||"Customer";
+  billingAddress.value=p.billingAddress||"";
+  shippingAddress.value=p.shippingAddress||"";
+  editPartyId=id;
+  partyFormTitle.innerText="Edit Party";
+};
+
+/* CLEAR */
+function clearPartyForm(){
+  document.querySelectorAll("#parties input, #parties textarea").forEach(i=>i.value="");
+}
 </script>
 
 </body>
