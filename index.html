@@ -10,8 +10,9 @@ body {
   font-family: Arial, sans-serif;
   background: #f1f5f9;
 }
+.hidden { display: none; }
 
-/* LOGIN BOX */
+/* LOGIN / REGISTER */
 .center {
   height: 100vh;
   display: flex;
@@ -48,7 +49,6 @@ button {
   color: #2563eb;
   cursor: pointer;
 }
-.hidden { display: none; }
 
 /* DASHBOARD */
 .dashboard {
@@ -135,10 +135,14 @@ button {
 <!-- FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } 
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, doc, setDoc } 
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAY4MfQ5zPh60EfYmY0JoKIDQkojqNU6hs",
@@ -154,6 +158,10 @@ const auth = getAuth();
 const db = getFirestore();
 
 let uid = "";
+
+/* AUTO FILL SAVED LOGIN */
+loginMobile.value = localStorage.getItem("mobile") || "";
+loginPassword.value = localStorage.getItem("password") || "";
 
 /* AUTH STATE */
 onAuthStateChanged(auth, (user) => {
@@ -180,24 +188,39 @@ function showDashboard() {
 
 /* REGISTER */
 window.register = async () => {
-  const email = regMobile.value + "@mobile.local";
-  const pass = regPassword.value;
+  try {
+    const email = regMobile.value + "@mobile.local";
+    const user = await createUserWithEmailAndPassword(auth, email, regPassword.value);
 
-  const user = await createUserWithEmailAndPassword(auth, email, pass);
-  await setDoc(doc(db, "users", user.user.uid), {
-    name: regName.value,
-    mobile: regMobile.value
-  });
+    await setDoc(doc(db, "users", user.user.uid), {
+      name: regName.value,
+      mobile: regMobile.value
+    });
 
-  alert("Account Created");
-  showLogin();
+    alert("Account Created Successfully");
+    showLogin();
+  } catch (e) {
+    alert(e.message);
+  }
 };
 
 /* LOGIN */
 window.login = async () => {
-  const email = loginMobile.value + "@mobile.local";
-  await signInWithEmailAndPassword(auth, email, loginPassword.value);
-  alert("Login Successful");
+  const mobile = loginMobile.value;
+  const pass = loginPassword.value;
+  const email = mobile + "@mobile.local";
+
+  try {
+    await signInWithEmailAndPassword(auth, email, pass);
+
+    // 🔐 REMEMBER LOGIN
+    localStorage.setItem("mobile", mobile);
+    localStorage.setItem("password", pass);
+
+    alert("Login Successful");
+  } catch (e) {
+    alert(e.message); // 🔥 WRONG PASSWORD POPUP
+  }
 };
 
 /* SAVE PROFILE */
@@ -216,6 +239,7 @@ window.saveProfile = async () => {
 /* LOGOUT */
 window.logout = async () => {
   await signOut(auth);
+  alert("Logged Out (Login Saved)");
   location.reload();
 };
 </script>
