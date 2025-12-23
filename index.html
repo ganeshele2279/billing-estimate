@@ -13,26 +13,29 @@ body{margin:0;font-family:Arial;background:#f1f5f9}
 #loginPage{display:flex;align-items:center;justify-content:center}
 .login-box{background:#fff;padding:25px;width:320px;border-radius:8px;box-shadow:0 0 10px #0002}
 input,textarea,select{width:100%;padding:10px;margin:6px 0;border:1px solid #ccc;border-radius:4px}
-button{padding:10px;border:none;border-radius:4px;cursor:pointer}
+button{padding:8px 12px;border:none;border-radius:4px;cursor:pointer}
 .btn-primary{background:#4f46e5;color:#fff}
 .btn-danger{background:#dc2626;color:#fff}
-.btn-small{padding:6px 10px;font-size:12px}
+.btn-small{padding:5px 8px;font-size:12px}
 
 /* DASHBOARD */
 #dashboardPage{display:flex}
 .sidebar{width:220px;background:#0f172a;color:#fff;display:flex;flex-direction:column}
 .menu{padding:14px;cursor:pointer}
 .menu:hover,.menu.active{background:#1e293b}
+.submenu{padding:12px 30px;font-size:14px;cursor:pointer}
+.submenu:hover,.submenu.active{background:#1e293b}
 .profile{margin-top:auto;padding:14px;border-top:1px solid #1e293b}
+
 .main{flex:1;padding:25px;overflow:auto}
 .content{max-width:1100px;margin:auto;display:none}
 .content.active{display:block}
 .card{background:#fff;padding:25px;border-radius:8px;box-shadow:0 0 10px #0001;margin-bottom:20px}
-.row{display:flex;gap:15px}
-.col{flex:1}
-.table{width:100%;border-collapse:collapse;margin-top:10px}
+
+.table{width:100%;border-collapse:collapse}
 .table th,.table td{border:1px solid #ddd;padding:8px;font-size:14px}
 .table th{background:#f3f4f6}
+.flex{display:flex;gap:10px;align-items:center}
 </style>
 </head>
 
@@ -52,8 +55,15 @@ button{padding:10px;border:none;border-radius:4px;cursor:pointer}
 <div id="dashboardPage">
   <div class="sidebar">
     <div class="menu active" onclick="showTab('home',this)">🏠 Dashboard</div>
-    <div class="menu" onclick="showTab('personal',this)">👤 Personal Details</div>
-    <div class="menu" onclick="showTab('parties',this)">👥 Parties</div>
+
+    <div class="menu" onclick="toggleParties(this)">
+      👥 Parties <span style="float:right" id="partyArrow">▸</span>
+    </div>
+    <div id="partySubMenu" style="display:none">
+      <div class="submenu" onclick="showTab('partyAdd',this)">➕ Add Party</div>
+      <div class="submenu" onclick="showTab('partyEdit',this)">✏️ Edit Party</div>
+    </div>
+
     <div class="profile">
       <div id="userName">User</div>
       <small>Online</small>
@@ -62,62 +72,51 @@ button{padding:10px;border:none;border-radius:4px;cursor:pointer}
 
   <div class="main">
 
-    <!-- HOME -->
     <div id="home" class="content active">
-      <div class="card">
-        <h2>Welcome 👋</h2>
-      </div>
+      <div class="card"><h2>Welcome 👋</h2></div>
     </div>
 
-    <!-- PERSONAL -->
-    <div id="personal" class="content">
+    <!-- ADD PARTY -->
+    <div id="partyAdd" class="content">
       <div class="card">
-        <h2>Personal / Business Details</h2>
-        <input id="business" placeholder="Business Name">
-        <input id="mobile" placeholder="Mobile Number">
-        <input id="gst" placeholder="GST Number">
-        <input id="email" placeholder="Email">
-        <textarea id="address" placeholder="Address"></textarea>
-        <button class="btn-primary" onclick="saveProfile()">Save</button>
-        <br><br>
-        <button class="btn-danger" onclick="logout()">Logout</button>
-      </div>
-    </div>
-
-    <!-- PARTIES -->
-    <div id="parties" class="content">
-
-      <!-- CREATE / EDIT -->
-      <div class="card">
-        <h2 id="partyFormTitle">Create Party</h2>
-        <input id="partyName" placeholder="Party Name *">
-        <input id="partyMobile" placeholder="Mobile Number">
-        <input id="partyEmail" placeholder="Email">
-        <input id="gstin" placeholder="GSTIN">
-        <input id="pan" placeholder="PAN">
-        <select id="partyType">
-          <option>Customer</option>
-          <option>Supplier</option>
-        </select>
-        <textarea id="billingAddress" placeholder="Billing Address"></textarea>
-        <textarea id="shippingAddress" placeholder="Shipping Address"></textarea>
-
+        <h2>Create Party</h2>
+        <input id="pName" placeholder="Party Name">
+        <input id="pMobile" placeholder="Mobile">
+        <input id="pEmail" placeholder="Email">
+        <select id="pType"><option>Customer</option><option>Supplier</option></select>
+        <input id="pOpening" placeholder="Opening Balance">
         <button class="btn-primary" onclick="saveParty()">Save Party</button>
+      </div>
+    </div>
+
+    <!-- EDIT PARTY -->
+    <div id="partyEdit" class="content">
+
+      <!-- SEARCH -->
+      <div class="card">
+        <input id="searchParty" placeholder="Search party by name or mobile" onkeyup="filterParties()">
       </div>
 
       <!-- PARTY LIST -->
       <div class="card">
-        <h3>Party List</h3>
         <table class="table">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Mobile</th>
-              <th>Type</th>
-              <th>Action</th>
+              <th>Name</th><th>Mobile</th><th>Type</th><th>Action</th>
             </tr>
           </thead>
           <tbody id="partyList"></tbody>
+        </table>
+      </div>
+
+      <!-- LEDGER -->
+      <div class="card" id="ledgerCard" style="display:none">
+        <h3>Party Ledger</h3>
+        <table class="table">
+          <thead>
+            <tr><th>Date</th><th>Description</th><th>Debit</th><th>Credit</th></tr>
+          </thead>
+          <tbody id="ledgerBody"></tbody>
         </table>
       </div>
 
@@ -128,120 +127,107 @@ button{padding:10px;border:none;border-radius:4px;cursor:pointer}
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } 
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } 
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, updateDoc } 
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } 
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const app = initializeApp({
-  apiKey:"AIzaSyAY4MfQ5zPh60EfYmY0JoKIDQkojqNU6hs",
-  authDomain:"ganeshbilling-bdada.firebaseapp.com",
-  projectId:"ganeshbilling-bdada"
+const app=initializeApp({
+ apiKey:"AIzaSyAY4MfQ5zPh60EfYmY0JoKIDQkojqNU6hs",
+ authDomain:"ganeshbilling-bdada.firebaseapp.com",
+ projectId:"ganeshbilling-bdada"
 });
 const auth=getAuth(), db=getFirestore();
-let uid="", editPartyId=null;
+let uid="", allParties=[];
 
 /* AUTH */
-onAuthStateChanged(auth, async user=>{
-  if(user){
-    uid=user.uid;
-    loginPage.style.display="none";
-    dashboardPage.style.display="flex";
-    loadParties();
-    const snap=await getDoc(doc(db,"users",uid));
-    if(snap.exists()) userName.innerText=snap.data().name;
-  }else{
-    dashboardPage.style.display="none";
-    loginPage.style.display="flex";
-  }
+onAuthStateChanged(auth,user=>{
+ if(user){uid=user.uid;loginPage.style.display="none";dashboardPage.style.display="flex";loadParties()}
+ else{loginPage.style.display="flex"}
 });
 
 /* LOGIN */
-window.login=async()=>{
-  await signInWithEmailAndPassword(auth,loginMobile.value+"@mobile.local",loginPassword.value);
-};
-
-/* LOGOUT */
-window.logout=async()=>{await signOut(auth)};
+window.login=()=>signInWithEmailAndPassword(auth,loginMobile.value+"@mobile.local",loginPassword.value);
 
 /* TABS */
 window.showTab=(id,el)=>{
-  document.querySelectorAll(".menu").forEach(m=>m.classList.remove("active"));
-  document.querySelectorAll(".content").forEach(c=>c.classList.remove("active"));
-  el.classList.add("active");
-  document.getElementById(id).classList.add("active");
+ document.querySelectorAll(".content").forEach(c=>c.classList.remove("active"));
+ document.querySelectorAll(".menu,.submenu").forEach(m=>m.classList.remove("active"));
+ el.classList.add("active");
+ document.getElementById(id).classList.add("active");
 };
 
-/* SAVE PERSONAL */
-window.saveProfile=async()=>{
-  await setDoc(doc(db,"profiles",uid),{
-    business:business.value,mobile:mobile.value,gst:gst.value,email:email.value,address:address.value
-  });
-  alert("Saved");
+/* ACCORDION */
+window.toggleParties=()=>{
+ const sub=partySubMenu, arr=partyArrow;
+ sub.style.display=sub.style.display==="none"?"block":"none";
+ arr.innerText=sub.style.display==="none"?"▸":"▾";
 };
 
-/* SAVE / UPDATE PARTY */
+/* SAVE PARTY */
 window.saveParty=async()=>{
-  const data={
-    partyName:partyName.value,
-    mobile:partyMobile.value,
-    email:partyEmail.value,
-    gstin:gstin.value,
-    pan:pan.value,
-    partyType:partyType.value,
-    billingAddress:billingAddress.value,
-    shippingAddress:shippingAddress.value
-  };
-
-  if(editPartyId){
-    await updateDoc(doc(db,"parties",uid,"list",editPartyId),data);
-    editPartyId=null;
-    partyFormTitle.innerText="Create Party";
-  }else{
-    await addDoc(collection(db,"parties",uid,"list"),data);
-  }
-
-  clearPartyForm();
-  loadParties();
+ await addDoc(collection(db,"parties",uid,"list"),{
+   partyName:pName.value,mobile:pMobile.value,email:pEmail.value,
+   partyType:pType.value,openingBalance:pOpening.value
+ });
+ alert("Party Added"); pName.value=pMobile.value=pEmail.value=pOpening.value="";
+ loadParties();
 };
 
-/* LOAD PARTIES */
+/* LOAD + SEARCH */
 async function loadParties(){
-  partyList.innerHTML="";
-  const snap=await getDocs(collection(db,"parties",uid,"list"));
-  snap.forEach(docu=>{
-    const p=docu.data();
-    partyList.innerHTML+=`
-      <tr>
-        <td>${p.partyName}</td>
-        <td>${p.mobile||""}</td>
-        <td>${p.partyType}</td>
-        <td><button class="btn-small btn-primary" onclick="editParty('${docu.id}')">Edit</button></td>
-      </tr>`;
-  });
+ const snap=await getDocs(collection(db,"parties",uid,"list"));
+ allParties=[];
+ snap.forEach(d=>allParties.push({id:d.id,...d.data()}));
+ renderParties(allParties);
 }
 
-/* EDIT */
-window.editParty=async(id)=>{
-  const snap=await getDoc(doc(db,"parties",uid,"list",id));
-  if(!snap.exists())return;
-  const p=snap.data();
-  partyName.value=p.partyName||"";
-  partyMobile.value=p.mobile||"";
-  partyEmail.value=p.email||"";
-  gstin.value=p.gstin||"";
-  pan.value=p.pan||"";
-  partyType.value=p.partyType||"Customer";
-  billingAddress.value=p.billingAddress||"";
-  shippingAddress.value=p.shippingAddress||"";
-  editPartyId=id;
-  partyFormTitle.innerText="Edit Party";
+function renderParties(list){
+ partyList.innerHTML="";
+ list.forEach(p=>{
+   partyList.innerHTML+=`
+    <tr>
+      <td>${p.partyName}</td>
+      <td>${p.mobile||""}</td>
+      <td>${p.partyType}</td>
+      <td class="flex">
+        <button class="btn-small btn-primary" onclick="openLedger('${p.id}')">Ledger</button>
+        <button class="btn-small btn-danger" onclick="deleteParty('${p.id}')">Delete</button>
+      </td>
+    </tr>`;
+ });
+}
+
+window.filterParties=()=>{
+ const q=searchParty.value.toLowerCase();
+ renderParties(allParties.filter(p=>
+   p.partyName.toLowerCase().includes(q) || (p.mobile||"").includes(q)
+ ));
 };
 
-/* CLEAR */
-function clearPartyForm(){
-  document.querySelectorAll("#parties input, #parties textarea").forEach(i=>i.value="");
-}
+/* DELETE */
+window.deleteParty=async(id)=>{
+ if(!confirm("Delete this party?"))return;
+ await deleteDoc(doc(db,"parties",uid,"list",id));
+ loadParties();
+};
+
+/* LEDGER */
+window.openLedger=async(pid)=>{
+ ledgerBody.innerHTML="";
+ ledgerCard.style.display="block";
+ const snap=await getDocs(collection(db,"ledgers",uid,pid));
+ snap.forEach(d=>{
+   const l=d.data();
+   ledgerBody.innerHTML+=`
+    <tr>
+      <td>${l.date||""}</td>
+      <td>${l.description||""}</td>
+      <td>${l.debit||""}</td>
+      <td>${l.credit||""}</td>
+    </tr>`;
+ });
+};
 </script>
 
 </body>
