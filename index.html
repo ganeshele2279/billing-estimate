@@ -5,21 +5,14 @@
 <title>Ganesh Billing</title>
 
 <style>
-* {
-  box-sizing: border-box;
-}
 body {
   margin: 0;
   font-family: Arial, sans-serif;
   background: #f1f5f9;
-  overflow: hidden;
-}
-.hidden {
-  display: none !important;
 }
 
-/* AUTH SCREENS */
-.auth {
+/* LOGIN BOX */
+.center {
   height: 100vh;
   display: flex;
   align-items: center;
@@ -55,6 +48,7 @@ button {
   color: #2563eb;
   cursor: pointer;
 }
+.hidden { display: none; }
 
 /* DASHBOARD */
 .dashboard {
@@ -76,13 +70,11 @@ button {
   border-radius: 5px;
   cursor: pointer;
 }
-.menu:hover {
-  background: #1e293b;
-}
+.menu:hover { background: #1e293b; }
+
 .main {
   flex: 1;
   padding: 25px;
-  overflow-y: auto;
 }
 .card {
   background: #fff;
@@ -97,7 +89,7 @@ button {
 <body>
 
 <!-- LOGIN -->
-<div class="auth" id="loginBox">
+<div class="center" id="loginBox">
   <div class="box">
     <h2>Login</h2>
     <input id="loginMobile" placeholder="Mobile Number">
@@ -108,7 +100,7 @@ button {
 </div>
 
 <!-- REGISTER -->
-<div class="auth hidden" id="registerBox">
+<div class="center hidden" id="registerBox">
   <div class="box">
     <h2>Register</h2>
     <input id="regName" placeholder="Full Name">
@@ -142,4 +134,91 @@ button {
 
 <!-- FIREBASE -->
 <script type="module">
-import { initializeApp } from "https://www
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } 
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, setDoc } 
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAY4MfQ5zPh60EfYmY0JoKIDQkojqNU6hs",
+  authDomain: "ganeshbilling-bdada.firebaseapp.com",
+  projectId: "ganeshbilling-bdada",
+  storageBucket: "ganeshbilling-bdada.firebasestorage.app",
+  messagingSenderId: "351410373004",
+  appId: "1:351410373004:web:50be765037e463735a16a9"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth();
+const db = getFirestore();
+
+let uid = "";
+
+/* AUTH STATE */
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    uid = user.uid;
+    showDashboard();
+  }
+});
+
+/* UI SWITCH */
+window.showRegister = () => {
+  loginBox.classList.add("hidden");
+  registerBox.classList.remove("hidden");
+};
+window.showLogin = () => {
+  registerBox.classList.add("hidden");
+  loginBox.classList.remove("hidden");
+};
+function showDashboard() {
+  loginBox.classList.add("hidden");
+  registerBox.classList.add("hidden");
+  dashboard.classList.remove("hidden");
+}
+
+/* REGISTER */
+window.register = async () => {
+  const email = regMobile.value + "@mobile.local";
+  const pass = regPassword.value;
+
+  const user = await createUserWithEmailAndPassword(auth, email, pass);
+  await setDoc(doc(db, "users", user.user.uid), {
+    name: regName.value,
+    mobile: regMobile.value
+  });
+
+  alert("Account Created");
+  showLogin();
+};
+
+/* LOGIN */
+window.login = async () => {
+  const email = loginMobile.value + "@mobile.local";
+  await signInWithEmailAndPassword(auth, email, loginPassword.value);
+  alert("Login Successful");
+};
+
+/* SAVE PROFILE */
+window.saveProfile = async () => {
+  await setDoc(doc(db, "profiles", uid), {
+    business: business.value,
+    mobile: mobile.value,
+    gst: gst.value,
+    email: email.value,
+    address: address.value,
+    updatedAt: new Date()
+  });
+  alert("Details Saved");
+};
+
+/* LOGOUT */
+window.logout = async () => {
+  await signOut(auth);
+  location.reload();
+};
+</script>
+
+</body>
+</html>
