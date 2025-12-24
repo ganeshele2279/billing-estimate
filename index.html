@@ -200,16 +200,15 @@ button:hover{ filter:brightness(0.9); }
 </head>
 <body>
 
-
-<div class="no-print" style="
+ <div class="no-print" style="
   position:fixed;
   top:10px;
   left:10px;
-  z-index:800;
+  z-index:99999;
   display:flex;
   flex-direction:column;
-  align-items:flex-start;
   gap:6px;
+  pointer-events:auto;
 ">
 
   <button class="theme-btn" onclick="openAdmin()">Admin</button>
@@ -219,6 +218,7 @@ button:hover{ filter:brightness(0.9); }
   </button>
 
 </div>
+
 
 
 
