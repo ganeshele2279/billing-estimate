@@ -270,21 +270,25 @@ text-align:center;font-size:24px;font-weight:bold;width:100%">
 </h2>
 
 <div class="header">
- <div>
-  Estimate No: <b><span id="invNo"></span></b><br>
-  Date: <span id="date"></span><br>
-  Time: <span id="time"></span>
- </div>
- <div>
-  Customer Name<br>
-  <input id="cust" list="custList">
-  <datalist id="custList"></datalist>
- </div>
 
-<div id="printAddress" style="font-size:11px;margin-top:4px">
-  <div id="custMobile"></div>
-  <div id="custAddress"></div>
-</div>
+  <!-- LEFT : CUSTOMER -->
+  <div>
+    Customer Name<br>
+    <input id="cust" list="custList">
+    <datalist id="custList"></datalist>
+
+    <div id="printAddress" style="font-size:11px;margin-top:4px">
+      <div id="custMobile"></div>
+      <div id="custAddress"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT : ESTIMATE INFO -->
+  <div style="text-align:right">
+    Estimate No: <b><span id="invNo"></span></b><br>
+    Date: <span id="date"></span><br>
+    Time: <span id="time"></span>
+  </div>
 
 </div>
 
