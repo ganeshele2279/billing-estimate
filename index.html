@@ -201,15 +201,27 @@ button:hover{ filter:brightness(0.9); }
 <body>
 
 
-<div class="no-print" style="position:fixed;top:10px;left:10px;z-index:3000">
+<div class="no-print" style="
+  position:fixed;
+  top:10px;
+  left:10px;
+  z-index:3000;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:6px;
+">
 
   <button class="theme-btn" onclick="openAdmin()">Admin</button>
 
   <button class="theme-btn"
-        style="writing-mode:vertical-rl;margin-top:6px"
-        onclick="openBusinessPanel()">
-  BUSINESS
-</button>
+          style="writing-mode:vertical-rl"
+          onclick="openBusinessPanel()">
+    BUSINESS
+  </button>
+
+</div>
+
 
 
   <!-- ADMIN HIDDEN PANEL -->
