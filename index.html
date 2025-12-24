@@ -203,12 +203,16 @@ button:hover{ filter:brightness(0.9); }
 
 <div class="no-print" style="position:fixed;top:10px;left:10px;z-index:3000">
 <div style="margin-top:6px">
+
+
+
+
 <div style="margin-bottom:6px">
   <select id="firmSelect" onchange="switchFirm(this.value)" style="width:100%;font-size:11px;padding:4px">
     <option value="">-- Select Firm --</option>
   </select>
-  <button class="theme-btn" style="width:100%;margin-top:4px;font-size:10px;padding:3px 6px" onclick="newFirm()">+ New Firm</button>
-  <button class="theme-btn" style="width:100%;margin-top:4px;font-size:10px;padding:3px 6px" onclick="editFirm()">✏️ Edit Firm</button>
+  <button class="theme-btn" style="width:auto;display:block;margin-top:4px;font-size:10px;padding:3px 6px" onclick="newFirm()">+ New Firm</button>
+  <button class="theme-btn" style="width:auto;display:block;margin-top:4px;font-size:10px;padding:3px 6px" onclick="editFirm()">✏️ Edit Firm</button>
 </div>
 
   <button class="theme-btn" onclick="document.getElementById('profilePanel').style.display='block';loadProfile()">Profile</button>
@@ -235,6 +239,56 @@ width:260px;
 
 
   <button class="theme-btn" onclick="openAdmin()">Admin</button>
+<div style="margin-top:6px">
+  <button class="theme-btn" style="display:block;width:auto;padding:3px 6px" onclick="newParty()">+ New Party</button>
+  <button class="theme-btn" style="display:block;width:auto;margin-top:4px;font-size:10px;padding:3px 6px" onclick="editParty()">✏️ Edit Party</button>
+<button class="theme-btn" style="display:block;margin-top:6px" onclick="toggleFirmPanel()">Firm List</button>
+<button class="theme-btn" style="display:block;margin-top:4px" onclick="togglePartyPanel()">Party List</button>
+
+<div id="firmPanel" style="
+  display:none;
+  margin-top:6px;
+  background:#fff;
+  border:1px solid #ccc;
+  padding:6px;
+  border-radius:6px;
+  max-height:220px;
+  overflow:auto;
+">
+</div>
+
+<div id="partyPanel" style="
+  display:none;
+  margin-top:6px;
+  background:#fff;
+  border:1px solid #ccc;
+  padding:6px;
+  border-radius:6px;
+  max-height:220px;
+  overflow:auto;
+">
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <!-- LIST BUTTONS -->
+  
+  
+</div>
+
 
   <!-- ADMIN HIDDEN PANEL -->
   <div id="adminPanel" style="
@@ -351,7 +405,7 @@ text-align:center;font-size:24px;font-weight:bold;width:100%">
 
 
 <button class="no-print" onclick="openLedger()">Party Ledger</button>
-<button class="no-print" onclick="openEditParty()">Edit Party</button>
+
 <button class="no-print" onclick="window.print()">Print</button>
 <label class="no-print gst-btn"><input type="checkbox" id="gstToggle" onchange="calc()"> GST</label>
 </div>
@@ -969,6 +1023,8 @@ background:#fff;border:2px solid #000;padding:10px;z-index:4000">
   </div>
 </div>
 
+
+
 </body>
     </html>
   `);
@@ -1260,6 +1316,8 @@ background:#fff;border:2px solid #000;padding:10px;z-index:4000">
   </div>
 </div>
 
+
+
 </body>
     </html>
   `);
@@ -1544,6 +1602,8 @@ background:#fff;border:2px solid #000;padding:10px;z-index:4000">
   </div>
 </div>
 
+
+
 </body>
     </html>
   `);
@@ -1771,6 +1831,8 @@ background:#fff;border:2px solid #000;padding:10px;z-index:4000">
     <button onclick="closeAdmin()">Close</button>
   </div>
 </div>
+
+
 
 </body>
       </html>
@@ -2264,51 +2326,147 @@ document.getElementById("gstToggle").addEventListener("change", function(){
 });
 
 
-/* ===== PARTY FULL DETAILS SYSTEM ===== */
+/* ===== NEW PARTY (SAME LOGIC AS NEW FIRM) ===== */
 function getParties(){
   return JSON.parse(localStorage.getItem("PARTIES") || "{}");
 }
-function saveParties(p){
-  localStorage.setItem("PARTIES", JSON.stringify(p));
+function saveParties(obj){
+  localStorage.setItem("PARTIES", JSON.stringify(obj));
 }
 
-/* Save / Update Party from Edit Party */
-function savePartyDetails(name, data){
+function newParty(){
+  const partyName = prompt("Enter Party Name");
+  if(!partyName) return;
+
+  const name = prompt("Enter Contact Name");
+  const gst = prompt("Enter GST Number");
+  const address = prompt("Enter Address");
+  const mobile = prompt("Enter Mobile Number");
+  const email = prompt("Enter Email");
+
   const parties = getParties();
-  parties[name] = data;
+  parties[partyName] = {
+    name: name || "",
+    gst: gst || "",
+    address: address || "",
+    mobile: mobile || "",
+    email: email || ""
+  };
+
   saveParties(parties);
-  refreshPartyList();
+  alert("New Party Saved");
 }
 
-/* Populate customer dropdown */
-function refreshPartyList(){
-  const list = document.getElementById("custList");
-  if(!list) return;
-  list.innerHTML = "";
-  const parties = getParties();
-  Object.keys(parties).forEach(n=>{
-    const o=document.createElement("option");
-    o.value=n;
-    list.appendChild(o);
-  });
-}
 
-/* On customer select → load full details */
-document.addEventListener("change",function(e){
-  if(e.target && e.target.id==="cust"){
-    const name=e.target.value;
-    const p=getParties()[name];
-    if(!p) return;
-    document.getElementById("custMobile").innerText = p.mobile||"";
-    document.getElementById("custAddress").innerText =
-      (p.address? p.address+" " : "") +
-      (p.gst? "GST: "+p.gst+" " : "") +
-      (p.email? p.email : "");
+/* ===== EDIT PARTY (SAME AS EDIT FIRM CONCEPT) ===== */
+function editParty(){
+  const parties = JSON.parse(localStorage.getItem("PARTIES") || "{}");
+  const keys = Object.keys(parties);
+
+  if(keys.length === 0){
+    alert("No party available to edit");
+    return;
   }
-});
+
+  const partyName = prompt(
+    "Enter Party Name to Edit:\n" + keys.join("\n")
+  );
+  if(!partyName || !parties[partyName]){
+    alert("Party not found");
+    return;
+  }
+
+  const p = parties[partyName];
+
+  const name = prompt("Edit Contact Name", p.name || "");
+  const gst = prompt("Edit GST Number", p.gst || "");
+  const address = prompt("Edit Address", p.address || "");
+  const mobile = prompt("Edit Mobile Number", p.mobile || "");
+  const email = prompt("Edit Email", p.email || "");
+
+  parties[partyName] = {
+    name: name || "",
+    gst: gst || "",
+    address: address || "",
+    mobile: mobile || "",
+    email: email || ""
+  };
+
+  localStorage.setItem("PARTIES", JSON.stringify(parties));
+  alert("Party Updated Successfully");
+}
 
 
-refreshPartyList();
+/* ===== OPEN FIRM & PARTY LISTS ===== */
+
+function toggleFirmPanel(){
+  const p = document.getElementById("firmPanel");
+  const q = document.getElementById("partyPanel");
+  q.style.display = "none";
+  p.style.display = (p.style.display === "block") ? "none" : "block";
+  if(p.style.display === "block"){
+    const firms = JSON.parse(localStorage.getItem("FIRMS") || "{}");
+    let h = "<b>Firm List</b><ul style='margin:4px 0;padding-left:18px'>";
+    Object.keys(firms).forEach(k=>{
+      const f=firms[k];
+      h += "<li><b>"+k+"</b><br><span style='font-size:11px'>"
+        +(f.address||"")+"<br>"
+        +(f.gst?("GST: "+f.gst+"<br>"):"")
+        +(f.mobile?("Mob: "+f.mobile+"<br>"):"")
+        +(f.email||"")
+        +"</span></li>";
+    });
+    h += "</ul>";
+    p.innerHTML = h;
+  }
+}
+
+function togglePartyPanel(){
+  const p = document.getElementById("partyPanel");
+  const q = document.getElementById("firmPanel");
+  q.style.display = "none";
+  p.style.display = (p.style.display === "block") ? "none" : "block";
+  if(p.style.display === "block"){
+    const parties = JSON.parse(localStorage.getItem("PARTIES") || "{}");
+    let h = "<b>Party List</b><ul style='margin:4px 0;padding-left:18px'>";
+    Object.keys(parties).forEach(k=>{
+      const f=parties[k];
+      h += "<li><b>"+k+"</b><br><span style='font-size:11px'>"
+        +(f.address||"")+"<br>"
+        +(f.gst?("GST: "+f.gst+"<br>"):"")
+        +(f.mobile?("Mob: "+f.mobile+"<br>"):"")
+        +(f.email||"")
+        +"</span></li>";
+    });
+    h += "</ul>";
+    p.innerHTML = h;
+  }
+}
+
+
+function togglePartyPanel(){
+  const p=document.getElementById("partyPanel");
+  const q=document.getElementById("firmPanel");
+  q.style.display="none";
+  p.style.display=p.style.display==="block"?"none":"block";
+  if(p.style.display==="block"){
+  const box = document.getElementById("partyListBox");
+  const parties = JSON.parse(localStorage.getItem("PARTIES") || "{}");
+  let html = "<b>Party List</b><ul style='margin:4px 0;padding-left:18px'>";
+  Object.keys(parties).forEach(k=>{
+    const p = parties[k];
+    html += "<li><b>"+k+"</b><br><span style='font-size:11px'>"
+      +(p.address||"")+"<br>"
+      +(p.gst?("GST: "+p.gst+"<br>"):"")
+      +(p.mobile?("Mob: "+p.mobile+"<br>"):"")
+      +(p.email||"")
+      +"</span></li>";
+  });
+  html += "</ul>";
+  p.innerHTML = html;
+}
+}
+
 </script>
 
 <!-- Edit Party Modal -->
@@ -2412,6 +2570,8 @@ window.togglePaid = async function(docId,current){
 <!-- 🔥 FIREBASE END -->
 
   
+
+
 </body>
 </html>
 
