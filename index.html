@@ -202,6 +202,37 @@ button:hover{ filter:brightness(0.9); }
 
 
 <div class="no-print" style="position:fixed;top:10px;left:10px;z-index:3000">
+<div style="margin-top:6px">
+<div style="margin-bottom:6px">
+  <select id="firmSelect" onchange="switchFirm(this.value)" style="width:100%;font-size:11px;padding:4px">
+    <option value="">-- Select Firm --</option>
+  </select>
+  <button class="theme-btn" style="width:100%;margin-top:4px;font-size:10px;padding:3px 6px" onclick="newFirm()">+ New Firm</button>
+  <button class="theme-btn" style="width:100%;margin-top:4px;font-size:10px;padding:3px 6px" onclick="editFirm()">✏️ Edit Firm</button>
+</div>
+
+  <button class="theme-btn" onclick="document.getElementById('profilePanel').style.display='block';loadProfile()">Profile</button>
+</div>
+
+<div id="profilePanel" style="
+display:none;
+margin-top:6px;
+background:#fff;
+border:2px solid #000;
+padding:10px;
+border-radius:6px;
+width:260px;
+">
+<b>PROFILE DETAILS</b><br><br>
+<input id="p_name" placeholder="Name"><br><br>
+<input id="p_gst" placeholder="GST"><br><br>
+<textarea id="p_address" placeholder="Address"></textarea><br><br>
+<input id="p_mobile" placeholder="Mobile"><br><br>
+<input id="p_email" placeholder="Gmail"><br><br>
+<button onclick="saveProfile()">Save</button>
+<button onclick="this.parentNode.style.display='none'">Close</button>
+</div>
+
 
   <button class="theme-btn" onclick="openAdmin()">Admin</button>
 
@@ -264,6 +295,12 @@ button:hover{ filter:brightness(0.9); }
 
 
 <div class="box">
+
+<div id="firmHeader" style="display:none;text-align:center;margin-bottom:8px">
+  <div id="firmName" style="font-size:20px;font-weight:bold"></div>
+  <div id="firmDetails" style="font-size:11px;line-height:1.4"></div>
+</div>
+
 <h2>
 <input value="ESTIMATE" style="border:none;outline:none;background:transparent;
 text-align:center;font-size:24px;font-weight:bold;width:100%">
@@ -2051,6 +2088,227 @@ function showUsageLogs(){
   renderGroupedLogs();
 }
 
+
+/* ===== MULTI FIRM PROFILE SYSTEM ===== */
+function getFirms(){
+  return JSON.parse(localStorage.getItem("FIRMS") || "{}");
+}
+function saveFirms(obj){
+  localStorage.setItem("FIRMS", JSON.stringify(obj));
+}
+
+function refreshFirmList(){
+  const sel = document.getElementById("firmSelect");
+  const firms = getFirms();
+  sel.innerHTML = '<option value="">-- Select Firm --</option>';
+
+  Object.keys(firms).forEach(k=>{
+    const f = firms[k] || {};
+    // show only firms which have at least one saved field
+    if(f.name || f.gst || f.address || f.mobile || f.email){
+      const o=document.createElement("option");
+      o.value=k;
+      o.textContent=k;
+      sel.appendChild(o);
+    }
+  });
+
+  sel.value = localStorage.getItem("ACTIVE_FIRM") || "";
+}
+
+function newFirm(){
+  const firmName = prompt("Enter Firm Name");
+  if(!firmName) return;
+
+  const name = prompt("Enter Owner / Firm Display Name");
+  const gst = prompt("Enter GST Number");
+  const address = prompt("Enter Address");
+  const mobile = prompt("Enter Mobile Number");
+  const email = prompt("Enter Gmail");
+
+  const firms = getFirms();
+  firms[firmName] = {
+    name: name || "",
+    gst: gst || "",
+    address: address || "",
+    mobile: mobile || "",
+    email: email || ""
+  };
+
+  saveFirms(firms);
+  localStorage.setItem("ACTIVE_FIRM", firmName);
+  refreshFirmList();
+  loadProfile();
+}
+
+function switchFirm(name){
+  if(!name) return;
+  localStorage.setItem("ACTIVE_FIRM", name);
+  loadProfile();
+}
+
+function saveProfile(){
+  const firm = localStorage.getItem("ACTIVE_FIRM");
+  if(!firm){ alert("Select or create a firm first"); return; }
+  const firms = getFirms();
+  firms[firm] = {
+    name:p_name.value,
+    gst:p_gst.value,
+    address:p_address.value,
+    mobile:p_mobile.value,
+    email:p_email.value
+  };
+  saveFirms(firms);
+  alert("Firm Profile Saved");
+}
+
+
+function editFirm(){
+  const firm = localStorage.getItem("ACTIVE_FIRM");
+  if(!firm){ alert("Select a firm first"); return; }
+
+  const firms = getFirms();
+  const f = firms[firm] || {};
+
+  const name = prompt("Edit Owner / Firm Display Name", f.name || "");
+  const gst = prompt("Edit GST Number", f.gst || "");
+  const address = prompt("Edit Address", f.address || "");
+  const mobile = prompt("Edit Mobile Number", f.mobile || "");
+  const email = prompt("Edit Gmail", f.email || "");
+
+  firms[firm] = {
+    name: name || "",
+    gst: gst || "",
+    address: address || "",
+    mobile: mobile || "",
+    email: email || ""
+  };
+
+  saveFirms(firms);
+  alert("Firm Updated");
+  loadProfile();
+}
+
+function loadProfile(){
+  refreshFirmList();
+  const firm = localStorage.getItem("ACTIVE_FIRM");
+  if(!firm) return;
+  const firms = getFirms();
+  const p = firms[firm] || {};
+  p_name.value=p.name||"";
+  p_gst.value=p.gst||"";
+  p_address.value=p.address||"";
+  p_mobile.value=p.mobile||"";
+  p_email.value=p.email||"";
+}
+
+/* ===== BACKUP INCLUDE FIRMS ===== */
+function exportBackup(){
+  const data = {
+    FIRMS: getFirms(),
+    ACTIVE_FIRM: localStorage.getItem("ACTIVE_FIRM")
+  };
+  const blob = new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="backup_with_firms.json";
+  a.click();
+}
+
+function importBackup(){
+  document.getElementById("backupFile").click();
+}
+
+function handleBackupFile(inp){
+  const file=inp.files[0];
+  if(!file) return;
+  const r=new FileReader();
+  r.onload=function(){
+    const data=JSON.parse(r.result||"{}");
+    if(data.FIRMS) localStorage.setItem("FIRMS", JSON.stringify(data.FIRMS));
+    if(data.ACTIVE_FIRM) localStorage.setItem("ACTIVE_FIRM", data.ACTIVE_FIRM);
+    alert("Backup Imported");
+    loadProfile();
+  };
+  r.readAsText(file);
+}
+
+
+loadProfile();
+
+/* ===== GST TOGGLE FIRM HEADER LOGIC ===== */
+document.getElementById("gstToggle").addEventListener("change", function(){
+  const on = this.checked;
+  const titleInput = document.querySelector("h2 input");
+  const firmHeader = document.getElementById("firmHeader");
+
+  if(on){
+    const firm = localStorage.getItem("ACTIVE_FIRM");
+    const firms = JSON.parse(localStorage.getItem("FIRMS")||"{}");
+    const f = firms[firm] || {};
+
+    titleInput.style.display="none";
+    firmHeader.style.display="block";
+
+    document.getElementById("firmName").innerText = f.name || firm || "";
+    document.getElementById("firmDetails").innerHTML =
+      (f.address?f.address+"<br>":"") +
+      (f.gst?"GST: "+f.gst+"<br>":"") +
+      (f.mobile?"Mobile: "+f.mobile+"<br>":"") +
+      (f.email?f.email:"");
+
+  }else{
+    titleInput.style.display="block";
+    firmHeader.style.display="none";
+  }
+});
+
+
+/* ===== PARTY FULL DETAILS SYSTEM ===== */
+function getParties(){
+  return JSON.parse(localStorage.getItem("PARTIES") || "{}");
+}
+function saveParties(p){
+  localStorage.setItem("PARTIES", JSON.stringify(p));
+}
+
+/* Save / Update Party from Edit Party */
+function savePartyDetails(name, data){
+  const parties = getParties();
+  parties[name] = data;
+  saveParties(parties);
+  refreshPartyList();
+}
+
+/* Populate customer dropdown */
+function refreshPartyList(){
+  const list = document.getElementById("custList");
+  if(!list) return;
+  list.innerHTML = "";
+  const parties = getParties();
+  Object.keys(parties).forEach(n=>{
+    const o=document.createElement("option");
+    o.value=n;
+    list.appendChild(o);
+  });
+}
+
+/* On customer select → load full details */
+document.addEventListener("change",function(e){
+  if(e.target && e.target.id==="cust"){
+    const name=e.target.value;
+    const p=getParties()[name];
+    if(!p) return;
+    document.getElementById("custMobile").innerText = p.mobile||"";
+    document.getElementById("custAddress").innerText =
+      (p.address? p.address+" " : "") +
+      (p.gst? "GST: "+p.gst+" " : "") +
+      (p.email? p.email : "");
+  }
+});
+
+
+refreshPartyList();
 </script>
 
 <!-- Edit Party Modal -->
