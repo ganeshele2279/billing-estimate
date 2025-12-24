@@ -940,6 +940,19 @@ background:#fff;border:2px solid #000;padding:10px;z-index:4000">
   </div>
 </div>
 
+
+<script>
+// === BUSINESS BUTTON SAFE HOOK (ADD ONLY) ===
+function openBusinessPanel(){
+  var p = document.getElementById("businessPanel");
+  if(p){
+    p.style.display = "block";
+  } else {
+    alert("businessPanel not found");
+  }
+}
+</script>
+
 </body>
     </html>
   `);
