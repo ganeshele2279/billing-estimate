@@ -230,6 +230,8 @@ button:hover{ filter:brightness(0.9); }
   Lock Admin
 </button>
 
+    <button class="theme-btn" style="width:100%;margin-top:6px" onclick="openSettings()">⚙ Settings</button>
+
 
   </div>
 </div>
@@ -932,6 +934,40 @@ background:#fff;border:2px solid #000;padding:10px;z-index:4000">
   </div>
 </div>
 
+
+<!-- SETTINGS PANEL -->
+<div id="settingsBox" style="display:none;position:fixed;top:10%;left:50%;transform:translateX(-50%);
+width:360px;background:#fff;border:2px solid #000;padding:12px;z-index:4000;border-radius:6px">
+<h3 style="margin-top:0">Settings</h3>
+
+<b>Document</b><br>
+<label>Title
+<select id="setDocTitle">
+  <option>ESTIMATE</option>
+  <option>QUOTATION</option>
+  <option>INVOICE</option>
+</select>
+</label><br><br>
+
+<b>GST</b><br>
+<label><input type="checkbox" id="setGstDefault"> GST Default ON</label><br>
+<label>GST % <input type="number" id="setGstPer" style="width:60px"></label><br><br>
+
+<b>Rate</b><br>
+<label><input type="checkbox" id="setRateLock"> Lock Rate Editing</label><br><br>
+
+<b>Theme</b><br>
+<select id="setThemeDefault">
+  <option value="theme-blue">Blue</option>
+  <option value="theme-green">Green</option>
+  <option value="theme-red">Red</option>
+  <option value="theme-black">Black</option>
+</select><br><br>
+
+<button onclick="saveSettings()">Save</button>
+<button onclick="closeSettings()">Close</button>
+</div>
+
 </body>
     </html>
   `);
@@ -1223,6 +1259,40 @@ background:#fff;border:2px solid #000;padding:10px;z-index:4000">
   </div>
 </div>
 
+
+<!-- SETTINGS PANEL -->
+<div id="settingsBox" style="display:none;position:fixed;top:10%;left:50%;transform:translateX(-50%);
+width:360px;background:#fff;border:2px solid #000;padding:12px;z-index:4000;border-radius:6px">
+<h3 style="margin-top:0">Settings</h3>
+
+<b>Document</b><br>
+<label>Title
+<select id="setDocTitle">
+  <option>ESTIMATE</option>
+  <option>QUOTATION</option>
+  <option>INVOICE</option>
+</select>
+</label><br><br>
+
+<b>GST</b><br>
+<label><input type="checkbox" id="setGstDefault"> GST Default ON</label><br>
+<label>GST % <input type="number" id="setGstPer" style="width:60px"></label><br><br>
+
+<b>Rate</b><br>
+<label><input type="checkbox" id="setRateLock"> Lock Rate Editing</label><br><br>
+
+<b>Theme</b><br>
+<select id="setThemeDefault">
+  <option value="theme-blue">Blue</option>
+  <option value="theme-green">Green</option>
+  <option value="theme-red">Red</option>
+  <option value="theme-black">Black</option>
+</select><br><br>
+
+<button onclick="saveSettings()">Save</button>
+<button onclick="closeSettings()">Close</button>
+</div>
+
 </body>
     </html>
   `);
@@ -1507,6 +1577,40 @@ background:#fff;border:2px solid #000;padding:10px;z-index:4000">
   </div>
 </div>
 
+
+<!-- SETTINGS PANEL -->
+<div id="settingsBox" style="display:none;position:fixed;top:10%;left:50%;transform:translateX(-50%);
+width:360px;background:#fff;border:2px solid #000;padding:12px;z-index:4000;border-radius:6px">
+<h3 style="margin-top:0">Settings</h3>
+
+<b>Document</b><br>
+<label>Title
+<select id="setDocTitle">
+  <option>ESTIMATE</option>
+  <option>QUOTATION</option>
+  <option>INVOICE</option>
+</select>
+</label><br><br>
+
+<b>GST</b><br>
+<label><input type="checkbox" id="setGstDefault"> GST Default ON</label><br>
+<label>GST % <input type="number" id="setGstPer" style="width:60px"></label><br><br>
+
+<b>Rate</b><br>
+<label><input type="checkbox" id="setRateLock"> Lock Rate Editing</label><br><br>
+
+<b>Theme</b><br>
+<select id="setThemeDefault">
+  <option value="theme-blue">Blue</option>
+  <option value="theme-green">Green</option>
+  <option value="theme-red">Red</option>
+  <option value="theme-black">Black</option>
+</select><br><br>
+
+<button onclick="saveSettings()">Save</button>
+<button onclick="closeSettings()">Close</button>
+</div>
+
 </body>
     </html>
   `);
@@ -1733,6 +1837,40 @@ background:#fff;border:2px solid #000;padding:10px;z-index:4000">
 
     <button onclick="closeAdmin()">Close</button>
   </div>
+</div>
+
+
+<!-- SETTINGS PANEL -->
+<div id="settingsBox" style="display:none;position:fixed;top:10%;left:50%;transform:translateX(-50%);
+width:360px;background:#fff;border:2px solid #000;padding:12px;z-index:4000;border-radius:6px">
+<h3 style="margin-top:0">Settings</h3>
+
+<b>Document</b><br>
+<label>Title
+<select id="setDocTitle">
+  <option>ESTIMATE</option>
+  <option>QUOTATION</option>
+  <option>INVOICE</option>
+</select>
+</label><br><br>
+
+<b>GST</b><br>
+<label><input type="checkbox" id="setGstDefault"> GST Default ON</label><br>
+<label>GST % <input type="number" id="setGstPer" style="width:60px"></label><br><br>
+
+<b>Rate</b><br>
+<label><input type="checkbox" id="setRateLock"> Lock Rate Editing</label><br><br>
+
+<b>Theme</b><br>
+<select id="setThemeDefault">
+  <option value="theme-blue">Blue</option>
+  <option value="theme-green">Green</option>
+  <option value="theme-red">Red</option>
+  <option value="theme-black">Black</option>
+</select><br><br>
+
+<button onclick="saveSettings()">Save</button>
+<button onclick="closeSettings()">Close</button>
 </div>
 
 </body>
@@ -2051,6 +2189,56 @@ function showUsageLogs(){
   renderGroupedLogs();
 }
 
+
+// ===== SETTINGS LOGIC =====
+const SETTINGS_KEY = "APP_SETTINGS";
+
+function openSettings(){
+  if(!ADMIN_UNLOCKED){ alert("Admin locked"); return; }
+  loadSettingsUI();
+  document.getElementById("settingsBox").style.display="block";
+}
+function closeSettings(){
+  document.getElementById("settingsBox").style.display="none";
+}
+
+function saveSettings(){
+  const s = {
+    title: document.getElementById("setDocTitle").value,
+    gstOn: document.getElementById("setGstDefault").checked,
+    gstPer: document.getElementById("setGstPer").value || 18,
+    rateLock: document.getElementById("setRateLock").checked,
+    theme: document.getElementById("setThemeDefault").value
+  };
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
+  applySettings();
+  closeSettings();
+}
+
+function loadSettingsUI(){
+  const s = JSON.parse(localStorage.getItem(SETTINGS_KEY)||"{}");
+  if(s.title) document.querySelector("h2 input").value = s.title;
+  document.getElementById("setDocTitle").value = s.title||"ESTIMATE";
+  document.getElementById("setGstDefault").checked = !!s.gstOn;
+  document.getElementById("setGstPer").value = s.gstPer||18;
+  document.getElementById("setRateLock").checked = !!s.rateLock;
+  document.getElementById("setThemeDefault").value = s.theme||"theme-blue";
+}
+
+function applySettings(){
+  const s = JSON.parse(localStorage.getItem(SETTINGS_KEY)||"{}");
+  if(s.title) document.querySelector("h2 input").value = s.title;
+  if(s.theme) setTheme(s.theme);
+  document.getElementById("gstToggle").checked = !!s.gstOn;
+  document.getElementById("gstPer").value = s.gstPer||18;
+  calc();
+  document.querySelectorAll(".col-rate input").forEach(i=>{
+    i.disabled = !!s.rateLock;
+  });
+}
+
+window.addEventListener("load", applySettings);
+
 </script>
 
 <!-- Edit Party Modal -->
@@ -2102,8 +2290,108 @@ background:#fff;border:2px solid #000;padding:10px;z-index:4000">
 </div>
 
   <!-- 🔥 FIREBASE START -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">
+// ===== SETTINGS LOGIC =====
+const SETTINGS_KEY = "APP_SETTINGS";
+
+function openSettings(){
+  if(!ADMIN_UNLOCKED){ alert("Admin locked"); return; }
+  loadSettingsUI();
+  document.getElementById("settingsBox").style.display="block";
+}
+function closeSettings(){
+  document.getElementById("settingsBox").style.display="none";
+}
+
+function saveSettings(){
+  const s = {
+    title: document.getElementById("setDocTitle").value,
+    gstOn: document.getElementById("setGstDefault").checked,
+    gstPer: document.getElementById("setGstPer").value || 18,
+    rateLock: document.getElementById("setRateLock").checked,
+    theme: document.getElementById("setThemeDefault").value
+  };
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
+  applySettings();
+  closeSettings();
+}
+
+function loadSettingsUI(){
+  const s = JSON.parse(localStorage.getItem(SETTINGS_KEY)||"{}");
+  if(s.title) document.querySelector("h2 input").value = s.title;
+  document.getElementById("setDocTitle").value = s.title||"ESTIMATE";
+  document.getElementById("setGstDefault").checked = !!s.gstOn;
+  document.getElementById("setGstPer").value = s.gstPer||18;
+  document.getElementById("setRateLock").checked = !!s.rateLock;
+  document.getElementById("setThemeDefault").value = s.theme||"theme-blue";
+}
+
+function applySettings(){
+  const s = JSON.parse(localStorage.getItem(SETTINGS_KEY)||"{}");
+  if(s.title) document.querySelector("h2 input").value = s.title;
+  if(s.theme) setTheme(s.theme);
+  document.getElementById("gstToggle").checked = !!s.gstOn;
+  document.getElementById("gstPer").value = s.gstPer||18;
+  calc();
+  document.querySelectorAll(".col-rate input").forEach(i=>{
+    i.disabled = !!s.rateLock;
+  });
+}
+
+window.addEventListener("load", applySettings);
+
+</script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js">
+// ===== SETTINGS LOGIC =====
+const SETTINGS_KEY = "APP_SETTINGS";
+
+function openSettings(){
+  if(!ADMIN_UNLOCKED){ alert("Admin locked"); return; }
+  loadSettingsUI();
+  document.getElementById("settingsBox").style.display="block";
+}
+function closeSettings(){
+  document.getElementById("settingsBox").style.display="none";
+}
+
+function saveSettings(){
+  const s = {
+    title: document.getElementById("setDocTitle").value,
+    gstOn: document.getElementById("setGstDefault").checked,
+    gstPer: document.getElementById("setGstPer").value || 18,
+    rateLock: document.getElementById("setRateLock").checked,
+    theme: document.getElementById("setThemeDefault").value
+  };
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
+  applySettings();
+  closeSettings();
+}
+
+function loadSettingsUI(){
+  const s = JSON.parse(localStorage.getItem(SETTINGS_KEY)||"{}");
+  if(s.title) document.querySelector("h2 input").value = s.title;
+  document.getElementById("setDocTitle").value = s.title||"ESTIMATE";
+  document.getElementById("setGstDefault").checked = !!s.gstOn;
+  document.getElementById("setGstPer").value = s.gstPer||18;
+  document.getElementById("setRateLock").checked = !!s.rateLock;
+  document.getElementById("setThemeDefault").value = s.theme||"theme-blue";
+}
+
+function applySettings(){
+  const s = JSON.parse(localStorage.getItem(SETTINGS_KEY)||"{}");
+  if(s.title) document.querySelector("h2 input").value = s.title;
+  if(s.theme) setTheme(s.theme);
+  document.getElementById("gstToggle").checked = !!s.gstOn;
+  document.getElementById("gstPer").value = s.gstPer||18;
+  calc();
+  document.querySelectorAll(".col-rate input").forEach(i=>{
+    i.disabled = !!s.rateLock;
+  });
+}
+
+window.addEventListener("load", applySettings);
+
+</script>
 
 <script>
   const firebaseConfig = {
@@ -2150,10 +2438,94 @@ window.togglePaid = async function(docId,current){
   }
 };
 
+
+// ===== SETTINGS LOGIC =====
+const SETTINGS_KEY = "APP_SETTINGS";
+
+function openSettings(){
+  if(!ADMIN_UNLOCKED){ alert("Admin locked"); return; }
+  loadSettingsUI();
+  document.getElementById("settingsBox").style.display="block";
+}
+function closeSettings(){
+  document.getElementById("settingsBox").style.display="none";
+}
+
+function saveSettings(){
+  const s = {
+    title: document.getElementById("setDocTitle").value,
+    gstOn: document.getElementById("setGstDefault").checked,
+    gstPer: document.getElementById("setGstPer").value || 18,
+    rateLock: document.getElementById("setRateLock").checked,
+    theme: document.getElementById("setThemeDefault").value
+  };
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
+  applySettings();
+  closeSettings();
+}
+
+function loadSettingsUI(){
+  const s = JSON.parse(localStorage.getItem(SETTINGS_KEY)||"{}");
+  if(s.title) document.querySelector("h2 input").value = s.title;
+  document.getElementById("setDocTitle").value = s.title||"ESTIMATE";
+  document.getElementById("setGstDefault").checked = !!s.gstOn;
+  document.getElementById("setGstPer").value = s.gstPer||18;
+  document.getElementById("setRateLock").checked = !!s.rateLock;
+  document.getElementById("setThemeDefault").value = s.theme||"theme-blue";
+}
+
+function applySettings(){
+  const s = JSON.parse(localStorage.getItem(SETTINGS_KEY)||"{}");
+  if(s.title) document.querySelector("h2 input").value = s.title;
+  if(s.theme) setTheme(s.theme);
+  document.getElementById("gstToggle").checked = !!s.gstOn;
+  document.getElementById("gstPer").value = s.gstPer||18;
+  calc();
+  document.querySelectorAll(".col-rate input").forEach(i=>{
+    i.disabled = !!s.rateLock;
+  });
+}
+
+window.addEventListener("load", applySettings);
+
 </script>
 <!-- 🔥 FIREBASE END -->
 
   
+
+<!-- SETTINGS PANEL -->
+<div id="settingsBox" style="display:none;position:fixed;top:10%;left:50%;transform:translateX(-50%);
+width:360px;background:#fff;border:2px solid #000;padding:12px;z-index:4000;border-radius:6px">
+<h3 style="margin-top:0">Settings</h3>
+
+<b>Document</b><br>
+<label>Title
+<select id="setDocTitle">
+  <option>ESTIMATE</option>
+  <option>QUOTATION</option>
+  <option>INVOICE</option>
+</select>
+</label><br><br>
+
+<b>GST</b><br>
+<label><input type="checkbox" id="setGstDefault"> GST Default ON</label><br>
+<label>GST % <input type="number" id="setGstPer" style="width:60px"></label><br><br>
+
+<b>Rate</b><br>
+<label><input type="checkbox" id="setRateLock"> Lock Rate Editing</label><br><br>
+
+<b>Theme</b><br>
+<select id="setThemeDefault">
+  <option value="theme-blue">Blue</option>
+  <option value="theme-green">Green</option>
+  <option value="theme-red">Red</option>
+  <option value="theme-black">Black</option>
+</select><br><br>
+
+<button onclick="saveSettings()">Save</button>
+<button onclick="closeSettings()">Close</button>
+</div>
+
 </body>
 </html>
 
