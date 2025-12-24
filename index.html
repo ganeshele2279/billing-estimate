@@ -200,9 +200,34 @@ button:hover{ filter:brightness(0.9); }
 </head>
 <body>
 
+
 <div class="no-print" style="position:fixed;top:10px;left:10px;z-index:3000">
+
   <button class="theme-btn" onclick="openAdmin()">Admin</button>
+
+  <!-- ADMIN HIDDEN PANEL -->
+  <div id="adminPanel" style="
+    display:none;
+    margin-top:6px;
+    background:#fff;
+    border:1px solid #ccc;
+    padding:8px;
+    border-radius:6px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.15);
+    min-width:140px;
+  ">
+
+    <div style="font-size:11px;font-weight:bold;margin-bottom:6px;color:#555">
+      USER
+    </div>
+
+    <button class="theme-btn" style="width:100%;margin-bottom:4px" onclick="exportBackup()">Export</button>
+    <button class="theme-btn" style="width:100%;margin-bottom:4px" onclick="importBackup()">Import</button>
+    <button class="theme-btn danger" style="width:100%" onclick="confirmDeleteAll()">Delete All</button>
+
+  </div>
 </div>
+
  
 
 <div class="no-print" style="position:fixed;top:10px;right:10px;z-index:2000">
@@ -214,12 +239,8 @@ button:hover{ filter:brightness(0.9); }
 </select>
 
 <div class="no-print" style="margin-top:6px;display:flex;flex-direction:column;gap:6px;align-items:flex-end">
-  <button class="theme-btn" onclick="exportBackup()">Export</button>
-  <button class="theme-btn" onclick="importBackup()">Import</button>
+
   <button class="theme-btn" onclick="refreshSameEstimate()">Refresh</button>
-
-<button class="theme-btn danger" onclick="confirmDeleteAll()">Delete All</button>
-
 
 <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;margin-bottom:2px">
   <span style="font-size:10px;color:#555">Welcome!</span>
@@ -1945,8 +1966,12 @@ function logVisit(){
 
 
 function openAdmin(){
-  document.getElementById("adminPanel").style.display="block";
+  const p = document.getElementById("adminPanel");
+  p.style.display = (p.style.display === "none" || p.style.display === "") 
+    ? "block" 
+    : "none";
 }
+
 
 function closeAdmin(){
   document.getElementById("adminPanel").style.display="none";
