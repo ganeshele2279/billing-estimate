@@ -204,8 +204,6 @@ button:hover{ filter:brightness(0.9); }
 <div class="no-print" style="position:fixed;top:10px;left:10px;z-index:3000">
 
   <button class="theme-btn" onclick="openAdmin()">Admin</button>
-  <button class="theme-btn" style="margin-top:4px" onclick="openSettings()">⚙ Settings</button>
-
 
   <!-- ADMIN HIDDEN PANEL -->
   <div id="adminPanel" style="
@@ -261,37 +259,6 @@ button:hover{ filter:brightness(0.9); }
 
 </div>
 <input type="file" id="backupFile" accept=".json" style="display:none" onchange="handleBackupFile(this)">
-
-
-<!-- SETTINGS PANEL -->
-<div id="settingsPanel" style="display:none;position:fixed;top:15%;left:50%;transform:translateX(-50%);
-background:#fff;border:2px solid #000;padding:12px;z-index:5000;width:320px">
-<h3>Settings</h3>
-
-<b>Document</b><br>
-<select id="setDocTitle">
-<option>ESTIMATE</option>
-<option>QUOTATION</option>
-<option>INVOICE</option>
-</select><br><br>
-
-<b>GST</b><br>
-<label><input type="checkbox" id="setGST"> Default GST</label><br>
-<input type="number" id="setGSTPer" value="18" style="width:60px"> %<br><br>
-
-<b>Rate / Item</b><br>
-<label><input type="checkbox" id="setLockRate"> Lock Rate</label><br><br>
-
-<b>UI</b><br>
-<select id="setThemeDef">
-<option value="theme-blue">Blue</option>
-<option value="theme-green">Green</option>
-<option value="theme-red">Red</option>
-</select><br><br>
-
-<button onclick="saveSettings()">Save</button>
-<button onclick="closeSettings()">Close</button>
-</div>
 
 </div>
 
@@ -2084,42 +2051,6 @@ function showUsageLogs(){
   renderGroupedLogs();
 }
 
-
-// SETTINGS LOGIC
-let SETTINGS = JSON.parse(localStorage.getItem("SETTINGS")||"{}");
-
-function openSettings(){
-  document.getElementById("settingsPanel").style.display="block";
-  document.getElementById("setDocTitle").value = SETTINGS.docTitle || "ESTIMATE";
-  document.getElementById("setGST").checked = SETTINGS.gst||false;
-  document.getElementById("setGSTPer").value = SETTINGS.gstPer||18;
-  document.getElementById("setLockRate").checked = SETTINGS.lockRate||false;
-  document.getElementById("setThemeDef").value = SETTINGS.theme||"theme-blue";
-}
-function closeSettings(){ document.getElementById("settingsPanel").style.display="none"; }
-
-function saveSettings(){
-  SETTINGS={
-    docTitle:document.getElementById("setDocTitle").value,
-    gst:document.getElementById("setGST").checked,
-    gstPer:document.getElementById("setGSTPer").value,
-    lockRate:document.getElementById("setLockRate").checked,
-    theme:document.getElementById("setThemeDef").value
-  };
-  localStorage.setItem("SETTINGS",JSON.stringify(SETTINGS));
-  applySettings();
-  closeSettings();
-}
-
-function applySettings(){
-  document.querySelector("h2 input").value = SETTINGS.docTitle||"ESTIMATE";
-  document.getElementById("gstToggle").checked = SETTINGS.gst||false;
-  document.getElementById("gstPer").value = SETTINGS.gstPer||18;
-  setTheme(SETTINGS.theme||"theme-blue");
-}
-
-window.addEventListener("load",applySettings);
-
 </script>
 
 <!-- Edit Party Modal -->
@@ -2171,80 +2102,8 @@ background:#fff;border:2px solid #000;padding:10px;z-index:4000">
 </div>
 
   <!-- 🔥 FIREBASE START -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">
-// SETTINGS LOGIC
-let SETTINGS = JSON.parse(localStorage.getItem("SETTINGS")||"{}");
-
-function openSettings(){
-  document.getElementById("settingsPanel").style.display="block";
-  document.getElementById("setDocTitle").value = SETTINGS.docTitle || "ESTIMATE";
-  document.getElementById("setGST").checked = SETTINGS.gst||false;
-  document.getElementById("setGSTPer").value = SETTINGS.gstPer||18;
-  document.getElementById("setLockRate").checked = SETTINGS.lockRate||false;
-  document.getElementById("setThemeDef").value = SETTINGS.theme||"theme-blue";
-}
-function closeSettings(){ document.getElementById("settingsPanel").style.display="none"; }
-
-function saveSettings(){
-  SETTINGS={
-    docTitle:document.getElementById("setDocTitle").value,
-    gst:document.getElementById("setGST").checked,
-    gstPer:document.getElementById("setGSTPer").value,
-    lockRate:document.getElementById("setLockRate").checked,
-    theme:document.getElementById("setThemeDef").value
-  };
-  localStorage.setItem("SETTINGS",JSON.stringify(SETTINGS));
-  applySettings();
-  closeSettings();
-}
-
-function applySettings(){
-  document.querySelector("h2 input").value = SETTINGS.docTitle||"ESTIMATE";
-  document.getElementById("gstToggle").checked = SETTINGS.gst||false;
-  document.getElementById("gstPer").value = SETTINGS.gstPer||18;
-  setTheme(SETTINGS.theme||"theme-blue");
-}
-
-window.addEventListener("load",applySettings);
-
-</script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js">
-// SETTINGS LOGIC
-let SETTINGS = JSON.parse(localStorage.getItem("SETTINGS")||"{}");
-
-function openSettings(){
-  document.getElementById("settingsPanel").style.display="block";
-  document.getElementById("setDocTitle").value = SETTINGS.docTitle || "ESTIMATE";
-  document.getElementById("setGST").checked = SETTINGS.gst||false;
-  document.getElementById("setGSTPer").value = SETTINGS.gstPer||18;
-  document.getElementById("setLockRate").checked = SETTINGS.lockRate||false;
-  document.getElementById("setThemeDef").value = SETTINGS.theme||"theme-blue";
-}
-function closeSettings(){ document.getElementById("settingsPanel").style.display="none"; }
-
-function saveSettings(){
-  SETTINGS={
-    docTitle:document.getElementById("setDocTitle").value,
-    gst:document.getElementById("setGST").checked,
-    gstPer:document.getElementById("setGSTPer").value,
-    lockRate:document.getElementById("setLockRate").checked,
-    theme:document.getElementById("setThemeDef").value
-  };
-  localStorage.setItem("SETTINGS",JSON.stringify(SETTINGS));
-  applySettings();
-  closeSettings();
-}
-
-function applySettings(){
-  document.querySelector("h2 input").value = SETTINGS.docTitle||"ESTIMATE";
-  document.getElementById("gstToggle").checked = SETTINGS.gst||false;
-  document.getElementById("gstPer").value = SETTINGS.gstPer||18;
-  setTheme(SETTINGS.theme||"theme-blue");
-}
-
-window.addEventListener("load",applySettings);
-
-</script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
   const firebaseConfig = {
@@ -2290,42 +2149,6 @@ window.togglePaid = async function(docId,current){
     console.error(e);
   }
 };
-
-
-// SETTINGS LOGIC
-let SETTINGS = JSON.parse(localStorage.getItem("SETTINGS")||"{}");
-
-function openSettings(){
-  document.getElementById("settingsPanel").style.display="block";
-  document.getElementById("setDocTitle").value = SETTINGS.docTitle || "ESTIMATE";
-  document.getElementById("setGST").checked = SETTINGS.gst||false;
-  document.getElementById("setGSTPer").value = SETTINGS.gstPer||18;
-  document.getElementById("setLockRate").checked = SETTINGS.lockRate||false;
-  document.getElementById("setThemeDef").value = SETTINGS.theme||"theme-blue";
-}
-function closeSettings(){ document.getElementById("settingsPanel").style.display="none"; }
-
-function saveSettings(){
-  SETTINGS={
-    docTitle:document.getElementById("setDocTitle").value,
-    gst:document.getElementById("setGST").checked,
-    gstPer:document.getElementById("setGSTPer").value,
-    lockRate:document.getElementById("setLockRate").checked,
-    theme:document.getElementById("setThemeDef").value
-  };
-  localStorage.setItem("SETTINGS",JSON.stringify(SETTINGS));
-  applySettings();
-  closeSettings();
-}
-
-function applySettings(){
-  document.querySelector("h2 input").value = SETTINGS.docTitle||"ESTIMATE";
-  document.getElementById("gstToggle").checked = SETTINGS.gst||false;
-  document.getElementById("gstPer").value = SETTINGS.gstPer||18;
-  setTheme(SETTINGS.theme||"theme-blue");
-}
-
-window.addEventListener("load",applySettings);
 
 </script>
 <!-- 🔥 FIREBASE END -->
