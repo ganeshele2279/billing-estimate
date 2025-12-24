@@ -205,6 +205,13 @@ button:hover{ filter:brightness(0.9); }
 
   <button class="theme-btn" onclick="openAdmin()">Admin</button>
 
+  <button class="theme-btn"
+        style="writing-mode:vertical-rl;margin-top:6px"
+        onclick="openBusinessPanel()">
+  BUSINESS
+</button>
+
+
   <!-- ADMIN HIDDEN PANEL -->
   <div id="adminPanel" style="
     display:none;
@@ -352,6 +359,75 @@ text-align:center;font-size:24px;font-weight:bold;width:100%">
 </div>
 
 <script>
+
+
+  function openBusinessPanel(){
+  document.getElementById("businessPanel").style.display = "block";
+  loadBusiness();
+}
+
+function closeBusinessPanel(){
+  document.getElementById("businessPanel").style.display = "none";
+}
+
+  async function saveBusiness(){
+
+  const file = document.getElementById("bizLogo").files[0];
+  let logoBase64 = "";
+
+  if(file){
+    const reader = new FileReader();
+    reader.onload = async function(){
+      logoBase64 = reader.result;
+      await saveBusinessData(logoBase64);
+    };
+    reader.readAsDataURL(file);
+  } else {
+    await saveBusinessData("");
+  }
+}
+
+async function saveBusinessData(logo){
+
+  const data = {
+    name: bizName.value,
+    address: bizAddress.value,
+    gst: bizGST.value,
+    mobile: bizMobile.value,
+    email: bizEmail.value,
+    logo: logo,
+    updated: Date.now()
+  };
+
+  await firebase.firestore()
+    .collection("business")
+    .doc("main")
+    .set(data);
+
+  alert("✅ Business details saved");
+  closeBusinessPanel();
+}
+
+  async function loadBusiness(){
+
+  const doc = await firebase.firestore()
+    .collection("business")
+    .doc("main")
+    .get();
+
+  if(!doc.exists) return;
+
+  const d = doc.data();
+
+  bizName.value = d.name || "";
+  bizAddress.value = d.address || "";
+  bizGST.value = d.gst || "";
+  bizMobile.value = d.mobile || "";
+  bizEmail.value = d.email || "";
+}
+
+
+  
 
   let ADMIN_UNLOCKED = false;
 const ADMIN_PASSWORD = "2279"; // 🔐 yaha apna password set karo
@@ -931,6 +1007,36 @@ background:#fff;border:2px solid #000;padding:10px;z-index:4000">
     <button onclick="closeAdmin()">Close</button>
   </div>
 </div>
+
+<div id="businessPanel" class="no-print" style="
+  display:none;
+  position:fixed;
+  top:8%;
+  left:50%;
+  transform:translateX(-50%);
+  width:340px;
+  background:#fff;
+  border:2px solid #000;
+  padding:12px;
+  z-index:4000;
+  border-radius:6px;
+">
+
+  <h3 style="margin-top:0">Business Details</h3>
+
+  <input id="bizName" placeholder="Shop Name"><br><br>
+  <textarea id="bizAddress" placeholder="Address" rows="3"></textarea><br><br>
+  <input id="bizGST" placeholder="GST Number"><br><br>
+  <input id="bizMobile" placeholder="Mobile Number"><br><br>
+  <input id="bizEmail" placeholder="Email ID"><br><br>
+
+  <label style="font-size:12px">Logo</label>
+  <input type="file" id="bizLogo"><br><br>
+
+  <button class="theme-btn" onclick="saveBusiness()">Save</button>
+  <button class="theme-btn danger" onclick="closeBusinessPanel()">Close</button>
+</div>
+
 
 </body>
     </html>
