@@ -622,7 +622,14 @@ width:260px;
   <span style="font-size:10px;color:#555">Welcome!</span>
   <button class="theme-btn support" onclick="openSupport()">Support</button>
 
-<button class="theme-btn review" onclick="openReview()">Review</button>
+<button class="theme-btn review" onclick="openReview()">Review</h2>
+
+<!-- LOGOUT BUTTON -->
+<div id="logoutWrap" style="margin-top:8px">
+  <button id="logoutBtn" onclick="logoutUser()">Logout</button>
+</div>
+
+<h2button>
 
 </div>
 
@@ -1590,12 +1597,6 @@ position:fixed;top:10px;right:10px;display:none;z-index:99999">
   🔔 <span id="reqCount">0</span>
 </div>
 
-
-<!-- LOGOUT BUTTON (UNDER REVIEW PANEL) -->
-<button id="logoutBtn"
-style="margin-top:8px;display:none"
-onclick="doLogout()">Logout</button>
-
 </body>
     </html>
   `);
@@ -2131,12 +2132,6 @@ position:fixed;top:10px;right:10px;display:none;z-index:99999">
   🔔 <span id="reqCount">0</span>
 </div>
 
-
-<!-- LOGOUT BUTTON (UNDER REVIEW PANEL) -->
-<button id="logoutBtn"
-style="margin-top:8px;display:none"
-onclick="doLogout()">Logout</button>
-
 </body>
     </html>
   `);
@@ -2665,12 +2660,6 @@ position:fixed;top:10px;right:10px;display:none;z-index:99999">
   🔔 <span id="reqCount">0</span>
 </div>
 
-
-<!-- LOGOUT BUTTON (UNDER REVIEW PANEL) -->
-<button id="logoutBtn"
-style="margin-top:8px;display:none"
-onclick="doLogout()">Logout</button>
-
 </body>
     </html>
   `);
@@ -3142,12 +3131,6 @@ background:#fff;border:2px solid #000;padding:10px;z-index:4000">
 position:fixed;top:10px;right:10px;display:none;z-index:99999">
   🔔 <span id="reqCount">0</span>
 </div>
-
-
-<!-- LOGOUT BUTTON (UNDER REVIEW PANEL) -->
-<button id="logoutBtn"
-style="margin-top:8px;display:none"
-onclick="doLogout()">Logout</button>
 
 </body>
       </html>
@@ -4158,6 +4141,7 @@ async function loginUser(){
   // Admin login
   if(m===ADMIN_MOBILE && p===ADMIN_PASS){
     CURRENT_USER = { mobile:m, role:"admin" };
+    saveLoginSession(CURRENT_USER);
     authOverlay.style.display="none";
     adminNotify.style.display="block";
     loadUserRequests();
@@ -4169,6 +4153,7 @@ async function loginUser(){
   if(doc.data().pass !== p){ alert("Wrong password"); return; }
 
   CURRENT_USER = doc.data();
+    saveLoginSession(CURRENT_USER);
   authOverlay.style.display="none";
 }
 
@@ -4256,56 +4241,47 @@ function firebaseInitAlertOnce(msg){
 }
 
 
-/* ===== REMEMBER LOGIN ===== */
-function saveLoginSession(mobile, pass, role){
-  localStorage.setItem("LOGIN_MOBILE", mobile);
-  localStorage.setItem("LOGIN_PASS", pass);
-  localStorage.setItem("LOGIN_ROLE", role || "user");
+/* ===== HARD LOGIN SESSION FIX (NO UI / TABLE CHANGE) ===== */
+
+// Save session after successful login
+function saveLoginSession(user){
+  sessionStorage.setItem("LOGGED_IN_USER", JSON.stringify(user));
 }
 
-function clearLoginSession(){
-  localStorage.removeItem("LOGIN_MOBILE");
-  localStorage.removeItem("LOGIN_PASS");
-  localStorage.removeItem("LOGIN_ROLE");
-}
-
-function autoLoginIfExists(){
-  const m = localStorage.getItem("LOGIN_MOBILE");
-  const p = localStorage.getItem("LOGIN_PASS");
-  const r = localStorage.getItem("LOGIN_ROLE");
-  if(m && p){
-    document.getElementById("loginMobile").value = m;
-    document.getElementById("loginPass").value = p;
+// Restore session on refresh
+function restoreLoginSession(){
+  try{
+    const u = sessionStorage.getItem("LOGGED_IN_USER");
+    if(!u) return false;
+    CURRENT_USER = JSON.parse(u);
+    const overlay = document.getElementById("authOverlay");
+    if(overlay) overlay.style.display = "none";
+    if(CURRENT_USER && CURRENT_USER.role==="admin"){
+      const n = document.getElementById("adminNotify");
+      if(n) n.style.display="block";
+    }
+    return true;
+  }catch(e){
+    return false;
   }
 }
-window.addEventListener("load", autoLoginIfExists);
+
+// Clear session on logout (future use)
+function clearLoginSession(){
+  sessionStorage.removeItem("LOGGED_IN_USER");
+}
+
+// Auto-restore on load
+window.addEventListener("load", ()=>{
+  restoreLoginSession();
+});
 
 
-/* ===== LOGOUT ===== */
-function doLogout(){
+/* ===== LOGOUT FUNCTION ===== */
+function logoutUser(){
   clearLoginSession();
   location.reload();
 }
-
-// Show logout when logged in
-window.addEventListener("load", ()=>{
-  if(localStorage.getItem("LOGIN_MOBILE")){
-    document.getElementById("authOverlay").style.display="none";
-    document.getElementById("logoutBtn").style.display="block";
-  }
-});
-
-
-/* ===== SESSION PERSISTENCE FIX ===== */
-window.addEventListener("load", ()=>{
-  const loggedIn = localStorage.getItem("LOGIN_MOBILE");
-  if(loggedIn){
-    const overlay = document.getElementById("authOverlay");
-    if(overlay) overlay.style.display = "none";
-    const lb = document.getElementById("logoutBtn");
-    if(lb) lb.style.display = "block";
-  }
-});
 
 </script>
 
@@ -4734,6 +4710,7 @@ async function loginUser(){
   // Admin login
   if(m===ADMIN_MOBILE && p===ADMIN_PASS){
     CURRENT_USER = { mobile:m, role:"admin" };
+    saveLoginSession(CURRENT_USER);
     authOverlay.style.display="none";
     adminNotify.style.display="block";
     loadUserRequests();
@@ -4745,6 +4722,7 @@ async function loginUser(){
   if(doc.data().pass !== p){ alert("Wrong password"); return; }
 
   CURRENT_USER = doc.data();
+    saveLoginSession(CURRENT_USER);
   authOverlay.style.display="none";
 }
 
@@ -4832,56 +4810,47 @@ function firebaseInitAlertOnce(msg){
 }
 
 
-/* ===== REMEMBER LOGIN ===== */
-function saveLoginSession(mobile, pass, role){
-  localStorage.setItem("LOGIN_MOBILE", mobile);
-  localStorage.setItem("LOGIN_PASS", pass);
-  localStorage.setItem("LOGIN_ROLE", role || "user");
+/* ===== HARD LOGIN SESSION FIX (NO UI / TABLE CHANGE) ===== */
+
+// Save session after successful login
+function saveLoginSession(user){
+  sessionStorage.setItem("LOGGED_IN_USER", JSON.stringify(user));
 }
 
-function clearLoginSession(){
-  localStorage.removeItem("LOGIN_MOBILE");
-  localStorage.removeItem("LOGIN_PASS");
-  localStorage.removeItem("LOGIN_ROLE");
-}
-
-function autoLoginIfExists(){
-  const m = localStorage.getItem("LOGIN_MOBILE");
-  const p = localStorage.getItem("LOGIN_PASS");
-  const r = localStorage.getItem("LOGIN_ROLE");
-  if(m && p){
-    document.getElementById("loginMobile").value = m;
-    document.getElementById("loginPass").value = p;
+// Restore session on refresh
+function restoreLoginSession(){
+  try{
+    const u = sessionStorage.getItem("LOGGED_IN_USER");
+    if(!u) return false;
+    CURRENT_USER = JSON.parse(u);
+    const overlay = document.getElementById("authOverlay");
+    if(overlay) overlay.style.display = "none";
+    if(CURRENT_USER && CURRENT_USER.role==="admin"){
+      const n = document.getElementById("adminNotify");
+      if(n) n.style.display="block";
+    }
+    return true;
+  }catch(e){
+    return false;
   }
 }
-window.addEventListener("load", autoLoginIfExists);
+
+// Clear session on logout (future use)
+function clearLoginSession(){
+  sessionStorage.removeItem("LOGGED_IN_USER");
+}
+
+// Auto-restore on load
+window.addEventListener("load", ()=>{
+  restoreLoginSession();
+});
 
 
-/* ===== LOGOUT ===== */
-function doLogout(){
+/* ===== LOGOUT FUNCTION ===== */
+function logoutUser(){
   clearLoginSession();
   location.reload();
 }
-
-// Show logout when logged in
-window.addEventListener("load", ()=>{
-  if(localStorage.getItem("LOGIN_MOBILE")){
-    document.getElementById("authOverlay").style.display="none";
-    document.getElementById("logoutBtn").style.display="block";
-  }
-});
-
-
-/* ===== SESSION PERSISTENCE FIX ===== */
-window.addEventListener("load", ()=>{
-  const loggedIn = localStorage.getItem("LOGIN_MOBILE");
-  if(loggedIn){
-    const overlay = document.getElementById("authOverlay");
-    if(overlay) overlay.style.display = "none";
-    const lb = document.getElementById("logoutBtn");
-    if(lb) lb.style.display = "block";
-  }
-});
 
 </script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js">
@@ -5260,6 +5229,7 @@ async function loginUser(){
   // Admin login
   if(m===ADMIN_MOBILE && p===ADMIN_PASS){
     CURRENT_USER = { mobile:m, role:"admin" };
+    saveLoginSession(CURRENT_USER);
     authOverlay.style.display="none";
     adminNotify.style.display="block";
     loadUserRequests();
@@ -5271,6 +5241,7 @@ async function loginUser(){
   if(doc.data().pass !== p){ alert("Wrong password"); return; }
 
   CURRENT_USER = doc.data();
+    saveLoginSession(CURRENT_USER);
   authOverlay.style.display="none";
 }
 
@@ -5358,56 +5329,47 @@ function firebaseInitAlertOnce(msg){
 }
 
 
-/* ===== REMEMBER LOGIN ===== */
-function saveLoginSession(mobile, pass, role){
-  localStorage.setItem("LOGIN_MOBILE", mobile);
-  localStorage.setItem("LOGIN_PASS", pass);
-  localStorage.setItem("LOGIN_ROLE", role || "user");
+/* ===== HARD LOGIN SESSION FIX (NO UI / TABLE CHANGE) ===== */
+
+// Save session after successful login
+function saveLoginSession(user){
+  sessionStorage.setItem("LOGGED_IN_USER", JSON.stringify(user));
 }
 
-function clearLoginSession(){
-  localStorage.removeItem("LOGIN_MOBILE");
-  localStorage.removeItem("LOGIN_PASS");
-  localStorage.removeItem("LOGIN_ROLE");
-}
-
-function autoLoginIfExists(){
-  const m = localStorage.getItem("LOGIN_MOBILE");
-  const p = localStorage.getItem("LOGIN_PASS");
-  const r = localStorage.getItem("LOGIN_ROLE");
-  if(m && p){
-    document.getElementById("loginMobile").value = m;
-    document.getElementById("loginPass").value = p;
+// Restore session on refresh
+function restoreLoginSession(){
+  try{
+    const u = sessionStorage.getItem("LOGGED_IN_USER");
+    if(!u) return false;
+    CURRENT_USER = JSON.parse(u);
+    const overlay = document.getElementById("authOverlay");
+    if(overlay) overlay.style.display = "none";
+    if(CURRENT_USER && CURRENT_USER.role==="admin"){
+      const n = document.getElementById("adminNotify");
+      if(n) n.style.display="block";
+    }
+    return true;
+  }catch(e){
+    return false;
   }
 }
-window.addEventListener("load", autoLoginIfExists);
+
+// Clear session on logout (future use)
+function clearLoginSession(){
+  sessionStorage.removeItem("LOGGED_IN_USER");
+}
+
+// Auto-restore on load
+window.addEventListener("load", ()=>{
+  restoreLoginSession();
+});
 
 
-/* ===== LOGOUT ===== */
-function doLogout(){
+/* ===== LOGOUT FUNCTION ===== */
+function logoutUser(){
   clearLoginSession();
   location.reload();
 }
-
-// Show logout when logged in
-window.addEventListener("load", ()=>{
-  if(localStorage.getItem("LOGIN_MOBILE")){
-    document.getElementById("authOverlay").style.display="none";
-    document.getElementById("logoutBtn").style.display="block";
-  }
-});
-
-
-/* ===== SESSION PERSISTENCE FIX ===== */
-window.addEventListener("load", ()=>{
-  const loggedIn = localStorage.getItem("LOGIN_MOBILE");
-  if(loggedIn){
-    const overlay = document.getElementById("authOverlay");
-    if(overlay) overlay.style.display = "none";
-    const lb = document.getElementById("logoutBtn");
-    if(lb) lb.style.display = "block";
-  }
-});
 
 </script>
 
@@ -5832,6 +5794,7 @@ async function loginUser(){
   // Admin login
   if(m===ADMIN_MOBILE && p===ADMIN_PASS){
     CURRENT_USER = { mobile:m, role:"admin" };
+    saveLoginSession(CURRENT_USER);
     authOverlay.style.display="none";
     adminNotify.style.display="block";
     loadUserRequests();
@@ -5843,6 +5806,7 @@ async function loginUser(){
   if(doc.data().pass !== p){ alert("Wrong password"); return; }
 
   CURRENT_USER = doc.data();
+    saveLoginSession(CURRENT_USER);
   authOverlay.style.display="none";
 }
 
@@ -5930,56 +5894,47 @@ function firebaseInitAlertOnce(msg){
 }
 
 
-/* ===== REMEMBER LOGIN ===== */
-function saveLoginSession(mobile, pass, role){
-  localStorage.setItem("LOGIN_MOBILE", mobile);
-  localStorage.setItem("LOGIN_PASS", pass);
-  localStorage.setItem("LOGIN_ROLE", role || "user");
+/* ===== HARD LOGIN SESSION FIX (NO UI / TABLE CHANGE) ===== */
+
+// Save session after successful login
+function saveLoginSession(user){
+  sessionStorage.setItem("LOGGED_IN_USER", JSON.stringify(user));
 }
 
-function clearLoginSession(){
-  localStorage.removeItem("LOGIN_MOBILE");
-  localStorage.removeItem("LOGIN_PASS");
-  localStorage.removeItem("LOGIN_ROLE");
-}
-
-function autoLoginIfExists(){
-  const m = localStorage.getItem("LOGIN_MOBILE");
-  const p = localStorage.getItem("LOGIN_PASS");
-  const r = localStorage.getItem("LOGIN_ROLE");
-  if(m && p){
-    document.getElementById("loginMobile").value = m;
-    document.getElementById("loginPass").value = p;
+// Restore session on refresh
+function restoreLoginSession(){
+  try{
+    const u = sessionStorage.getItem("LOGGED_IN_USER");
+    if(!u) return false;
+    CURRENT_USER = JSON.parse(u);
+    const overlay = document.getElementById("authOverlay");
+    if(overlay) overlay.style.display = "none";
+    if(CURRENT_USER && CURRENT_USER.role==="admin"){
+      const n = document.getElementById("adminNotify");
+      if(n) n.style.display="block";
+    }
+    return true;
+  }catch(e){
+    return false;
   }
 }
-window.addEventListener("load", autoLoginIfExists);
+
+// Clear session on logout (future use)
+function clearLoginSession(){
+  sessionStorage.removeItem("LOGGED_IN_USER");
+}
+
+// Auto-restore on load
+window.addEventListener("load", ()=>{
+  restoreLoginSession();
+});
 
 
-/* ===== LOGOUT ===== */
-function doLogout(){
+/* ===== LOGOUT FUNCTION ===== */
+function logoutUser(){
   clearLoginSession();
   location.reload();
 }
-
-// Show logout when logged in
-window.addEventListener("load", ()=>{
-  if(localStorage.getItem("LOGIN_MOBILE")){
-    document.getElementById("authOverlay").style.display="none";
-    document.getElementById("logoutBtn").style.display="block";
-  }
-});
-
-
-/* ===== SESSION PERSISTENCE FIX ===== */
-window.addEventListener("load", ()=>{
-  const loggedIn = localStorage.getItem("LOGIN_MOBILE");
-  if(loggedIn){
-    const overlay = document.getElementById("authOverlay");
-    if(overlay) overlay.style.display = "none";
-    const lb = document.getElementById("logoutBtn");
-    if(lb) lb.style.display = "block";
-  }
-});
 
 </script>
 <!-- 🔥 FIREBASE END -->
@@ -5993,12 +5948,6 @@ window.addEventListener("load", ()=>{
 position:fixed;top:10px;right:10px;display:none;z-index:99999">
   🔔 <span id="reqCount">0</span>
 </div>
-
-
-<!-- LOGOUT BUTTON (UNDER REVIEW PANEL) -->
-<button id="logoutBtn"
-style="margin-top:8px;display:none"
-onclick="doLogout()">Logout</button>
 
 </body>
 </html>
