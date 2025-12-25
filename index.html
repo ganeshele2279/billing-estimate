@@ -4184,6 +4184,89 @@ localStorage.getItem = function(k){
   return _lsGet(userKey(k));
 };
 
+
+/* ================= AUTH FIX (NON-DESTRUCTIVE) ================= */
+
+function _getDBSafe(){
+  try{
+    if (typeof db !== "undefined") return db;
+    if (typeof firebase !== "undefined" && firebase.firestore) return firebase.firestore();
+  }catch(e){}
+  alert("Firebase not initialized properly");
+  throw new Error("DB not available");
+}
+
+async function registerUser(){
+  try{
+    const name = document.getElementById("regName").value.trim();
+    const mobile = document.getElementById("regMobile").value.trim();
+    const pass = document.getElementById("regPass").value.trim();
+
+    if(!name || !mobile || !pass){
+      alert("Fill all fields");
+      return;
+    }
+
+    const dbx = _getDBSafe();
+    await dbx.collection("USER_REQUESTS").doc(mobile).set({
+      name, mobile, pass, status:"pending", createdAt:new Date()
+    });
+
+    alert("Request submitted. Wait for admin approval.");
+    document.getElementById("registerBox").style.display="none";
+  }catch(e){
+    alert("Register failed: " + e.message);
+  }
+}
+
+async function loginUser(){
+  try{
+    const m = document.getElementById("loginMobile").value.trim();
+    const p = document.getElementById("loginPass").value.trim();
+    if(!m || !p){ alert("Enter mobile & password"); return; }
+
+    const dbx = _getDBSafe();
+
+    // Admin login
+    if(m==="7073741650" && p==="2279"){
+      window.CURRENT_USER = { mobile:m, role:"admin" };
+      document.getElementById("authOverlay").style.display="none";
+      document.getElementById("adminNotify").style.display="block";
+      await loadUserRequests();
+      alert("Admin login successful");
+      return;
+    }
+
+    const doc = await dbx.collection("USERS").doc(m).get();
+    if(!doc.exists){
+      alert("Account not found or not approved");
+      return;
+    }
+    if(doc.data().pass !== p){
+      alert("Wrong password");
+      return;
+    }
+
+    window.CURRENT_USER = doc.data();
+    document.getElementById("authOverlay").style.display="none";
+    alert("Login successful");
+  }catch(e){
+    alert("Login failed: " + e.message);
+  }
+}
+
+async function loadUserRequests(){
+  try{
+    const dbx = _getDBSafe();
+    const snap = await dbx.collection("USER_REQUESTS").where("status","==","pending").get();
+    const c = snap.size || 0;
+    const el = document.getElementById("reqCount");
+    if(el) el.innerText = c;
+  }catch(e){
+    console.warn("Load requests failed", e);
+  }
+}
+
 </script>
 
 <!-- Edit Party Modal -->
@@ -4661,6 +4744,89 @@ localStorage.getItem = function(k){
   return _lsGet(userKey(k));
 };
 
+
+/* ================= AUTH FIX (NON-DESTRUCTIVE) ================= */
+
+function _getDBSafe(){
+  try{
+    if (typeof db !== "undefined") return db;
+    if (typeof firebase !== "undefined" && firebase.firestore) return firebase.firestore();
+  }catch(e){}
+  alert("Firebase not initialized properly");
+  throw new Error("DB not available");
+}
+
+async function registerUser(){
+  try{
+    const name = document.getElementById("regName").value.trim();
+    const mobile = document.getElementById("regMobile").value.trim();
+    const pass = document.getElementById("regPass").value.trim();
+
+    if(!name || !mobile || !pass){
+      alert("Fill all fields");
+      return;
+    }
+
+    const dbx = _getDBSafe();
+    await dbx.collection("USER_REQUESTS").doc(mobile).set({
+      name, mobile, pass, status:"pending", createdAt:new Date()
+    });
+
+    alert("Request submitted. Wait for admin approval.");
+    document.getElementById("registerBox").style.display="none";
+  }catch(e){
+    alert("Register failed: " + e.message);
+  }
+}
+
+async function loginUser(){
+  try{
+    const m = document.getElementById("loginMobile").value.trim();
+    const p = document.getElementById("loginPass").value.trim();
+    if(!m || !p){ alert("Enter mobile & password"); return; }
+
+    const dbx = _getDBSafe();
+
+    // Admin login
+    if(m==="7073741650" && p==="2279"){
+      window.CURRENT_USER = { mobile:m, role:"admin" };
+      document.getElementById("authOverlay").style.display="none";
+      document.getElementById("adminNotify").style.display="block";
+      await loadUserRequests();
+      alert("Admin login successful");
+      return;
+    }
+
+    const doc = await dbx.collection("USERS").doc(m).get();
+    if(!doc.exists){
+      alert("Account not found or not approved");
+      return;
+    }
+    if(doc.data().pass !== p){
+      alert("Wrong password");
+      return;
+    }
+
+    window.CURRENT_USER = doc.data();
+    document.getElementById("authOverlay").style.display="none";
+    alert("Login successful");
+  }catch(e){
+    alert("Login failed: " + e.message);
+  }
+}
+
+async function loadUserRequests(){
+  try{
+    const dbx = _getDBSafe();
+    const snap = await dbx.collection("USER_REQUESTS").where("status","==","pending").get();
+    const c = snap.size || 0;
+    const el = document.getElementById("reqCount");
+    if(el) el.innerText = c;
+  }catch(e){
+    console.warn("Load requests failed", e);
+  }
+}
+
 </script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js">
 
@@ -5087,6 +5253,89 @@ localStorage.setItem = function(k,v){
 localStorage.getItem = function(k){
   return _lsGet(userKey(k));
 };
+
+
+/* ================= AUTH FIX (NON-DESTRUCTIVE) ================= */
+
+function _getDBSafe(){
+  try{
+    if (typeof db !== "undefined") return db;
+    if (typeof firebase !== "undefined" && firebase.firestore) return firebase.firestore();
+  }catch(e){}
+  alert("Firebase not initialized properly");
+  throw new Error("DB not available");
+}
+
+async function registerUser(){
+  try{
+    const name = document.getElementById("regName").value.trim();
+    const mobile = document.getElementById("regMobile").value.trim();
+    const pass = document.getElementById("regPass").value.trim();
+
+    if(!name || !mobile || !pass){
+      alert("Fill all fields");
+      return;
+    }
+
+    const dbx = _getDBSafe();
+    await dbx.collection("USER_REQUESTS").doc(mobile).set({
+      name, mobile, pass, status:"pending", createdAt:new Date()
+    });
+
+    alert("Request submitted. Wait for admin approval.");
+    document.getElementById("registerBox").style.display="none";
+  }catch(e){
+    alert("Register failed: " + e.message);
+  }
+}
+
+async function loginUser(){
+  try{
+    const m = document.getElementById("loginMobile").value.trim();
+    const p = document.getElementById("loginPass").value.trim();
+    if(!m || !p){ alert("Enter mobile & password"); return; }
+
+    const dbx = _getDBSafe();
+
+    // Admin login
+    if(m==="7073741650" && p==="2279"){
+      window.CURRENT_USER = { mobile:m, role:"admin" };
+      document.getElementById("authOverlay").style.display="none";
+      document.getElementById("adminNotify").style.display="block";
+      await loadUserRequests();
+      alert("Admin login successful");
+      return;
+    }
+
+    const doc = await dbx.collection("USERS").doc(m).get();
+    if(!doc.exists){
+      alert("Account not found or not approved");
+      return;
+    }
+    if(doc.data().pass !== p){
+      alert("Wrong password");
+      return;
+    }
+
+    window.CURRENT_USER = doc.data();
+    document.getElementById("authOverlay").style.display="none";
+    alert("Login successful");
+  }catch(e){
+    alert("Login failed: " + e.message);
+  }
+}
+
+async function loadUserRequests(){
+  try{
+    const dbx = _getDBSafe();
+    const snap = await dbx.collection("USER_REQUESTS").where("status","==","pending").get();
+    const c = snap.size || 0;
+    const el = document.getElementById("reqCount");
+    if(el) el.innerText = c;
+  }catch(e){
+    console.warn("Load requests failed", e);
+  }
+}
 
 </script>
 
@@ -5560,6 +5809,89 @@ localStorage.setItem = function(k,v){
 localStorage.getItem = function(k){
   return _lsGet(userKey(k));
 };
+
+
+/* ================= AUTH FIX (NON-DESTRUCTIVE) ================= */
+
+function _getDBSafe(){
+  try{
+    if (typeof db !== "undefined") return db;
+    if (typeof firebase !== "undefined" && firebase.firestore) return firebase.firestore();
+  }catch(e){}
+  alert("Firebase not initialized properly");
+  throw new Error("DB not available");
+}
+
+async function registerUser(){
+  try{
+    const name = document.getElementById("regName").value.trim();
+    const mobile = document.getElementById("regMobile").value.trim();
+    const pass = document.getElementById("regPass").value.trim();
+
+    if(!name || !mobile || !pass){
+      alert("Fill all fields");
+      return;
+    }
+
+    const dbx = _getDBSafe();
+    await dbx.collection("USER_REQUESTS").doc(mobile).set({
+      name, mobile, pass, status:"pending", createdAt:new Date()
+    });
+
+    alert("Request submitted. Wait for admin approval.");
+    document.getElementById("registerBox").style.display="none";
+  }catch(e){
+    alert("Register failed: " + e.message);
+  }
+}
+
+async function loginUser(){
+  try{
+    const m = document.getElementById("loginMobile").value.trim();
+    const p = document.getElementById("loginPass").value.trim();
+    if(!m || !p){ alert("Enter mobile & password"); return; }
+
+    const dbx = _getDBSafe();
+
+    // Admin login
+    if(m==="7073741650" && p==="2279"){
+      window.CURRENT_USER = { mobile:m, role:"admin" };
+      document.getElementById("authOverlay").style.display="none";
+      document.getElementById("adminNotify").style.display="block";
+      await loadUserRequests();
+      alert("Admin login successful");
+      return;
+    }
+
+    const doc = await dbx.collection("USERS").doc(m).get();
+    if(!doc.exists){
+      alert("Account not found or not approved");
+      return;
+    }
+    if(doc.data().pass !== p){
+      alert("Wrong password");
+      return;
+    }
+
+    window.CURRENT_USER = doc.data();
+    document.getElementById("authOverlay").style.display="none";
+    alert("Login successful");
+  }catch(e){
+    alert("Login failed: " + e.message);
+  }
+}
+
+async function loadUserRequests(){
+  try{
+    const dbx = _getDBSafe();
+    const snap = await dbx.collection("USER_REQUESTS").where("status","==","pending").get();
+    const c = snap.size || 0;
+    const el = document.getElementById("reqCount");
+    if(el) el.innerText = c;
+  }catch(e){
+    console.warn("Load requests failed", e);
+  }
+}
 
 </script>
 <!-- 🔥 FIREBASE END -->
