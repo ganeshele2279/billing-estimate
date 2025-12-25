@@ -4120,18 +4120,46 @@ function openRegister(){
   document.getElementById("registerBox").style.display="block";
 }
 
-async function registerUser(){
-  const name = regName.value;
-  const mobile = regMobile.value;
-  const pass = regPass.value;
-  if(!name||!mobile||!pass){ alert("Fill all fields"); return; }
 
-  const dbx = getDB();
-  await dbx.collection("USER_REQUESTS").doc(mobile).set({
-    name, mobile, pass, status:"pending"
-  });
-  alert("Request sent for approval");
+/* ===== REGISTER SUBMIT HARD FIX (NO UI CHANGE) ===== */
+async function registerUser(){
+  try{
+    const name = document.getElementById("regName").value.trim();
+    const mobile = document.getElementById("regMobile").value.trim();
+    const pass = document.getElementById("regPass").value.trim();
+
+    if(!name || !mobile || !pass){
+      alert("Please fill all fields");
+      return;
+    }
+
+    const dbx = getDB();
+    if(!dbx){
+      alert("Server not ready, try again");
+      return;
+    }
+
+    await dbx.collection("USER_REQUESTS").doc(mobile).set({
+      name: name,
+      mobile: mobile,
+      pass: pass,
+      status: "pending",
+      createdAt: new Date()
+    });
+
+    alert("Request submitted successfully, wait for admin approval");
+
+    // clear fields
+    document.getElementById("regName").value = "";
+    document.getElementById("regMobile").value = "";
+    document.getElementById("regPass").value = "";
+
+  }catch(e){
+    alert("Failed to submit request");
+    console.error(e);
+  }
 }
+
 
 async function loginUser(){
   const m = loginMobile.value;
@@ -4689,18 +4717,46 @@ function openRegister(){
   document.getElementById("registerBox").style.display="block";
 }
 
-async function registerUser(){
-  const name = regName.value;
-  const mobile = regMobile.value;
-  const pass = regPass.value;
-  if(!name||!mobile||!pass){ alert("Fill all fields"); return; }
 
-  const dbx = getDB();
-  await dbx.collection("USER_REQUESTS").doc(mobile).set({
-    name, mobile, pass, status:"pending"
-  });
-  alert("Request sent for approval");
+/* ===== REGISTER SUBMIT HARD FIX (NO UI CHANGE) ===== */
+async function registerUser(){
+  try{
+    const name = document.getElementById("regName").value.trim();
+    const mobile = document.getElementById("regMobile").value.trim();
+    const pass = document.getElementById("regPass").value.trim();
+
+    if(!name || !mobile || !pass){
+      alert("Please fill all fields");
+      return;
+    }
+
+    const dbx = getDB();
+    if(!dbx){
+      alert("Server not ready, try again");
+      return;
+    }
+
+    await dbx.collection("USER_REQUESTS").doc(mobile).set({
+      name: name,
+      mobile: mobile,
+      pass: pass,
+      status: "pending",
+      createdAt: new Date()
+    });
+
+    alert("Request submitted successfully, wait for admin approval");
+
+    // clear fields
+    document.getElementById("regName").value = "";
+    document.getElementById("regMobile").value = "";
+    document.getElementById("regPass").value = "";
+
+  }catch(e){
+    alert("Failed to submit request");
+    console.error(e);
+  }
 }
+
 
 async function loginUser(){
   const m = loginMobile.value;
@@ -5208,18 +5264,46 @@ function openRegister(){
   document.getElementById("registerBox").style.display="block";
 }
 
-async function registerUser(){
-  const name = regName.value;
-  const mobile = regMobile.value;
-  const pass = regPass.value;
-  if(!name||!mobile||!pass){ alert("Fill all fields"); return; }
 
-  const dbx = getDB();
-  await dbx.collection("USER_REQUESTS").doc(mobile).set({
-    name, mobile, pass, status:"pending"
-  });
-  alert("Request sent for approval");
+/* ===== REGISTER SUBMIT HARD FIX (NO UI CHANGE) ===== */
+async function registerUser(){
+  try{
+    const name = document.getElementById("regName").value.trim();
+    const mobile = document.getElementById("regMobile").value.trim();
+    const pass = document.getElementById("regPass").value.trim();
+
+    if(!name || !mobile || !pass){
+      alert("Please fill all fields");
+      return;
+    }
+
+    const dbx = getDB();
+    if(!dbx){
+      alert("Server not ready, try again");
+      return;
+    }
+
+    await dbx.collection("USER_REQUESTS").doc(mobile).set({
+      name: name,
+      mobile: mobile,
+      pass: pass,
+      status: "pending",
+      createdAt: new Date()
+    });
+
+    alert("Request submitted successfully, wait for admin approval");
+
+    // clear fields
+    document.getElementById("regName").value = "";
+    document.getElementById("regMobile").value = "";
+    document.getElementById("regPass").value = "";
+
+  }catch(e){
+    alert("Failed to submit request");
+    console.error(e);
+  }
 }
+
 
 async function loginUser(){
   const m = loginMobile.value;
@@ -5773,18 +5857,46 @@ function openRegister(){
   document.getElementById("registerBox").style.display="block";
 }
 
-async function registerUser(){
-  const name = regName.value;
-  const mobile = regMobile.value;
-  const pass = regPass.value;
-  if(!name||!mobile||!pass){ alert("Fill all fields"); return; }
 
-  const dbx = getDB();
-  await dbx.collection("USER_REQUESTS").doc(mobile).set({
-    name, mobile, pass, status:"pending"
-  });
-  alert("Request sent for approval");
+/* ===== REGISTER SUBMIT HARD FIX (NO UI CHANGE) ===== */
+async function registerUser(){
+  try{
+    const name = document.getElementById("regName").value.trim();
+    const mobile = document.getElementById("regMobile").value.trim();
+    const pass = document.getElementById("regPass").value.trim();
+
+    if(!name || !mobile || !pass){
+      alert("Please fill all fields");
+      return;
+    }
+
+    const dbx = getDB();
+    if(!dbx){
+      alert("Server not ready, try again");
+      return;
+    }
+
+    await dbx.collection("USER_REQUESTS").doc(mobile).set({
+      name: name,
+      mobile: mobile,
+      pass: pass,
+      status: "pending",
+      createdAt: new Date()
+    });
+
+    alert("Request submitted successfully, wait for admin approval");
+
+    // clear fields
+    document.getElementById("regName").value = "";
+    document.getElementById("regMobile").value = "";
+    document.getElementById("regPass").value = "";
+
+  }catch(e){
+    alert("Failed to submit request");
+    console.error(e);
+  }
 }
+
 
 async function loginUser(){
   const m = loginMobile.value;
