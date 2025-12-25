@@ -456,6 +456,31 @@ align-items:center;justify-content:center;">
       <input id="regPass" type="password" placeholder="Password" style="width:100%;margin-bottom:6px">
       <button style="width:100%" onclick="registerUser()">Submit Request</button>
     </div>
+
+<!-- REGISTER LOADING SPINNER -->
+<div id="registerLoader" style="
+display:none;
+margin-top:10px;
+text-align:center;
+font-size:12px;">
+  <div style="
+    width:24px;height:24px;
+    border:3px solid #ccc;
+    border-top:3px solid #000;
+    border-radius:50%;
+    margin:0 auto 6px;
+    animation:spin 1s linear infinite;">
+  </div>
+  Please wait...
+</div>
+
+<style>
+@keyframes spin{
+  from{transform:rotate(0deg);}
+  to{transform:rotate(360deg);}
+}
+</style>
+
   </div>
 </div>
 
@@ -4122,20 +4147,25 @@ function openRegister(){
 
 
 
-/* ===== REGISTER SUBMIT FINAL FIX ===== */
+
+/* ===== REGISTER SUBMIT FINAL (WITH LOADER, NO POPUP SPAM) ===== */
 async function registerUser(){
   const name = document.getElementById("regName").value.trim();
   const mobile = document.getElementById("regMobile").value.trim();
   const pass = document.getElementById("regPass").value.trim();
+  const loader = document.getElementById("registerLoader");
 
   if(!name || !mobile || !pass){
     alert("Please fill all fields");
     return;
   }
 
-  const dbx = await waitForDB();
+  loader.style.display = "block";
+
+  const dbx = await waitForDB(5000);
   if(!dbx){
-    alert("Server not ready, please refresh once");
+    loader.style.display = "none";
+    alert("Unable to connect, please try again");
     return;
   }
 
@@ -4146,16 +4176,19 @@ async function registerUser(){
       createdAt:new Date()
     });
 
+    loader.style.display = "none";
     alert("Request submitted successfully, wait for admin approval");
 
     document.getElementById("regName").value="";
     document.getElementById("regMobile").value="";
     document.getElementById("regPass").value="";
   }catch(e){
+    loader.style.display = "none";
     alert("Failed to submit request");
     console.error(e);
   }
 }
+
 
 
 
@@ -4740,20 +4773,25 @@ function openRegister(){
 
 
 
-/* ===== REGISTER SUBMIT FINAL FIX ===== */
+
+/* ===== REGISTER SUBMIT FINAL (WITH LOADER, NO POPUP SPAM) ===== */
 async function registerUser(){
   const name = document.getElementById("regName").value.trim();
   const mobile = document.getElementById("regMobile").value.trim();
   const pass = document.getElementById("regPass").value.trim();
+  const loader = document.getElementById("registerLoader");
 
   if(!name || !mobile || !pass){
     alert("Please fill all fields");
     return;
   }
 
-  const dbx = await waitForDB();
+  loader.style.display = "block";
+
+  const dbx = await waitForDB(5000);
   if(!dbx){
-    alert("Server not ready, please refresh once");
+    loader.style.display = "none";
+    alert("Unable to connect, please try again");
     return;
   }
 
@@ -4764,16 +4802,19 @@ async function registerUser(){
       createdAt:new Date()
     });
 
+    loader.style.display = "none";
     alert("Request submitted successfully, wait for admin approval");
 
     document.getElementById("regName").value="";
     document.getElementById("regMobile").value="";
     document.getElementById("regPass").value="";
   }catch(e){
+    loader.style.display = "none";
     alert("Failed to submit request");
     console.error(e);
   }
 }
+
 
 
 
@@ -5308,20 +5349,25 @@ function openRegister(){
 
 
 
-/* ===== REGISTER SUBMIT FINAL FIX ===== */
+
+/* ===== REGISTER SUBMIT FINAL (WITH LOADER, NO POPUP SPAM) ===== */
 async function registerUser(){
   const name = document.getElementById("regName").value.trim();
   const mobile = document.getElementById("regMobile").value.trim();
   const pass = document.getElementById("regPass").value.trim();
+  const loader = document.getElementById("registerLoader");
 
   if(!name || !mobile || !pass){
     alert("Please fill all fields");
     return;
   }
 
-  const dbx = await waitForDB();
+  loader.style.display = "block";
+
+  const dbx = await waitForDB(5000);
   if(!dbx){
-    alert("Server not ready, please refresh once");
+    loader.style.display = "none";
+    alert("Unable to connect, please try again");
     return;
   }
 
@@ -5332,16 +5378,19 @@ async function registerUser(){
       createdAt:new Date()
     });
 
+    loader.style.display = "none";
     alert("Request submitted successfully, wait for admin approval");
 
     document.getElementById("regName").value="";
     document.getElementById("regMobile").value="";
     document.getElementById("regPass").value="";
   }catch(e){
+    loader.style.display = "none";
     alert("Failed to submit request");
     console.error(e);
   }
 }
+
 
 
 
@@ -5922,20 +5971,25 @@ function openRegister(){
 
 
 
-/* ===== REGISTER SUBMIT FINAL FIX ===== */
+
+/* ===== REGISTER SUBMIT FINAL (WITH LOADER, NO POPUP SPAM) ===== */
 async function registerUser(){
   const name = document.getElementById("regName").value.trim();
   const mobile = document.getElementById("regMobile").value.trim();
   const pass = document.getElementById("regPass").value.trim();
+  const loader = document.getElementById("registerLoader");
 
   if(!name || !mobile || !pass){
     alert("Please fill all fields");
     return;
   }
 
-  const dbx = await waitForDB();
+  loader.style.display = "block";
+
+  const dbx = await waitForDB(5000);
   if(!dbx){
-    alert("Server not ready, please refresh once");
+    loader.style.display = "none";
+    alert("Unable to connect, please try again");
     return;
   }
 
@@ -5946,16 +6000,19 @@ async function registerUser(){
       createdAt:new Date()
     });
 
+    loader.style.display = "none";
     alert("Request submitted successfully, wait for admin approval");
 
     document.getElementById("regName").value="";
     document.getElementById("regMobile").value="";
     document.getElementById("regPass").value="";
   }catch(e){
+    loader.style.display = "none";
     alert("Failed to submit request");
     console.error(e);
   }
 }
+
 
 
 
