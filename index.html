@@ -3950,6 +3950,32 @@ window.addEventListener("load", async ()=>{
 window.cloudAfterPartySave = syncPartySave;
 window.cloudAfterFirmSave  = syncFirmSave;
 
+
+/* FIX: ENSURE BANK DETAILS SHOW IN PRINT */
+function ensureBankPrint(){
+  const gst = document.getElementById("gstToggle");
+  const box = document.getElementById("printBank");
+  if(!box) return;
+
+  if(gst && gst.checked){
+    const d = JSON.parse(localStorage.getItem("BANK_DATA") || "{}");
+    if(d && d.bankName){
+      box.innerHTML =
+        "<b>Bank Details</b><br>" +
+        d.bankName + "<br>" +
+        "A/c: " + (d.bankAcc || "") + "<br>" +
+        "IFSC: " + (d.bankIfsc || "") + "<br>" +
+        (d.bankBranch || "");
+      box.style.display = "block";
+    }
+  }else{
+    box.style.display = "none";
+  }
+}
+
+window.addEventListener("beforeprint", ensureBankPrint);
+window.addEventListener("load", ensureBankPrint);
+
 </script>
 
 <!-- Edit Party Modal -->
@@ -4246,6 +4272,32 @@ window.addEventListener("load", async ()=>{
 window.cloudAfterPartySave = syncPartySave;
 window.cloudAfterFirmSave  = syncFirmSave;
 
+
+/* FIX: ENSURE BANK DETAILS SHOW IN PRINT */
+function ensureBankPrint(){
+  const gst = document.getElementById("gstToggle");
+  const box = document.getElementById("printBank");
+  if(!box) return;
+
+  if(gst && gst.checked){
+    const d = JSON.parse(localStorage.getItem("BANK_DATA") || "{}");
+    if(d && d.bankName){
+      box.innerHTML =
+        "<b>Bank Details</b><br>" +
+        d.bankName + "<br>" +
+        "A/c: " + (d.bankAcc || "") + "<br>" +
+        "IFSC: " + (d.bankIfsc || "") + "<br>" +
+        (d.bankBranch || "");
+      box.style.display = "block";
+    }
+  }else{
+    box.style.display = "none";
+  }
+}
+
+window.addEventListener("beforeprint", ensureBankPrint);
+window.addEventListener("load", ensureBankPrint);
+
 </script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js">
 
@@ -4491,6 +4543,32 @@ window.addEventListener("load", async ()=>{
 // Call these AFTER existing save logic
 window.cloudAfterPartySave = syncPartySave;
 window.cloudAfterFirmSave  = syncFirmSave;
+
+
+/* FIX: ENSURE BANK DETAILS SHOW IN PRINT */
+function ensureBankPrint(){
+  const gst = document.getElementById("gstToggle");
+  const box = document.getElementById("printBank");
+  if(!box) return;
+
+  if(gst && gst.checked){
+    const d = JSON.parse(localStorage.getItem("BANK_DATA") || "{}");
+    if(d && d.bankName){
+      box.innerHTML =
+        "<b>Bank Details</b><br>" +
+        d.bankName + "<br>" +
+        "A/c: " + (d.bankAcc || "") + "<br>" +
+        "IFSC: " + (d.bankIfsc || "") + "<br>" +
+        (d.bankBranch || "");
+      box.style.display = "block";
+    }
+  }else{
+    box.style.display = "none";
+  }
+}
+
+window.addEventListener("beforeprint", ensureBankPrint);
+window.addEventListener("load", ensureBankPrint);
 
 </script>
 
@@ -4783,6 +4861,32 @@ window.addEventListener("load", async ()=>{
 // Call these AFTER existing save logic
 window.cloudAfterPartySave = syncPartySave;
 window.cloudAfterFirmSave  = syncFirmSave;
+
+
+/* FIX: ENSURE BANK DETAILS SHOW IN PRINT */
+function ensureBankPrint(){
+  const gst = document.getElementById("gstToggle");
+  const box = document.getElementById("printBank");
+  if(!box) return;
+
+  if(gst && gst.checked){
+    const d = JSON.parse(localStorage.getItem("BANK_DATA") || "{}");
+    if(d && d.bankName){
+      box.innerHTML =
+        "<b>Bank Details</b><br>" +
+        d.bankName + "<br>" +
+        "A/c: " + (d.bankAcc || "") + "<br>" +
+        "IFSC: " + (d.bankIfsc || "") + "<br>" +
+        (d.bankBranch || "");
+      box.style.display = "block";
+    }
+  }else{
+    box.style.display = "none";
+  }
+}
+
+window.addEventListener("beforeprint", ensureBankPrint);
+window.addEventListener("load", ensureBankPrint);
 
 </script>
 <!-- 🔥 FIREBASE END -->
