@@ -3885,6 +3885,71 @@ document.addEventListener("change",function(e){
 });
 window.addEventListener("load",updateEwayVisibility);
 
+
+/* ===============================
+   FIREBASE CLOUD SYNC (PARTY & FIRM)
+   =============================== */
+
+// Expected: firebase & firestore already initialized
+// const db = firebase.firestore();
+
+async function saveToCloud(collection, data){
+  try{
+    await db.collection(collection).doc("MAIN").set({ data });
+  }catch(e){
+    console.warn("Cloud save failed:", e);
+  }
+}
+
+async function loadFromCloud(collection){
+  try{
+    const doc = await db.collection(collection).doc("MAIN").get();
+    if(doc.exists){
+      return doc.data().data;
+    }
+  }catch(e){
+    console.warn("Cloud load failed:", e);
+  }
+  return null;
+}
+
+// ---- PARTY SYNC ----
+async function syncPartySave(){
+  const data = JSON.parse(localStorage.getItem("PARTY_LIST") || "[]");
+  await saveToCloud("PARTIES", data);
+}
+
+async function syncPartyLoad(){
+  const cloud = await loadFromCloud("PARTIES");
+  if(cloud){
+    localStorage.setItem("PARTY_LIST", JSON.stringify(cloud));
+  }
+}
+
+// ---- FIRM SYNC ----
+async function syncFirmSave(){
+  const data = JSON.parse(localStorage.getItem("FIRM_LIST") || "[]");
+  await saveToCloud("FIRMS", data);
+}
+
+async function syncFirmLoad(){
+  const cloud = await loadFromCloud("FIRMS");
+  if(cloud){
+    localStorage.setItem("FIRM_LIST", JSON.stringify(cloud));
+  }
+}
+
+// ---- AUTO LOAD ON START ----
+window.addEventListener("load", async ()=>{
+  await syncFirmLoad();
+  await syncPartyLoad();
+});
+
+// ---- HOOK EXISTING SAVES (NON-DESTRUCTIVE) ----
+// Call these AFTER existing save logic
+window.cloudAfterPartySave = syncPartySave;
+window.cloudAfterFirmSave  = syncFirmSave;
+
 </script>
 
 <!-- Edit Party Modal -->
@@ -4116,6 +4181,71 @@ document.addEventListener("change",function(e){
 });
 window.addEventListener("load",updateEwayVisibility);
 
+
+/* ===============================
+   FIREBASE CLOUD SYNC (PARTY & FIRM)
+   =============================== */
+
+// Expected: firebase & firestore already initialized
+// const db = firebase.firestore();
+
+async function saveToCloud(collection, data){
+  try{
+    await db.collection(collection).doc("MAIN").set({ data });
+  }catch(e){
+    console.warn("Cloud save failed:", e);
+  }
+}
+
+async function loadFromCloud(collection){
+  try{
+    const doc = await db.collection(collection).doc("MAIN").get();
+    if(doc.exists){
+      return doc.data().data;
+    }
+  }catch(e){
+    console.warn("Cloud load failed:", e);
+  }
+  return null;
+}
+
+// ---- PARTY SYNC ----
+async function syncPartySave(){
+  const data = JSON.parse(localStorage.getItem("PARTY_LIST") || "[]");
+  await saveToCloud("PARTIES", data);
+}
+
+async function syncPartyLoad(){
+  const cloud = await loadFromCloud("PARTIES");
+  if(cloud){
+    localStorage.setItem("PARTY_LIST", JSON.stringify(cloud));
+  }
+}
+
+// ---- FIRM SYNC ----
+async function syncFirmSave(){
+  const data = JSON.parse(localStorage.getItem("FIRM_LIST") || "[]");
+  await saveToCloud("FIRMS", data);
+}
+
+async function syncFirmLoad(){
+  const cloud = await loadFromCloud("FIRMS");
+  if(cloud){
+    localStorage.setItem("FIRM_LIST", JSON.stringify(cloud));
+  }
+}
+
+// ---- AUTO LOAD ON START ----
+window.addEventListener("load", async ()=>{
+  await syncFirmLoad();
+  await syncPartyLoad();
+});
+
+// ---- HOOK EXISTING SAVES (NON-DESTRUCTIVE) ----
+// Call these AFTER existing save logic
+window.cloudAfterPartySave = syncPartySave;
+window.cloudAfterFirmSave  = syncFirmSave;
+
 </script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js">
 
@@ -4296,6 +4426,71 @@ document.addEventListener("change",function(e){
   }
 });
 window.addEventListener("load",updateEwayVisibility);
+
+
+/* ===============================
+   FIREBASE CLOUD SYNC (PARTY & FIRM)
+   =============================== */
+
+// Expected: firebase & firestore already initialized
+// const db = firebase.firestore();
+
+async function saveToCloud(collection, data){
+  try{
+    await db.collection(collection).doc("MAIN").set({ data });
+  }catch(e){
+    console.warn("Cloud save failed:", e);
+  }
+}
+
+async function loadFromCloud(collection){
+  try{
+    const doc = await db.collection(collection).doc("MAIN").get();
+    if(doc.exists){
+      return doc.data().data;
+    }
+  }catch(e){
+    console.warn("Cloud load failed:", e);
+  }
+  return null;
+}
+
+// ---- PARTY SYNC ----
+async function syncPartySave(){
+  const data = JSON.parse(localStorage.getItem("PARTY_LIST") || "[]");
+  await saveToCloud("PARTIES", data);
+}
+
+async function syncPartyLoad(){
+  const cloud = await loadFromCloud("PARTIES");
+  if(cloud){
+    localStorage.setItem("PARTY_LIST", JSON.stringify(cloud));
+  }
+}
+
+// ---- FIRM SYNC ----
+async function syncFirmSave(){
+  const data = JSON.parse(localStorage.getItem("FIRM_LIST") || "[]");
+  await saveToCloud("FIRMS", data);
+}
+
+async function syncFirmLoad(){
+  const cloud = await loadFromCloud("FIRMS");
+  if(cloud){
+    localStorage.setItem("FIRM_LIST", JSON.stringify(cloud));
+  }
+}
+
+// ---- AUTO LOAD ON START ----
+window.addEventListener("load", async ()=>{
+  await syncFirmLoad();
+  await syncPartyLoad();
+});
+
+// ---- HOOK EXISTING SAVES (NON-DESTRUCTIVE) ----
+// Call these AFTER existing save logic
+window.cloudAfterPartySave = syncPartySave;
+window.cloudAfterFirmSave  = syncFirmSave;
 
 </script>
 
@@ -4523,6 +4718,71 @@ document.addEventListener("change",function(e){
   }
 });
 window.addEventListener("load",updateEwayVisibility);
+
+
+/* ===============================
+   FIREBASE CLOUD SYNC (PARTY & FIRM)
+   =============================== */
+
+// Expected: firebase & firestore already initialized
+// const db = firebase.firestore();
+
+async function saveToCloud(collection, data){
+  try{
+    await db.collection(collection).doc("MAIN").set({ data });
+  }catch(e){
+    console.warn("Cloud save failed:", e);
+  }
+}
+
+async function loadFromCloud(collection){
+  try{
+    const doc = await db.collection(collection).doc("MAIN").get();
+    if(doc.exists){
+      return doc.data().data;
+    }
+  }catch(e){
+    console.warn("Cloud load failed:", e);
+  }
+  return null;
+}
+
+// ---- PARTY SYNC ----
+async function syncPartySave(){
+  const data = JSON.parse(localStorage.getItem("PARTY_LIST") || "[]");
+  await saveToCloud("PARTIES", data);
+}
+
+async function syncPartyLoad(){
+  const cloud = await loadFromCloud("PARTIES");
+  if(cloud){
+    localStorage.setItem("PARTY_LIST", JSON.stringify(cloud));
+  }
+}
+
+// ---- FIRM SYNC ----
+async function syncFirmSave(){
+  const data = JSON.parse(localStorage.getItem("FIRM_LIST") || "[]");
+  await saveToCloud("FIRMS", data);
+}
+
+async function syncFirmLoad(){
+  const cloud = await loadFromCloud("FIRMS");
+  if(cloud){
+    localStorage.setItem("FIRM_LIST", JSON.stringify(cloud));
+  }
+}
+
+// ---- AUTO LOAD ON START ----
+window.addEventListener("load", async ()=>{
+  await syncFirmLoad();
+  await syncPartyLoad();
+});
+
+// ---- HOOK EXISTING SAVES (NON-DESTRUCTIVE) ----
+// Call these AFTER existing save logic
+window.cloudAfterPartySave = syncPartySave;
+window.cloudAfterFirmSave  = syncFirmSave;
 
 </script>
 <!-- 🔥 FIREBASE END -->
