@@ -197,8 +197,247 @@ button:hover{ filter:brightness(0.9); }
 }
 
 </style>
+
+<style>
+@media print{
+  .customer-block{display:none !important;}
+  .customer-input{display:none !important;}
+  .screen-only{display:none !important;}
+  .print-only{display:block !important;}
+}
+@media screen{
+  .print-only{display:none;}
+}
+</style>
+
+
+<style>
+@media print {
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+
+  * {
+    background: transparent !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  body {
+    background: #fff !important;
+  }
+
+  table, th, td {
+    background: transparent !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}
+</style>
+
+
+<style>
+@media print {
+  .print-page-border {
+    position: fixed;
+    top: 5mm;
+    left: 5mm;
+    right: 5mm;
+    bottom: 5mm;
+    border: 1px solid #000;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .print-tax-header {
+    position: fixed;
+    top: 0mm;
+    left: 8mm;
+    font-size: 11px;
+    font-weight: bold;
+    background: #fff;
+    padding: 0 4px;
+    z-index: 1;
+  }
+}
+</style>
+
+
+<style>
+@media print {
+  .print-bottom-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border-top: 1px solid #000;
+    margin-top: 8mm;
+    min-height: 80mm;
+  }
+  .print-bottom-left,
+  .print-bottom-right {
+    border-left: 1px solid #000;
+    padding: 6px;
+  }
+  .print-bottom-left {
+    border-left: none;
+  }
+}
+</style>
+
+
+<style>
+.gst-dependent{display:none;}
+</style>
+
+
+<style>
+@media print{
+  .print-bottom-split{
+    display:flex !important;
+    align-items:flex-start;
+  }
+  .print-bottom-left,
+  .print-bottom-right{
+    width:50%;
+    box-sizing:border-box;
+  }
+  .print-bottom-right{
+    text-align:center;
+  }
+}
+</style>
+
+
+<style>
+@media print{
+  #printSign{
+    margin-top:40px; /* move sign text a bit down */
+  }
+}
+</style>
+
+
+<style>
+@media print{
+  .print-bottom-right{
+    text-align:left !important;
+    padding-top:40px !important;
+  }
+  #printSign{
+    margin-top:0 !important;
+  }
+}
+</style>
+
+
+<style>
+@media print{
+  .print-bottom-left,
+  .print-bottom-right{
+    border-left:none !important;
+    border-right:none !important;
+  }
+}
+</style>
+
+
+<style>
+@media print{
+  #printSign{
+    display:block !important;
+    width:100% !important;
+    text-align:center !important;
+  }
+}
+</style>
+
+
+<style>
+@media screen{
+  #printTaxHeader{
+    display:none !important;
+  }
+}
+@media print{
+  #printTaxHeader{
+    display:block !important;
+  }
+}
+</style>
+
+
+<style>
+@media print{
+  .print-page-border{
+    border:2px solid #000 !important;
+  }
+}
+</style>
+
+
+<style>
+/* HARD EDIT FIX FOR INVOICE FIELDS */
+#estimateNo, #invoiceNo, #ewayNo{
+  pointer-events:auto !important;
+  background:#fff !important;
+  position:relative !important;
+  z-index:5 !important;
+}
+.invoice-edit-area, .header, .header *{
+  pointer-events:auto !important;
+}
+</style>
+
+
+<style>
+/* FINAL HARD FIX FOR EDITABILITY */
+.invoice-edit-wrap,
+.invoice-edit-wrap *{
+  pointer-events:auto !important;
+  user-select:text !important;
+}
+
+#estimateNo, #invoiceNo, #ewayNo{
+  pointer-events:auto !important;
+  background:#fff !important;
+  border:1px solid #000 !important;
+  cursor:text !important;
+}
+</style>
+
+
+<style>
+/* REAL FIX: enable editing in header on SCREEN only */
+@media screen{
+  .header, .header *{
+    pointer-events: auto !important;
+  }
+}
+</style>
+
+
+<style>
+/* NUCLEAR EDIT FIX — SCREEN ONLY */
+@media screen{
+  body .header,
+  body .header *,
+  body .invoice-edit-wrap,
+  body .invoice-edit-wrap *{
+    pointer-events: auto !important;
+    user-select: text !important;
+  }
+}
+</style>
+
 </head>
 <body>
+<div id="printTaxHeader" class="print-tax-header" style="display:none">TAX INVOICE <span style="font-weight:normal">ORIGINAL FOR RECIPIENT</span></div>
+
+<div class="print-page-border"></div>
+
 
 
 <div class="no-print" style="position:fixed;top:10px;left:10px;z-index:3000">
@@ -235,6 +474,27 @@ width:260px;
 <input id="p_email" placeholder="Gmail"><br><br>
 <button onclick="saveProfile()">Save</button>
 <button onclick="this.parentNode.style.display='none'">Close</button>
+</div>
+
+<!-- BANK DETAILS BUTTON -->
+<button class="theme-btn" style="display:block;margin-top:6px" onclick="toggleBankPanel()">🏦 Bank</button>
+
+<div id="bankPanel" style="
+  display:none;
+  margin-top:6px;
+  background:#fff;
+  border:2px solid #000;
+  padding:10px;
+  border-radius:6px;
+  width:260px;
+">
+<b>BANK DETAILS</b><br><br>
+<input id="bank_name" placeholder="Bank Name"><br><br>
+<input id="bank_acc" placeholder="Account Number"><br><br>
+<input id="bank_ifsc" placeholder="IFSC Code"><br><br>
+<input id="bank_branch" placeholder="Branch Name"><br><br>
+<button onclick="saveBank()">Save</button>
+<button onclick="toggleBankPanel()">Close</button>
 </div>
 
 
@@ -364,11 +624,28 @@ text-align:center;font-size:24px;font-weight:bold;width:100%">
 
   <!-- LEFT : CUSTOMER -->
   <div>
-    Customer Name<br>
-    <input id="cust" list="custList">
+    <span class="screen-only">Customer Name</span><br>
+    
+<span class="customer-input screen-only" style="display:inline-flex;align-items:center;gap:4px;position:relative">
+  <button type="button"
+    class="no-print"
+    title="Select Party"
+    onclick="openPartyFromList()"
+    style="
+      width:18px;
+      height:18px;
+      border:1px solid #555;
+      background:#f0f0f0;
+      font-size:11px;
+      cursor:pointer;
+    ">☰</button>
+  <input id="cust" list="custList">
+</span>
+
     <datalist id="custList"></datalist>
 
-    <div id="printAddress" style="font-size:11px;margin-top:4px">
+    <div class="print-only" style="font-weight:bold;margin-bottom:2px">BILL TO-</div>
+<div id="printAddress" style="font-size:11px;margin-top:4px">
       <div id="custMobile"></div>
       <div id="custAddress"></div>
     </div>
@@ -376,7 +653,18 @@ text-align:center;font-size:24px;font-weight:bold;width:100%">
 
   <!-- RIGHT : ESTIMATE INFO -->
   <div style="text-align:right">
-    Estimate No: <b><span id="invNo"></span></b><br>
+    <span id="labelEstimate">Estimate No:</span><span class="invoice-edit-wrap"><span id="labelInvoice" style="display:none">Sales Invoice No:</span><span class="invoice-edit-wrap"> <b><span id="invNo" contenteditable="true" style="display:inline-block;min-width:120px;border-bottom:1px solid #000;cursor:text;"></span></b>
+<br><span id="ewayWrap" style="display:none">
+  &nbsp;&nbsp;E-Way Bill No:
+  <span id="ewayNo"
+        contenteditable="true"
+        style="display:inline-block;
+               min-width:120px;
+               border-bottom:1px solid #000;
+               cursor:text;">
+  </span>
+</span>
+<br>
     Date: <span id="date"></span><br>
     Time: <span id="time"></span>
   </div>
@@ -434,6 +722,16 @@ text-align:center;font-size:24px;font-weight:bold;width:100%">
  </div>
 </div>
 </div>
+
+<div class="print-bottom-split print-only">
+  <div class="print-bottom-left">
+    <div id="printBank" class="gst-dependent"></div>
+  </div>
+  <div class="print-bottom-right" style="text-align:center">
+    <div style="margin-top:40px"><span id="printSign" class="gst-dependent">Authorised Signatory</span></div>
+  </div>
+</div>
+
 
 <!-- Ledger -->
 <div id="ledgerBox" style="display:none;position:fixed;top:5%;left:5%;width:90%;height:90%;background:#fff;border:2px solid #000;padding:10px;overflow:auto;z-index:1000">
@@ -952,7 +1250,242 @@ button:hover{ filter:brightness(0.9); }
 }
 
 </style>
-    </head>
+    
+<style>
+@media print{
+  .customer-block{display:none !important;}
+  .customer-input{display:none !important;}
+  .screen-only{display:none !important;}
+  .print-only{display:block !important;}
+}
+@media screen{
+  .print-only{display:none;}
+}
+</style>
+
+
+<style>
+@media print {
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+
+  * {
+    background: transparent !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  body {
+    background: #fff !important;
+  }
+
+  table, th, td {
+    background: transparent !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}
+</style>
+
+
+<style>
+@media print {
+  .print-page-border {
+    position: fixed;
+    top: 5mm;
+    left: 5mm;
+    right: 5mm;
+    bottom: 5mm;
+    border: 1px solid #000;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .print-tax-header {
+    position: fixed;
+    top: 0mm;
+    left: 8mm;
+    font-size: 11px;
+    font-weight: bold;
+    background: #fff;
+    padding: 0 4px;
+    z-index: 1;
+  }
+}
+</style>
+
+
+<style>
+@media print {
+  .print-bottom-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border-top: 1px solid #000;
+    margin-top: 8mm;
+    min-height: 80mm;
+  }
+  .print-bottom-left,
+  .print-bottom-right {
+    border-left: 1px solid #000;
+    padding: 6px;
+  }
+  .print-bottom-left {
+    border-left: none;
+  }
+}
+</style>
+
+
+<style>
+.gst-dependent{display:none;}
+</style>
+
+
+<style>
+@media print{
+  .print-bottom-split{
+    display:flex !important;
+    align-items:flex-start;
+  }
+  .print-bottom-left,
+  .print-bottom-right{
+    width:50%;
+    box-sizing:border-box;
+  }
+  .print-bottom-right{
+    text-align:center;
+  }
+}
+</style>
+
+
+<style>
+@media print{
+  #printSign{
+    margin-top:40px; /* move sign text a bit down */
+  }
+}
+</style>
+
+
+<style>
+@media print{
+  .print-bottom-right{
+    text-align:left !important;
+    padding-top:40px !important;
+  }
+  #printSign{
+    margin-top:0 !important;
+  }
+}
+</style>
+
+
+<style>
+@media print{
+  .print-bottom-left,
+  .print-bottom-right{
+    border-left:none !important;
+    border-right:none !important;
+  }
+}
+</style>
+
+
+<style>
+@media print{
+  #printSign{
+    display:block !important;
+    width:100% !important;
+    text-align:center !important;
+  }
+}
+</style>
+
+
+<style>
+@media screen{
+  #printTaxHeader{
+    display:none !important;
+  }
+}
+@media print{
+  #printTaxHeader{
+    display:block !important;
+  }
+}
+</style>
+
+
+<style>
+@media print{
+  .print-page-border{
+    border:2px solid #000 !important;
+  }
+}
+</style>
+
+
+<style>
+/* HARD EDIT FIX FOR INVOICE FIELDS */
+#estimateNo, #invoiceNo, #ewayNo{
+  pointer-events:auto !important;
+  background:#fff !important;
+  position:relative !important;
+  z-index:5 !important;
+}
+.invoice-edit-area, .header, .header *{
+  pointer-events:auto !important;
+}
+</style>
+
+
+<style>
+/* FINAL HARD FIX FOR EDITABILITY */
+.invoice-edit-wrap,
+.invoice-edit-wrap *{
+  pointer-events:auto !important;
+  user-select:text !important;
+}
+
+#estimateNo, #invoiceNo, #ewayNo{
+  pointer-events:auto !important;
+  background:#fff !important;
+  border:1px solid #000 !important;
+  cursor:text !important;
+}
+</style>
+
+
+<style>
+/* REAL FIX: enable editing in header on SCREEN only */
+@media screen{
+  .header, .header *{
+    pointer-events: auto !important;
+  }
+}
+</style>
+
+
+<style>
+/* NUCLEAR EDIT FIX — SCREEN ONLY */
+@media screen{
+  body .header,
+  body .header *,
+  body .invoice-edit-wrap,
+  body .invoice-edit-wrap *{
+    pointer-events: auto !important;
+    user-select: text !important;
+  }
+}
+</style>
+
+</head>
     <body onload="window.print()">
       <div class="top">
         <div>
@@ -1252,7 +1785,242 @@ button:hover{ filter:brightness(0.9); }
 }
 
 </style>
-    </head>
+    
+<style>
+@media print{
+  .customer-block{display:none !important;}
+  .customer-input{display:none !important;}
+  .screen-only{display:none !important;}
+  .print-only{display:block !important;}
+}
+@media screen{
+  .print-only{display:none;}
+}
+</style>
+
+
+<style>
+@media print {
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+
+  * {
+    background: transparent !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  body {
+    background: #fff !important;
+  }
+
+  table, th, td {
+    background: transparent !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}
+</style>
+
+
+<style>
+@media print {
+  .print-page-border {
+    position: fixed;
+    top: 5mm;
+    left: 5mm;
+    right: 5mm;
+    bottom: 5mm;
+    border: 1px solid #000;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .print-tax-header {
+    position: fixed;
+    top: 0mm;
+    left: 8mm;
+    font-size: 11px;
+    font-weight: bold;
+    background: #fff;
+    padding: 0 4px;
+    z-index: 1;
+  }
+}
+</style>
+
+
+<style>
+@media print {
+  .print-bottom-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border-top: 1px solid #000;
+    margin-top: 8mm;
+    min-height: 80mm;
+  }
+  .print-bottom-left,
+  .print-bottom-right {
+    border-left: 1px solid #000;
+    padding: 6px;
+  }
+  .print-bottom-left {
+    border-left: none;
+  }
+}
+</style>
+
+
+<style>
+.gst-dependent{display:none;}
+</style>
+
+
+<style>
+@media print{
+  .print-bottom-split{
+    display:flex !important;
+    align-items:flex-start;
+  }
+  .print-bottom-left,
+  .print-bottom-right{
+    width:50%;
+    box-sizing:border-box;
+  }
+  .print-bottom-right{
+    text-align:center;
+  }
+}
+</style>
+
+
+<style>
+@media print{
+  #printSign{
+    margin-top:40px; /* move sign text a bit down */
+  }
+}
+</style>
+
+
+<style>
+@media print{
+  .print-bottom-right{
+    text-align:left !important;
+    padding-top:40px !important;
+  }
+  #printSign{
+    margin-top:0 !important;
+  }
+}
+</style>
+
+
+<style>
+@media print{
+  .print-bottom-left,
+  .print-bottom-right{
+    border-left:none !important;
+    border-right:none !important;
+  }
+}
+</style>
+
+
+<style>
+@media print{
+  #printSign{
+    display:block !important;
+    width:100% !important;
+    text-align:center !important;
+  }
+}
+</style>
+
+
+<style>
+@media screen{
+  #printTaxHeader{
+    display:none !important;
+  }
+}
+@media print{
+  #printTaxHeader{
+    display:block !important;
+  }
+}
+</style>
+
+
+<style>
+@media print{
+  .print-page-border{
+    border:2px solid #000 !important;
+  }
+}
+</style>
+
+
+<style>
+/* HARD EDIT FIX FOR INVOICE FIELDS */
+#estimateNo, #invoiceNo, #ewayNo{
+  pointer-events:auto !important;
+  background:#fff !important;
+  position:relative !important;
+  z-index:5 !important;
+}
+.invoice-edit-area, .header, .header *{
+  pointer-events:auto !important;
+}
+</style>
+
+
+<style>
+/* FINAL HARD FIX FOR EDITABILITY */
+.invoice-edit-wrap,
+.invoice-edit-wrap *{
+  pointer-events:auto !important;
+  user-select:text !important;
+}
+
+#estimateNo, #invoiceNo, #ewayNo{
+  pointer-events:auto !important;
+  background:#fff !important;
+  border:1px solid #000 !important;
+  cursor:text !important;
+}
+</style>
+
+
+<style>
+/* REAL FIX: enable editing in header on SCREEN only */
+@media screen{
+  .header, .header *{
+    pointer-events: auto !important;
+  }
+}
+</style>
+
+
+<style>
+/* NUCLEAR EDIT FIX — SCREEN ONLY */
+@media screen{
+  body .header,
+  body .header *,
+  body .invoice-edit-wrap,
+  body .invoice-edit-wrap *{
+    pointer-events: auto !important;
+    user-select: text !important;
+  }
+}
+</style>
+
+</head>
     <body onload="window.print()">
       <h2>Party Statement</h2>
       <b>${name}</b><span style='float:right;font-size:12px'>Date: ${new Date().toLocaleDateString()} Time: ${new Date().toLocaleTimeString()}</span><br><br>
@@ -1528,7 +2296,242 @@ button:hover{ filter:brightness(0.9); }
 }
 
 </style>
-    </head>
+    
+<style>
+@media print{
+  .customer-block{display:none !important;}
+  .customer-input{display:none !important;}
+  .screen-only{display:none !important;}
+  .print-only{display:block !important;}
+}
+@media screen{
+  .print-only{display:none;}
+}
+</style>
+
+
+<style>
+@media print {
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+
+  * {
+    background: transparent !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  body {
+    background: #fff !important;
+  }
+
+  table, th, td {
+    background: transparent !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}
+</style>
+
+
+<style>
+@media print {
+  .print-page-border {
+    position: fixed;
+    top: 5mm;
+    left: 5mm;
+    right: 5mm;
+    bottom: 5mm;
+    border: 1px solid #000;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .print-tax-header {
+    position: fixed;
+    top: 0mm;
+    left: 8mm;
+    font-size: 11px;
+    font-weight: bold;
+    background: #fff;
+    padding: 0 4px;
+    z-index: 1;
+  }
+}
+</style>
+
+
+<style>
+@media print {
+  .print-bottom-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border-top: 1px solid #000;
+    margin-top: 8mm;
+    min-height: 80mm;
+  }
+  .print-bottom-left,
+  .print-bottom-right {
+    border-left: 1px solid #000;
+    padding: 6px;
+  }
+  .print-bottom-left {
+    border-left: none;
+  }
+}
+</style>
+
+
+<style>
+.gst-dependent{display:none;}
+</style>
+
+
+<style>
+@media print{
+  .print-bottom-split{
+    display:flex !important;
+    align-items:flex-start;
+  }
+  .print-bottom-left,
+  .print-bottom-right{
+    width:50%;
+    box-sizing:border-box;
+  }
+  .print-bottom-right{
+    text-align:center;
+  }
+}
+</style>
+
+
+<style>
+@media print{
+  #printSign{
+    margin-top:40px; /* move sign text a bit down */
+  }
+}
+</style>
+
+
+<style>
+@media print{
+  .print-bottom-right{
+    text-align:left !important;
+    padding-top:40px !important;
+  }
+  #printSign{
+    margin-top:0 !important;
+  }
+}
+</style>
+
+
+<style>
+@media print{
+  .print-bottom-left,
+  .print-bottom-right{
+    border-left:none !important;
+    border-right:none !important;
+  }
+}
+</style>
+
+
+<style>
+@media print{
+  #printSign{
+    display:block !important;
+    width:100% !important;
+    text-align:center !important;
+  }
+}
+</style>
+
+
+<style>
+@media screen{
+  #printTaxHeader{
+    display:none !important;
+  }
+}
+@media print{
+  #printTaxHeader{
+    display:block !important;
+  }
+}
+</style>
+
+
+<style>
+@media print{
+  .print-page-border{
+    border:2px solid #000 !important;
+  }
+}
+</style>
+
+
+<style>
+/* HARD EDIT FIX FOR INVOICE FIELDS */
+#estimateNo, #invoiceNo, #ewayNo{
+  pointer-events:auto !important;
+  background:#fff !important;
+  position:relative !important;
+  z-index:5 !important;
+}
+.invoice-edit-area, .header, .header *{
+  pointer-events:auto !important;
+}
+</style>
+
+
+<style>
+/* FINAL HARD FIX FOR EDITABILITY */
+.invoice-edit-wrap,
+.invoice-edit-wrap *{
+  pointer-events:auto !important;
+  user-select:text !important;
+}
+
+#estimateNo, #invoiceNo, #ewayNo{
+  pointer-events:auto !important;
+  background:#fff !important;
+  border:1px solid #000 !important;
+  cursor:text !important;
+}
+</style>
+
+
+<style>
+/* REAL FIX: enable editing in header on SCREEN only */
+@media screen{
+  .header, .header *{
+    pointer-events: auto !important;
+  }
+}
+</style>
+
+
+<style>
+/* NUCLEAR EDIT FIX — SCREEN ONLY */
+@media screen{
+  body .header,
+  body .header *,
+  body .invoice-edit-wrap,
+  body .invoice-edit-wrap *{
+    pointer-events: auto !important;
+    user-select: text !important;
+  }
+}
+</style>
+
+</head>
     <body onload="window.print()">
       <h2 style="text-align:center">ESTIMATE</h2>
       <b>Customer:</b> ${p}<br>
@@ -1780,7 +2783,242 @@ button:hover{ filter:brightness(0.9); }
 }
 
 </style>
-        </head>
+        
+<style>
+@media print{
+  .customer-block{display:none !important;}
+  .customer-input{display:none !important;}
+  .screen-only{display:none !important;}
+  .print-only{display:block !important;}
+}
+@media screen{
+  .print-only{display:none;}
+}
+</style>
+
+
+<style>
+@media print {
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+
+  * {
+    background: transparent !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  body {
+    background: #fff !important;
+  }
+
+  table, th, td {
+    background: transparent !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}
+</style>
+
+
+<style>
+@media print {
+  .print-page-border {
+    position: fixed;
+    top: 5mm;
+    left: 5mm;
+    right: 5mm;
+    bottom: 5mm;
+    border: 1px solid #000;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .print-tax-header {
+    position: fixed;
+    top: 0mm;
+    left: 8mm;
+    font-size: 11px;
+    font-weight: bold;
+    background: #fff;
+    padding: 0 4px;
+    z-index: 1;
+  }
+}
+</style>
+
+
+<style>
+@media print {
+  .print-bottom-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border-top: 1px solid #000;
+    margin-top: 8mm;
+    min-height: 80mm;
+  }
+  .print-bottom-left,
+  .print-bottom-right {
+    border-left: 1px solid #000;
+    padding: 6px;
+  }
+  .print-bottom-left {
+    border-left: none;
+  }
+}
+</style>
+
+
+<style>
+.gst-dependent{display:none;}
+</style>
+
+
+<style>
+@media print{
+  .print-bottom-split{
+    display:flex !important;
+    align-items:flex-start;
+  }
+  .print-bottom-left,
+  .print-bottom-right{
+    width:50%;
+    box-sizing:border-box;
+  }
+  .print-bottom-right{
+    text-align:center;
+  }
+}
+</style>
+
+
+<style>
+@media print{
+  #printSign{
+    margin-top:40px; /* move sign text a bit down */
+  }
+}
+</style>
+
+
+<style>
+@media print{
+  .print-bottom-right{
+    text-align:left !important;
+    padding-top:40px !important;
+  }
+  #printSign{
+    margin-top:0 !important;
+  }
+}
+</style>
+
+
+<style>
+@media print{
+  .print-bottom-left,
+  .print-bottom-right{
+    border-left:none !important;
+    border-right:none !important;
+  }
+}
+</style>
+
+
+<style>
+@media print{
+  #printSign{
+    display:block !important;
+    width:100% !important;
+    text-align:center !important;
+  }
+}
+</style>
+
+
+<style>
+@media screen{
+  #printTaxHeader{
+    display:none !important;
+  }
+}
+@media print{
+  #printTaxHeader{
+    display:block !important;
+  }
+}
+</style>
+
+
+<style>
+@media print{
+  .print-page-border{
+    border:2px solid #000 !important;
+  }
+}
+</style>
+
+
+<style>
+/* HARD EDIT FIX FOR INVOICE FIELDS */
+#estimateNo, #invoiceNo, #ewayNo{
+  pointer-events:auto !important;
+  background:#fff !important;
+  position:relative !important;
+  z-index:5 !important;
+}
+.invoice-edit-area, .header, .header *{
+  pointer-events:auto !important;
+}
+</style>
+
+
+<style>
+/* FINAL HARD FIX FOR EDITABILITY */
+.invoice-edit-wrap,
+.invoice-edit-wrap *{
+  pointer-events:auto !important;
+  user-select:text !important;
+}
+
+#estimateNo, #invoiceNo, #ewayNo{
+  pointer-events:auto !important;
+  background:#fff !important;
+  border:1px solid #000 !important;
+  cursor:text !important;
+}
+</style>
+
+
+<style>
+/* REAL FIX: enable editing in header on SCREEN only */
+@media screen{
+  .header, .header *{
+    pointer-events: auto !important;
+  }
+}
+</style>
+
+
+<style>
+/* NUCLEAR EDIT FIX — SCREEN ONLY */
+@media screen{
+  body .header,
+  body .header *,
+  body .invoice-edit-wrap,
+  body .invoice-edit-wrap *{
+    pointer-events: auto !important;
+    user-select: text !important;
+  }
+}
+</style>
+
+</head>
         <body onload="window.print()">
           ${billHTML}
         
@@ -2467,6 +3705,186 @@ function togglePartyPanel(){
 }
 }
 
+
+
+/* PARTY PICKER FOR CUSTOMER NAME (SAFE + DETAILS) */
+function openPartyFromList(){
+  const dl = document.getElementById("custList");
+  const parties = JSON.parse(localStorage.getItem("PARTIES") || "{}");
+  dl.innerHTML = "";
+  Object.keys(parties).forEach(k=>{
+    const o = document.createElement("option");
+    o.value = k;
+    dl.appendChild(o);
+  });
+  const inp = document.getElementById("cust");
+  if(inp){
+    inp.focus();
+    inp.click();
+  }
+}
+
+document.addEventListener("change", function(e){
+  if(e.target && e.target.id === "cust"){
+    const parties = JSON.parse(localStorage.getItem("PARTIES") || "{}");
+    const p = parties[e.target.value];
+    if(!p) return;
+
+    // Fill details safely
+    const mob = document.getElementById("custMobile");
+    const addr = document.getElementById("custAddress");
+
+    
+
+    if(addr){
+      addr.innerHTML =
+        '<div style="font-weight:bold;font-size:13px">'+ e.target.value +'</div>' +
+        (p.mobile ? '<div style="font-size:11px">📞 ' + p.mobile + '</div>' : '') +
+        '<div style="font-size:11px">' +
+        (p.address ? p.address + "<br>" : "") +
+        (p.gst ? "GST: " + p.gst + "<br>" : "") +
+        (p.email ? p.email : "") +
+        '</div>';
+    }
+  }
+});
+
+
+
+/* PRINT TAX INVOICE HEADER CONTROL */
+function updatePrintTaxHeader(){
+  const h = document.getElementById("printTaxHeader");
+  const gst = document.getElementById("gstToggle");
+  if(!h) return;
+  if(gst && gst.checked){
+    h.style.display = "block";
+  }else{
+    h.style.display = "none";
+  }
+}
+document.addEventListener("change", function(e){
+  if(e.target && e.target.id === "gstToggle"){
+    updatePrintTaxHeader();
+  }
+});
+window.addEventListener("beforeprint", updatePrintTaxHeader);
+
+
+/* BANK DETAILS */
+function toggleBankPanel(){
+  const p=document.getElementById("bankPanel");
+  p.style.display = p.style.display==="block"?"none":"block";
+  const d=JSON.parse(localStorage.getItem("BANK_DATA")||"{}");
+  if(d.name) bank_name.value=d.name;
+  if(d.acc) bank_acc.value=d.acc;
+  if(d.ifsc) bank_ifsc.value=d.ifsc;
+  if(d.branch) bank_branch.value=d.branch;
+}
+
+function saveBank(){
+  const d={
+    name:bank_name.value,
+    acc:bank_acc.value,
+    ifsc:bank_ifsc.value,
+    branch:bank_branch.value
+  };
+  localStorage.setItem("BANK_DATA",JSON.stringify(d));
+  renderBankPrint();
+  alert("Bank details saved");
+}
+
+function renderBankPrint(){
+  const d=JSON.parse(localStorage.getItem("BANK_DATA")||"{}");
+  const el=document.getElementById("printBank");
+  if(!el || !d.name) return;
+  el.innerHTML =
+    "<b>Bank Details</b><br>"+
+    d.name+"<br>"+
+    "A/c : "+d.acc+"<br>"+
+    "IFSC : "+d.ifsc+"<br>"+
+    d.branch;
+}
+window.addEventListener("load",renderBankPrint);
+
+
+/* GST DEPENDENT VISIBILITY */
+function updateGSTDependent(){
+  const gst = document.getElementById("gstToggle");
+  const els = document.querySelectorAll(".gst-dependent");
+  els.forEach(el=>{
+    el.style.display = (gst && gst.checked) ? "block" : "none";
+  });
+
+  // sync bank details on screen also
+  if(gst && gst.checked){
+    const d=JSON.parse(localStorage.getItem("BANK_DATA")||"{}");
+    const s=document.getElementById("screenBank");
+    if(s && d.name){
+      s.innerHTML =
+        "<b>Bank Details</b><br>"+
+        d.name+"<br>"+
+        "A/c : "+d.acc+"<br>"+
+        "IFSC : "+d.ifsc+"<br>"+
+        d.branch;
+    }
+  }
+}
+
+document.addEventListener("change",function(e){
+  if(e.target && e.target.id==="gstToggle"){
+    updateGSTDependent();
+  }
+});
+window.addEventListener("load",updateGSTDependent);
+
+
+/* ESTIMATE ↔ SALES INVOICE SWITCH (GST TOGGLE) */
+function updateInvoiceMode(){
+  const gst = document.getElementById("gstToggle");
+  const estLabel = document.getElementById("labelEstimate");
+  const invLabel = document.getElementById("labelInvoice");
+  const estInput = document.getElementById("estimateNo");
+  const invInput = document.getElementById("invoiceNo");
+  const eway = document.getElementById("ewayWrap");
+
+  if(gst && gst.checked){
+    if(estLabel) estLabel.style.display="none";
+    if(estInput) estInput.style.display="none";
+    if(invLabel) invLabel.style.display="inline";
+    if(invInput) invInput.style.display="inline-block";
+    if(eway) eway.style.display="inline-block";
+  }else{
+    if(estLabel) estLabel.style.display="inline";
+    if(estInput) estInput.style.display="inline-block";
+    if(invLabel) invLabel.style.display="none";
+    if(invInput) invInput.style.display="none";
+    if(eway) eway.style.display="none";
+  }
+}
+
+document.addEventListener("change",function(e){
+  if(e.target && e.target.id==="gstToggle"){
+    updateInvoiceMode();
+  }
+});
+
+
+
+/* E-WAY BILL VISIBILITY (GST ONLY) */
+function updateEwayVisibility(){
+  const gst = document.getElementById("gstToggle");
+  const ew = document.getElementById("ewayWrap");
+  if(!ew) return;
+  ew.style.display = (gst && gst.checked) ? "inline-block" : "none";
+}
+
+document.addEventListener("change",function(e){
+  if(e.target && e.target.id==="gstToggle"){
+    updateEwayVisibility();
+  }
+});
+window.addEventListener("load",updateEwayVisibility);
+
 </script>
 
 <!-- Edit Party Modal -->
@@ -2518,8 +3936,368 @@ background:#fff;border:2px solid #000;padding:10px;z-index:4000">
 </div>
 
   <!-- 🔥 FIREBASE START -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">
+
+/* PARTY PICKER FOR CUSTOMER NAME (SAFE + DETAILS) */
+function openPartyFromList(){
+  const dl = document.getElementById("custList");
+  const parties = JSON.parse(localStorage.getItem("PARTIES") || "{}");
+  dl.innerHTML = "";
+  Object.keys(parties).forEach(k=>{
+    const o = document.createElement("option");
+    o.value = k;
+    dl.appendChild(o);
+  });
+  const inp = document.getElementById("cust");
+  if(inp){
+    inp.focus();
+    inp.click();
+  }
+}
+
+document.addEventListener("change", function(e){
+  if(e.target && e.target.id === "cust"){
+    const parties = JSON.parse(localStorage.getItem("PARTIES") || "{}");
+    const p = parties[e.target.value];
+    if(!p) return;
+
+    // Fill details safely
+    const mob = document.getElementById("custMobile");
+    const addr = document.getElementById("custAddress");
+
+    
+
+    if(addr){
+      addr.innerHTML =
+        '<div style="font-weight:bold;font-size:13px">'+ e.target.value +'</div>' +
+        (p.mobile ? '<div style="font-size:11px">📞 ' + p.mobile + '</div>' : '') +
+        '<div style="font-size:11px">' +
+        (p.address ? p.address + "<br>" : "") +
+        (p.gst ? "GST: " + p.gst + "<br>" : "") +
+        (p.email ? p.email : "") +
+        '</div>';
+    }
+  }
+});
+
+
+
+/* PRINT TAX INVOICE HEADER CONTROL */
+function updatePrintTaxHeader(){
+  const h = document.getElementById("printTaxHeader");
+  const gst = document.getElementById("gstToggle");
+  if(!h) return;
+  if(gst && gst.checked){
+    h.style.display = "block";
+  }else{
+    h.style.display = "none";
+  }
+}
+document.addEventListener("change", function(e){
+  if(e.target && e.target.id === "gstToggle"){
+    updatePrintTaxHeader();
+  }
+});
+window.addEventListener("beforeprint", updatePrintTaxHeader);
+
+
+/* BANK DETAILS */
+function toggleBankPanel(){
+  const p=document.getElementById("bankPanel");
+  p.style.display = p.style.display==="block"?"none":"block";
+  const d=JSON.parse(localStorage.getItem("BANK_DATA")||"{}");
+  if(d.name) bank_name.value=d.name;
+  if(d.acc) bank_acc.value=d.acc;
+  if(d.ifsc) bank_ifsc.value=d.ifsc;
+  if(d.branch) bank_branch.value=d.branch;
+}
+
+function saveBank(){
+  const d={
+    name:bank_name.value,
+    acc:bank_acc.value,
+    ifsc:bank_ifsc.value,
+    branch:bank_branch.value
+  };
+  localStorage.setItem("BANK_DATA",JSON.stringify(d));
+  renderBankPrint();
+  alert("Bank details saved");
+}
+
+function renderBankPrint(){
+  const d=JSON.parse(localStorage.getItem("BANK_DATA")||"{}");
+  const el=document.getElementById("printBank");
+  if(!el || !d.name) return;
+  el.innerHTML =
+    "<b>Bank Details</b><br>"+
+    d.name+"<br>"+
+    "A/c : "+d.acc+"<br>"+
+    "IFSC : "+d.ifsc+"<br>"+
+    d.branch;
+}
+window.addEventListener("load",renderBankPrint);
+
+
+/* GST DEPENDENT VISIBILITY */
+function updateGSTDependent(){
+  const gst = document.getElementById("gstToggle");
+  const els = document.querySelectorAll(".gst-dependent");
+  els.forEach(el=>{
+    el.style.display = (gst && gst.checked) ? "block" : "none";
+  });
+
+  // sync bank details on screen also
+  if(gst && gst.checked){
+    const d=JSON.parse(localStorage.getItem("BANK_DATA")||"{}");
+    const s=document.getElementById("screenBank");
+    if(s && d.name){
+      s.innerHTML =
+        "<b>Bank Details</b><br>"+
+        d.name+"<br>"+
+        "A/c : "+d.acc+"<br>"+
+        "IFSC : "+d.ifsc+"<br>"+
+        d.branch;
+    }
+  }
+}
+
+document.addEventListener("change",function(e){
+  if(e.target && e.target.id==="gstToggle"){
+    updateGSTDependent();
+  }
+});
+window.addEventListener("load",updateGSTDependent);
+
+
+/* ESTIMATE ↔ SALES INVOICE SWITCH (GST TOGGLE) */
+function updateInvoiceMode(){
+  const gst = document.getElementById("gstToggle");
+  const estLabel = document.getElementById("labelEstimate");
+  const invLabel = document.getElementById("labelInvoice");
+  const estInput = document.getElementById("estimateNo");
+  const invInput = document.getElementById("invoiceNo");
+  const eway = document.getElementById("ewayWrap");
+
+  if(gst && gst.checked){
+    if(estLabel) estLabel.style.display="none";
+    if(estInput) estInput.style.display="none";
+    if(invLabel) invLabel.style.display="inline";
+    if(invInput) invInput.style.display="inline-block";
+    if(eway) eway.style.display="inline-block";
+  }else{
+    if(estLabel) estLabel.style.display="inline";
+    if(estInput) estInput.style.display="inline-block";
+    if(invLabel) invLabel.style.display="none";
+    if(invInput) invInput.style.display="none";
+    if(eway) eway.style.display="none";
+  }
+}
+
+document.addEventListener("change",function(e){
+  if(e.target && e.target.id==="gstToggle"){
+    updateInvoiceMode();
+  }
+});
+
+
+
+/* E-WAY BILL VISIBILITY (GST ONLY) */
+function updateEwayVisibility(){
+  const gst = document.getElementById("gstToggle");
+  const ew = document.getElementById("ewayWrap");
+  if(!ew) return;
+  ew.style.display = (gst && gst.checked) ? "inline-block" : "none";
+}
+
+document.addEventListener("change",function(e){
+  if(e.target && e.target.id==="gstToggle"){
+    updateEwayVisibility();
+  }
+});
+window.addEventListener("load",updateEwayVisibility);
+
+</script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js">
+
+/* PARTY PICKER FOR CUSTOMER NAME (SAFE + DETAILS) */
+function openPartyFromList(){
+  const dl = document.getElementById("custList");
+  const parties = JSON.parse(localStorage.getItem("PARTIES") || "{}");
+  dl.innerHTML = "";
+  Object.keys(parties).forEach(k=>{
+    const o = document.createElement("option");
+    o.value = k;
+    dl.appendChild(o);
+  });
+  const inp = document.getElementById("cust");
+  if(inp){
+    inp.focus();
+    inp.click();
+  }
+}
+
+document.addEventListener("change", function(e){
+  if(e.target && e.target.id === "cust"){
+    const parties = JSON.parse(localStorage.getItem("PARTIES") || "{}");
+    const p = parties[e.target.value];
+    if(!p) return;
+
+    // Fill details safely
+    const mob = document.getElementById("custMobile");
+    const addr = document.getElementById("custAddress");
+
+    
+
+    if(addr){
+      addr.innerHTML =
+        '<div style="font-weight:bold;font-size:13px">'+ e.target.value +'</div>' +
+        (p.mobile ? '<div style="font-size:11px">📞 ' + p.mobile + '</div>' : '') +
+        '<div style="font-size:11px">' +
+        (p.address ? p.address + "<br>" : "") +
+        (p.gst ? "GST: " + p.gst + "<br>" : "") +
+        (p.email ? p.email : "") +
+        '</div>';
+    }
+  }
+});
+
+
+
+/* PRINT TAX INVOICE HEADER CONTROL */
+function updatePrintTaxHeader(){
+  const h = document.getElementById("printTaxHeader");
+  const gst = document.getElementById("gstToggle");
+  if(!h) return;
+  if(gst && gst.checked){
+    h.style.display = "block";
+  }else{
+    h.style.display = "none";
+  }
+}
+document.addEventListener("change", function(e){
+  if(e.target && e.target.id === "gstToggle"){
+    updatePrintTaxHeader();
+  }
+});
+window.addEventListener("beforeprint", updatePrintTaxHeader);
+
+
+/* BANK DETAILS */
+function toggleBankPanel(){
+  const p=document.getElementById("bankPanel");
+  p.style.display = p.style.display==="block"?"none":"block";
+  const d=JSON.parse(localStorage.getItem("BANK_DATA")||"{}");
+  if(d.name) bank_name.value=d.name;
+  if(d.acc) bank_acc.value=d.acc;
+  if(d.ifsc) bank_ifsc.value=d.ifsc;
+  if(d.branch) bank_branch.value=d.branch;
+}
+
+function saveBank(){
+  const d={
+    name:bank_name.value,
+    acc:bank_acc.value,
+    ifsc:bank_ifsc.value,
+    branch:bank_branch.value
+  };
+  localStorage.setItem("BANK_DATA",JSON.stringify(d));
+  renderBankPrint();
+  alert("Bank details saved");
+}
+
+function renderBankPrint(){
+  const d=JSON.parse(localStorage.getItem("BANK_DATA")||"{}");
+  const el=document.getElementById("printBank");
+  if(!el || !d.name) return;
+  el.innerHTML =
+    "<b>Bank Details</b><br>"+
+    d.name+"<br>"+
+    "A/c : "+d.acc+"<br>"+
+    "IFSC : "+d.ifsc+"<br>"+
+    d.branch;
+}
+window.addEventListener("load",renderBankPrint);
+
+
+/* GST DEPENDENT VISIBILITY */
+function updateGSTDependent(){
+  const gst = document.getElementById("gstToggle");
+  const els = document.querySelectorAll(".gst-dependent");
+  els.forEach(el=>{
+    el.style.display = (gst && gst.checked) ? "block" : "none";
+  });
+
+  // sync bank details on screen also
+  if(gst && gst.checked){
+    const d=JSON.parse(localStorage.getItem("BANK_DATA")||"{}");
+    const s=document.getElementById("screenBank");
+    if(s && d.name){
+      s.innerHTML =
+        "<b>Bank Details</b><br>"+
+        d.name+"<br>"+
+        "A/c : "+d.acc+"<br>"+
+        "IFSC : "+d.ifsc+"<br>"+
+        d.branch;
+    }
+  }
+}
+
+document.addEventListener("change",function(e){
+  if(e.target && e.target.id==="gstToggle"){
+    updateGSTDependent();
+  }
+});
+window.addEventListener("load",updateGSTDependent);
+
+
+/* ESTIMATE ↔ SALES INVOICE SWITCH (GST TOGGLE) */
+function updateInvoiceMode(){
+  const gst = document.getElementById("gstToggle");
+  const estLabel = document.getElementById("labelEstimate");
+  const invLabel = document.getElementById("labelInvoice");
+  const estInput = document.getElementById("estimateNo");
+  const invInput = document.getElementById("invoiceNo");
+  const eway = document.getElementById("ewayWrap");
+
+  if(gst && gst.checked){
+    if(estLabel) estLabel.style.display="none";
+    if(estInput) estInput.style.display="none";
+    if(invLabel) invLabel.style.display="inline";
+    if(invInput) invInput.style.display="inline-block";
+    if(eway) eway.style.display="inline-block";
+  }else{
+    if(estLabel) estLabel.style.display="inline";
+    if(estInput) estInput.style.display="inline-block";
+    if(invLabel) invLabel.style.display="none";
+    if(invInput) invInput.style.display="none";
+    if(eway) eway.style.display="none";
+  }
+}
+
+document.addEventListener("change",function(e){
+  if(e.target && e.target.id==="gstToggle"){
+    updateInvoiceMode();
+  }
+});
+
+
+
+/* E-WAY BILL VISIBILITY (GST ONLY) */
+function updateEwayVisibility(){
+  const gst = document.getElementById("gstToggle");
+  const ew = document.getElementById("ewayWrap");
+  if(!ew) return;
+  ew.style.display = (gst && gst.checked) ? "inline-block" : "none";
+}
+
+document.addEventListener("change",function(e){
+  if(e.target && e.target.id==="gstToggle"){
+    updateEwayVisibility();
+  }
+});
+window.addEventListener("load",updateEwayVisibility);
+
+</script>
 
 <script>
   const firebaseConfig = {
@@ -2565,6 +4343,186 @@ window.togglePaid = async function(docId,current){
     console.error(e);
   }
 };
+
+
+
+/* PARTY PICKER FOR CUSTOMER NAME (SAFE + DETAILS) */
+function openPartyFromList(){
+  const dl = document.getElementById("custList");
+  const parties = JSON.parse(localStorage.getItem("PARTIES") || "{}");
+  dl.innerHTML = "";
+  Object.keys(parties).forEach(k=>{
+    const o = document.createElement("option");
+    o.value = k;
+    dl.appendChild(o);
+  });
+  const inp = document.getElementById("cust");
+  if(inp){
+    inp.focus();
+    inp.click();
+  }
+}
+
+document.addEventListener("change", function(e){
+  if(e.target && e.target.id === "cust"){
+    const parties = JSON.parse(localStorage.getItem("PARTIES") || "{}");
+    const p = parties[e.target.value];
+    if(!p) return;
+
+    // Fill details safely
+    const mob = document.getElementById("custMobile");
+    const addr = document.getElementById("custAddress");
+
+    
+
+    if(addr){
+      addr.innerHTML =
+        '<div style="font-weight:bold;font-size:13px">'+ e.target.value +'</div>' +
+        (p.mobile ? '<div style="font-size:11px">📞 ' + p.mobile + '</div>' : '') +
+        '<div style="font-size:11px">' +
+        (p.address ? p.address + "<br>" : "") +
+        (p.gst ? "GST: " + p.gst + "<br>" : "") +
+        (p.email ? p.email : "") +
+        '</div>';
+    }
+  }
+});
+
+
+
+/* PRINT TAX INVOICE HEADER CONTROL */
+function updatePrintTaxHeader(){
+  const h = document.getElementById("printTaxHeader");
+  const gst = document.getElementById("gstToggle");
+  if(!h) return;
+  if(gst && gst.checked){
+    h.style.display = "block";
+  }else{
+    h.style.display = "none";
+  }
+}
+document.addEventListener("change", function(e){
+  if(e.target && e.target.id === "gstToggle"){
+    updatePrintTaxHeader();
+  }
+});
+window.addEventListener("beforeprint", updatePrintTaxHeader);
+
+
+/* BANK DETAILS */
+function toggleBankPanel(){
+  const p=document.getElementById("bankPanel");
+  p.style.display = p.style.display==="block"?"none":"block";
+  const d=JSON.parse(localStorage.getItem("BANK_DATA")||"{}");
+  if(d.name) bank_name.value=d.name;
+  if(d.acc) bank_acc.value=d.acc;
+  if(d.ifsc) bank_ifsc.value=d.ifsc;
+  if(d.branch) bank_branch.value=d.branch;
+}
+
+function saveBank(){
+  const d={
+    name:bank_name.value,
+    acc:bank_acc.value,
+    ifsc:bank_ifsc.value,
+    branch:bank_branch.value
+  };
+  localStorage.setItem("BANK_DATA",JSON.stringify(d));
+  renderBankPrint();
+  alert("Bank details saved");
+}
+
+function renderBankPrint(){
+  const d=JSON.parse(localStorage.getItem("BANK_DATA")||"{}");
+  const el=document.getElementById("printBank");
+  if(!el || !d.name) return;
+  el.innerHTML =
+    "<b>Bank Details</b><br>"+
+    d.name+"<br>"+
+    "A/c : "+d.acc+"<br>"+
+    "IFSC : "+d.ifsc+"<br>"+
+    d.branch;
+}
+window.addEventListener("load",renderBankPrint);
+
+
+/* GST DEPENDENT VISIBILITY */
+function updateGSTDependent(){
+  const gst = document.getElementById("gstToggle");
+  const els = document.querySelectorAll(".gst-dependent");
+  els.forEach(el=>{
+    el.style.display = (gst && gst.checked) ? "block" : "none";
+  });
+
+  // sync bank details on screen also
+  if(gst && gst.checked){
+    const d=JSON.parse(localStorage.getItem("BANK_DATA")||"{}");
+    const s=document.getElementById("screenBank");
+    if(s && d.name){
+      s.innerHTML =
+        "<b>Bank Details</b><br>"+
+        d.name+"<br>"+
+        "A/c : "+d.acc+"<br>"+
+        "IFSC : "+d.ifsc+"<br>"+
+        d.branch;
+    }
+  }
+}
+
+document.addEventListener("change",function(e){
+  if(e.target && e.target.id==="gstToggle"){
+    updateGSTDependent();
+  }
+});
+window.addEventListener("load",updateGSTDependent);
+
+
+/* ESTIMATE ↔ SALES INVOICE SWITCH (GST TOGGLE) */
+function updateInvoiceMode(){
+  const gst = document.getElementById("gstToggle");
+  const estLabel = document.getElementById("labelEstimate");
+  const invLabel = document.getElementById("labelInvoice");
+  const estInput = document.getElementById("estimateNo");
+  const invInput = document.getElementById("invoiceNo");
+  const eway = document.getElementById("ewayWrap");
+
+  if(gst && gst.checked){
+    if(estLabel) estLabel.style.display="none";
+    if(estInput) estInput.style.display="none";
+    if(invLabel) invLabel.style.display="inline";
+    if(invInput) invInput.style.display="inline-block";
+    if(eway) eway.style.display="inline-block";
+  }else{
+    if(estLabel) estLabel.style.display="inline";
+    if(estInput) estInput.style.display="inline-block";
+    if(invLabel) invLabel.style.display="none";
+    if(invInput) invInput.style.display="none";
+    if(eway) eway.style.display="none";
+  }
+}
+
+document.addEventListener("change",function(e){
+  if(e.target && e.target.id==="gstToggle"){
+    updateInvoiceMode();
+  }
+});
+
+
+
+/* E-WAY BILL VISIBILITY (GST ONLY) */
+function updateEwayVisibility(){
+  const gst = document.getElementById("gstToggle");
+  const ew = document.getElementById("ewayWrap");
+  if(!ew) return;
+  ew.style.display = (gst && gst.checked) ? "inline-block" : "none";
+}
+
+document.addEventListener("change",function(e){
+  if(e.target && e.target.id==="gstToggle"){
+    updateEwayVisibility();
+  }
+});
+window.addEventListener("load",updateEwayVisibility);
 
 </script>
 <!-- 🔥 FIREBASE END -->
