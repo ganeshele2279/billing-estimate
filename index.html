@@ -798,7 +798,6 @@ window.addEventListener("load", ()=>{
     db = firebase.firestore();
     console.log("🔥 Firebase initialized");
     loadDashboard();
-    loadEstimateForEdit();
   }catch(e){
     console.error("Firebase init error", e);
   }
@@ -814,36 +813,21 @@ function firebaseSaveNow(){
   document.querySelectorAll("#body tr").forEach(r=>{
     const t = r.querySelectorAll("td");
     if(t.length>=6){
-      let itemName = "";
-      const ta = t[1].querySelector("textarea");
-      const inp = t[1].querySelector("input");
-      if(ta) itemName = ta.value;
-      else if(inp) itemName = inp.value;
-      else itemName = t[1].innerText;
-
-      const qtyInput = t[2].querySelector("input");
-      const rateInput = t[3].querySelector("input");
-
       items.push({
-        item: (itemName || "").trim(),
-        qty: qtyInput ? qtyInput.value : "",
-        rate: rateInput ? rateInput.value : ""
+        item:t[1].innerText,
+        qty:t[2].innerText,
+        rate:t[3].innerText,
+        amount:t[5].innerText
       });
     }
   });
 
   db.collection("estimates").doc(id).set({
-    invoiceNo: id,
-    customer: document.getElementById("cust").value || "",
+    invoiceNo:id,
+    customer:document.getElementById("cust").value || "",
     items,
-    gstEnabled: document.getElementById("gstToggle")?.checked || false,
-    gstPercent: document.getElementById("gstPer")?.value || "",
-    subTotal: document.getElementById("sub")?.innerText || "",
-    gstAmount: document.getElementById("gstAmt")?.innerText || "",
-    roundOff: document.getElementById("roundoff")?.innerText || "",
-    grandTotal: document.getElementById("grand")?.innerText || "",
-    notes: document.getElementById("notes")?.value || "",
-    time: new Date().toISOString()
+    total:document.getElementById("grand").innerText,
+    time:new Date().toISOString()
   }).then(()=>{
     alert("✅ Saved successfully");
   }).catch(err=>{
@@ -876,7 +860,11 @@ function loadDashboard(){
             <td>${d.invoiceNo || ""}</td>
             <td>${d.customer || ""}</td>
             <td>₹ ${d.total || "0.00"}</td>
-            <td><button onclick="openEstimate('${doc.id}')">Edit</button></td>
+            <td>
+<button onclick="openEstimate('${doc.id}')">Edit</button>
+<button onclick="printEstimate('${doc.id}')">Print</button>
+<button onclick="deleteEstimate('${doc.id}')">Delete</button>
+</td>
           </tr>
         `;
       });
@@ -885,69 +873,21 @@ function loadDashboard(){
 
 
   
-
-// ===== HARD FIX: FULL ITEM INJECTION WITH RECALC =====
+// ===== DASHBOARD WORKFLOW =====
 function openEstimate(id){
-  localStorage.setItem("EDIT_ESTIMATE_ID", id);
-  location.reload();
+  alert("Edit workflow placeholder for " + id);
 }
 
-function loadEstimateForEdit(){
-  const editId = localStorage.getItem("EDIT_ESTIMATE_ID");
-  if(!editId || !db) return;
+function printEstimate(id){
+  window.print();
+}
 
-  db.collection("estimates").doc(editId).get().then(doc=>{
-    if(!doc.exists) return;
-    const d = doc.data();
-
-    invNo.innerText = d.invoiceNo || editId;
-    document.getElementById("cust").value = d.customer || "";
-
-    const body = document.getElementById("body");
-    body.innerHTML = "";
-
-    (d.items || []).forEach(it=>{
-      addRow();
-      const row = body.querySelector("tr:last-child");
-      const tds = row.querySelectorAll("td");
-
-      tds[1].innerText = it.item || "";
-      tds[2].innerText = it.qty || "1";
-      tds[3].innerText = it.rate || "0";
-      if(tds[4]) tds[4].querySelector("input").value = 0;
-    });
-
-    calc(); // 🔥 force full recalculation
-    localStorage.removeItem("EDIT_ESTIMATE_ID");
+function deleteEstimate(id){
+  if(!confirm("Delete this estimate?")) return;
+  db.collection("estimates").doc(id).delete().then(()=>{
+    alert("Deleted");
   });
 }
-
-function loadEstimateForEdit(){
-  const editId = localStorage.getItem("EDIT_ESTIMATE_ID");
-  if(!editId || !db) return;
-
-  db.collection("estimates").doc(editId).get().then(doc=>{
-    if(!doc.exists) return;
-    const d = doc.data();
-
-    document.getElementById("invNo").innerText = d.invoiceNo || editId;
-    document.getElementById("cust").value = d.customer || "";
-
-    document.getElementById("body").innerHTML = "";
-
-    (d.items || []).forEach(it=>{
-      addRow();
-      const tds = document.querySelector("#body tr:last-child").querySelectorAll("td");
-      tds[1].innerText = it.item || "";
-      tds[2].innerText = it.qty || "";
-      tds[3].innerText = it.rate || "";
-    });
-
-    calc();
-    localStorage.removeItem("EDIT_ESTIMATE_ID");
-  });
-}
-
 
 let ADMIN_UNLOCKED = false;
 const ADMIN_PASSWORD = "2279"; // 🔐 yaha apna password set karo
