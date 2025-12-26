@@ -437,6 +437,21 @@ button:hover{ filter:brightness(0.9); }
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
+
+<style>
+/* ===== LEDGER HARD LOCK (NO UI DISTURB) ===== */
+#ledgerBox{
+  z-index:5000 !important;
+  background:#fff !important;
+}
+#ledgerBox button{
+  display:none !important; /* hide paid/unpaid/delete if any */
+}
+body.ledger-open .no-print{
+  display:none !important; /* hide left/right floating buttons */
+}
+</style>
+
 </head>
 <body>
 <div id="printTaxHeader" class="print-tax-header" style="display:none">TAX INVOICE <span style="font-weight:normal">ORIGINAL FOR RECIPIENT</span></div>
@@ -736,12 +751,11 @@ text-align:center;font-size:24px;font-weight:bold;width:100%">
         <th style="border:1px solid #ccc;padding:4px">Invoice</th>
         <th style="border:1px solid #ccc;padding:4px">Customer</th>
         <th style="border:1px solid #ccc;padding:4px">Total</th>
-        <th style="border:1px solid #ccc;padding:4px">Date</th>
         <th style="border:1px solid #ccc;padding:4px">Edit</th>
       </tr>
     </thead>
     <tbody id="dashboardBody">
-      <tr><td colspan="5" style="text-align:center">Loading from cloud…</td></tr>
+      <tr><td colspan="4" style="text-align:center">Loading…</td></tr>
     </tbody>
   </table>
 </div>
@@ -952,7 +966,7 @@ function refreshCustomers(){
  Object.keys(store).forEach(c=>{let o=document.createElement("option");o.value=c;custList.appendChild(o);});
 }
 
-async function openLedger(){
+async function openLedger(){ document.body.classList.add('ledger-open');
   ledgerBox.style.display = "block";
   ledgerContent.innerHTML = "Loading parties...";
 
@@ -1095,7 +1109,7 @@ function printFromLedger(p,i){
     refreshCustomers();
   },150);
 }
-function closeLedger(){ledgerBox.style.display="none";}
+function closeLedger(){ document.body.classList.remove('ledger-open');ledgerBox.style.display="none";}
 function newEstimate(){inv++;localStorage.setItem("EST_NO",inv);body.innerHTML="";cust.value="";notes.value="";gstToggle.checked=false;setHeader();addRow();calc();}
 
 refreshCustomers();
