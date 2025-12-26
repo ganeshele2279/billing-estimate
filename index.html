@@ -742,6 +742,62 @@ text-align:center;font-size:24px;font-weight:bold;width:100%">
 
 <script>
 
+/* ===== FIREBASE CLOUD (STABLE FIX) ===== */
+const firebaseConfig = {
+  apiKey: "AIzaSyCTukiMYfZLm9XKbmIxLd8G5mvuqWJo9ow",
+  authDomain: "webbilling-2de51.firebaseapp.com",
+  projectId: "webbilling-2de51",
+  storageBucket: "webbilling-2de51.firebasestorage.app",
+  messagingSenderId: "317669956422",
+  appId: "1:317669956422:web:7dff8cd4da83735cab2347"
+};
+
+let db = null;
+try{
+  firebase.initializeApp(firebaseConfig);
+  db = firebase.firestore();
+  console.log("Firebase initialized");
+}catch(e){
+  console.error("Firebase init error", e);
+}
+
+function cloudSaveEstimateSafe(){
+  if(!db){
+    console.error("Firestore DB not ready");
+    return;
+  }
+  const id = (invNo && invNo.innerText.trim()) ? invNo.innerText.trim() : Date.now().toString();
+  const items = [];
+  document.querySelectorAll("#body tr").forEach(r=>{
+    const c = r.querySelectorAll("td");
+    if(c.length >= 6){
+      items.push({
+        item: c[1].innerText.trim(),
+        qty: c[2].innerText.trim(),
+        rate: c[3].innerText.trim(),
+        amount: c[5].innerText.trim()
+      });
+    }
+  });
+
+  db.collection("estimates").doc(id).set({
+    invoiceNo: id,
+    customer: document.getElementById("cust")?.value || "",
+    items: items,
+    subtotal: document.getElementById("sub")?.innerText || "0",
+    gst: document.getElementById("gstAmt")?.innerText || "0",
+    grand: document.getElementById("grand")?.innerText || "0",
+    notes: document.getElementById("notes")?.value || "",
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  }).then(()=>{
+    console.log("Firebase save SUCCESS");
+  }).catch(err=>{
+    console.error("Firebase save FAILED", err);
+    alert("Firebase Save Error – Check Console");
+  });
+}
+
+
   let ADMIN_UNLOCKED = false;
 const ADMIN_PASSWORD = "2279"; // 🔐 yaha apna password set karo
 
