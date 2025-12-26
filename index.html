@@ -4,22 +4,7 @@
 <meta charset="UTF-8">
 <title>ESTIMATE</title>
 <style>
-body{font-family:Arial;background:#f4f4f4;padding:20px
-  // 🔥 CLOUD SAVE (non-destructive)
-  try{
-    db.collection("estimates").doc(invNo.innerText || Date.now().toString()).set({
-      invoiceNo: invNo.innerText || "",
-      customer: document.getElementById("cust")?.value || "",
-      items: cloudItems,
-      subtotal: document.getElementById("sub")?.innerText || "",
-      gst: document.getElementById("gstAmt")?.innerText || "",
-      grand: document.getElementById("grand")?.innerText || "",
-      notes: document.getElementById("notes")?.value || "",
-      updated: new Date().toISOString()
-    });
-  }catch(e){ console.log(e); }
-}
-
+body{font-family:Arial;background:#f4f4f4;padding:20px}
 .box{max-width:800px;margin:auto;background:#fff;padding:20px}
 h2{text-align:center}
 
@@ -447,11 +432,6 @@ button:hover{ filter:brightness(0.9); }
 }
 </style>
 
-
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
 </head>
 <body>
 <div id="printTaxHeader" class="print-tax-header" style="display:none">TAX INVOICE <span style="font-weight:normal">ORIGINAL FOR RECIPIENT</span></div>
@@ -762,34 +742,60 @@ text-align:center;font-size:24px;font-weight:bold;width:100%">
 
 <script>
 
-/* ===== FIREBASE INIT ===== */
-const firebaseConfig = {
-  apiKey: "AIzaSyCTukiMYfZLm9XKbmIxLd8G5mvuqWJo9ow",
-  authDomain: "webbilling-2de51.firebaseapp.com",
-  projectId: "webbilling-2de51",
-  storageBucket: "webbilling-2de51.firebasestorage.app",
-  messagingSenderId: "317669956422",
-  appId: "1:317669956422:web:7dff8cd4da83735cab2347"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+/* ===== FIREBASE REST FALLBACK (NO SDK ERRORS) ===== */
+const FIREBASE_PROJECT_ID = "webbilling-2de51";
+const FIREBASE_API_KEY = "AIzaSyCTukiMYfZLm9XKbmIxLd8G5mvuqWJo9ow";
 
-/* helper: collect rows safely */
-function collectItems(){
-  const rows = document.querySelectorAll("#body tr");
-  const items = [];
-  rows.forEach(r=>{
-    const tds = r.querySelectorAll("td");
-    if(tds.length){
-      items.push({
-        item: tds[1]?.innerText || "",
-        qty: tds[2]?.innerText || "",
-        rate: tds[3]?.innerText || "",
-        amount: tds[5]?.innerText || ""
-      });
+async function cloudSaveEstimateREST(){
+  try{
+    const id = (invNo && invNo.innerText.trim()) ? invNo.innerText.trim() : Date.now().toString();
+    const items = [];
+    document.querySelectorAll("#body tr").forEach(r=>{
+      const c = r.querySelectorAll("td");
+      if(c.length>=6){
+        items.push({
+          mapValue:{
+            fields:{
+              item:{stringValue:c[1].innerText.trim()},
+              qty:{stringValue:c[2].innerText.trim()},
+              rate:{stringValue:c[3].innerText.trim()},
+              amount:{stringValue:c[5].innerText.trim()}
+            }
+          }
+        });
+      }
+    });
+
+    const payload = {
+      fields:{
+        invoiceNo:{stringValue:id},
+        customer:{stringValue:document.getElementById("cust")?.value || ""},
+        notes:{stringValue:document.getElementById("notes")?.value || ""},
+        subtotal:{stringValue:document.getElementById("sub")?.innerText || "0"},
+        gst:{stringValue:document.getElementById("gstAmt")?.innerText || "0"},
+        grand:{stringValue:document.getElementById("grand")?.innerText || "0"},
+        items:{arrayValue:{values:items}},
+        createdAt:{timestampValue:new Date().toISOString()}
+      }
+    };
+
+    const url = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/estimates/${id}?key=${FIREBASE_API_KEY}`;
+
+    const res = await fetch(url,{
+      method:"PATCH",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify(payload)
+    });
+
+    if(!res.ok){
+      const t = await res.text();
+      throw t;
     }
-  });
-  return items;
+    console.log("Firebase REST save SUCCESS");
+  }catch(e){
+    console.error("Firebase REST save FAILED", e);
+    alert("Firebase save failed (REST). Check console.");
+  }
 }
 
 
@@ -887,6 +893,9 @@ function calc(){
 async function saveEstimate(){
  const name = cust.value.trim();
  if(!name){ alert("Customer name required"); return; }
+
+// 🔥 Firebase Cloud Save (REST fallback)
+try{ cloudSaveEstimateREST(); }catch(e){ console.log(e); }
 
  const snap = {
   header:{
