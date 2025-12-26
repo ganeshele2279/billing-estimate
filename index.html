@@ -860,7 +860,7 @@ function loadDashboard(){
             <td>${d.invoiceNo || ""}</td>
             <td>${d.customer || ""}</td>
             <td>₹ ${d.total || "0.00"}</td>
-            <td><button onclick="alert('Edit coming soon')">Edit</button></td>
+            <td><button onclick="window.location='index_dashboard_edit.html?edit=' + encodeURIComponent('${doc.id}')">Edit</button></td>
           </tr>
         `;
       });
@@ -868,7 +868,48 @@ function loadDashboard(){
 }
 
 
-  let ADMIN_UNLOCKED = false;
+  
+// ===== URL BASED EDIT LOADER =====
+function loadEstimateById(editId){
+  if(!db || !editId) return;
+
+  db.collection("estimates").doc(editId).get().then(doc=>{
+    if(!doc.exists){
+      alert("Invoice not found");
+      return;
+    }
+    const d = doc.data();
+
+    invNo.innerText = d.invoiceNo || editId;
+    document.getElementById("cust").value = d.customer || "";
+
+    document.getElementById("body").innerHTML = "";
+
+    (d.items || []).forEach(it=>{
+      addRow();
+      const row = document.querySelector("#body tr:last-child");
+      const tds = row.querySelectorAll("td");
+      tds[1].innerText = it.item || "";
+      tds[2].innerText = it.qty || "";
+      tds[3].innerText = it.rate || "";
+      tds[5].innerText = it.amount || "";
+    });
+
+    calc();
+    alert("Editing Invoice: " + editId);
+  });
+}
+
+window.addEventListener("load", ()=>{
+  const params = new URLSearchParams(window.location.search);
+  const editId = params.get("edit");
+  if(editId){
+    loadEstimateById(editId);
+  }
+});
+
+
+let ADMIN_UNLOCKED = false;
 const ADMIN_PASSWORD = "2279"; // 🔐 yaha apna password set karo
 
 
