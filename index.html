@@ -814,7 +814,14 @@ function firebaseSaveNow(){
   document.querySelectorAll("#body tr").forEach(r=>{
     const t = r.querySelectorAll("td");
     if(t.length>=6){
-      const itemName = t[1].innerText.trim();
+      // ITEM NAME can be textarea, input, or contenteditable td
+      let itemName = "";
+      const ta = t[1].querySelector("textarea");
+      const inp = t[1].querySelector("input");
+      if(ta) itemName = ta.value.trim();
+      else if(inp) itemName = inp.value.trim();
+      else itemName = t[1].innerText.trim();
+
       const qtyInput = t[2].querySelector("input");
       const rateInput = t[3].querySelector("input");
 
@@ -829,11 +836,17 @@ function firebaseSaveNow(){
   });
 
   db.collection("estimates").doc(id).set({
-    invoiceNo:id,
-    customer:document.getElementById("cust").value || "",
+    invoiceNo: id,
+    customer: document.getElementById("cust").value || "",
     items,
-    total:document.getElementById("grand").innerText,
-    time:new Date().toISOString()
+    gstEnabled: document.getElementById("gstToggle")?.checked || false,
+    gstPercent: document.getElementById("gstPer")?.value || "",
+    subTotal: document.getElementById("sub")?.innerText || "",
+    gstAmount: document.getElementById("gstAmt")?.innerText || "",
+    roundOff: document.getElementById("roundoff")?.innerText || "",
+    grandTotal: document.getElementById("grand")?.innerText || "",
+    notes: document.getElementById("notes")?.value || "",
+    time: new Date().toISOString()
   }).then(()=>{
     alert("✅ Saved successfully");
   }).catch(err=>{
