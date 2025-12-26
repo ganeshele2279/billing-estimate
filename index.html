@@ -4148,8 +4148,7 @@ function openRegister(){
 
 
 
-
-/* ===== REGISTER SUBMIT FINAL (FIREBASE VERSION SAFE) ===== */
+/* ===== REGISTER SUBMIT FINAL (WITH LOADER, NO POPUP SPAM) ===== */
 async function registerUser(){
   const name = document.getElementById("regName").value.trim();
   const mobile = document.getElementById("regMobile").value.trim();
@@ -4163,26 +4162,19 @@ async function registerUser(){
 
   loader.style.display = "block";
 
-  const dbx = await resolveFirestore();
+  const dbx = await waitForDB(5000);
   if(!dbx){
     loader.style.display = "none";
-    alert("Firebase not detected. Please check config once.");
+    alert("Unable to connect, please try again");
     return;
   }
 
   try{
-    // v8 or v9 compatible write
-    if(dbx.collection){
-      await dbx.collection("USER_REQUESTS").doc(mobile).set({
-        name, mobile, pass, status:"pending", createdAt:new Date()
-      });
-    }else{
-      // v9 modular
-      const ref = doc(dbx, "USER_REQUESTS", mobile);
-      await setDoc(ref, {
-        name, mobile, pass, status:"pending", createdAt:new Date()
-      });
-    }
+    await dbx.collection("USER_REQUESTS").doc(mobile).set({
+      name, mobile, pass,
+      status:"pending",
+      createdAt:new Date()
+    });
 
     loader.style.display = "none";
     alert("Request submitted successfully, wait for admin approval");
@@ -4192,11 +4184,10 @@ async function registerUser(){
     document.getElementById("regPass").value="";
   }catch(e){
     loader.style.display = "none";
-    alert("Register failed. Check Firestore rules.");
+    alert("Failed to submit request");
     console.error(e);
   }
 }
-
 
 
 
@@ -4375,34 +4366,38 @@ function waitForDB(maxWaitMs = 3000){
 }
 
 
-/* ===== FIREBASE REAL RESOLVER (v8 + v9 SAFE) ===== */
-async function resolveFirestore(maxWaitMs = 5000){
-  const start = Date.now();
+/* ===== FIREBASE v9 MODULAR COMPAT FIX (NO UI / TABLE CHANGE) =====
+   Handles Firebase v9 modular where globals are not exposed
+*/
+
+function resolveFirestore(){
+  // Firebase v8 / compat
+  if (typeof firebase !== "undefined" && firebase.firestore) {
+    try { return firebase.firestore(); } catch(e){}
+  }
+  // Firebase v9 modular (global import)
+  if (typeof getFirestore === "function") {
+    try { return getFirestore(); } catch(e){}
+  }
+  console.error("Firestore not resolvable");
+  return null;
+}
+
+async function waitForDB(maxWaitMs = 5000){
   return new Promise((resolve)=>{
+    const start = Date.now();
     const timer = setInterval(()=>{
-      try{
-        // v8 compat
-        if (typeof firebase !== "undefined" &&
-            firebase.apps && firebase.apps.length &&
-            firebase.firestore){
-          clearInterval(timer);
-          resolve(firebase.firestore());
-          return;
-        }
-
-        // v9 modular (global imports)
-        if (typeof getFirestore === "function"){
-          clearInterval(timer);
-          resolve(getFirestore());
-          return;
-        }
-      }catch(e){}
-
+      const dbx = resolveFirestore();
+      if (dbx){
+        clearInterval(timer);
+        resolve(dbx);
+        return;
+      }
       if(Date.now() - start > maxWaitMs){
         clearInterval(timer);
         resolve(null);
       }
-    },100);
+    },150);
   });
 }
 
@@ -4815,8 +4810,7 @@ function openRegister(){
 
 
 
-
-/* ===== REGISTER SUBMIT FINAL (FIREBASE VERSION SAFE) ===== */
+/* ===== REGISTER SUBMIT FINAL (WITH LOADER, NO POPUP SPAM) ===== */
 async function registerUser(){
   const name = document.getElementById("regName").value.trim();
   const mobile = document.getElementById("regMobile").value.trim();
@@ -4830,26 +4824,19 @@ async function registerUser(){
 
   loader.style.display = "block";
 
-  const dbx = await resolveFirestore();
+  const dbx = await waitForDB(5000);
   if(!dbx){
     loader.style.display = "none";
-    alert("Firebase not detected. Please check config once.");
+    alert("Unable to connect, please try again");
     return;
   }
 
   try{
-    // v8 or v9 compatible write
-    if(dbx.collection){
-      await dbx.collection("USER_REQUESTS").doc(mobile).set({
-        name, mobile, pass, status:"pending", createdAt:new Date()
-      });
-    }else{
-      // v9 modular
-      const ref = doc(dbx, "USER_REQUESTS", mobile);
-      await setDoc(ref, {
-        name, mobile, pass, status:"pending", createdAt:new Date()
-      });
-    }
+    await dbx.collection("USER_REQUESTS").doc(mobile).set({
+      name, mobile, pass,
+      status:"pending",
+      createdAt:new Date()
+    });
 
     loader.style.display = "none";
     alert("Request submitted successfully, wait for admin approval");
@@ -4859,11 +4846,10 @@ async function registerUser(){
     document.getElementById("regPass").value="";
   }catch(e){
     loader.style.display = "none";
-    alert("Register failed. Check Firestore rules.");
+    alert("Failed to submit request");
     console.error(e);
   }
 }
-
 
 
 
@@ -5042,34 +5028,38 @@ function waitForDB(maxWaitMs = 3000){
 }
 
 
-/* ===== FIREBASE REAL RESOLVER (v8 + v9 SAFE) ===== */
-async function resolveFirestore(maxWaitMs = 5000){
-  const start = Date.now();
+/* ===== FIREBASE v9 MODULAR COMPAT FIX (NO UI / TABLE CHANGE) =====
+   Handles Firebase v9 modular where globals are not exposed
+*/
+
+function resolveFirestore(){
+  // Firebase v8 / compat
+  if (typeof firebase !== "undefined" && firebase.firestore) {
+    try { return firebase.firestore(); } catch(e){}
+  }
+  // Firebase v9 modular (global import)
+  if (typeof getFirestore === "function") {
+    try { return getFirestore(); } catch(e){}
+  }
+  console.error("Firestore not resolvable");
+  return null;
+}
+
+async function waitForDB(maxWaitMs = 5000){
   return new Promise((resolve)=>{
+    const start = Date.now();
     const timer = setInterval(()=>{
-      try{
-        // v8 compat
-        if (typeof firebase !== "undefined" &&
-            firebase.apps && firebase.apps.length &&
-            firebase.firestore){
-          clearInterval(timer);
-          resolve(firebase.firestore());
-          return;
-        }
-
-        // v9 modular (global imports)
-        if (typeof getFirestore === "function"){
-          clearInterval(timer);
-          resolve(getFirestore());
-          return;
-        }
-      }catch(e){}
-
+      const dbx = resolveFirestore();
+      if (dbx){
+        clearInterval(timer);
+        resolve(dbx);
+        return;
+      }
       if(Date.now() - start > maxWaitMs){
         clearInterval(timer);
         resolve(null);
       }
-    },100);
+    },150);
   });
 }
 
@@ -5432,8 +5422,7 @@ function openRegister(){
 
 
 
-
-/* ===== REGISTER SUBMIT FINAL (FIREBASE VERSION SAFE) ===== */
+/* ===== REGISTER SUBMIT FINAL (WITH LOADER, NO POPUP SPAM) ===== */
 async function registerUser(){
   const name = document.getElementById("regName").value.trim();
   const mobile = document.getElementById("regMobile").value.trim();
@@ -5447,26 +5436,19 @@ async function registerUser(){
 
   loader.style.display = "block";
 
-  const dbx = await resolveFirestore();
+  const dbx = await waitForDB(5000);
   if(!dbx){
     loader.style.display = "none";
-    alert("Firebase not detected. Please check config once.");
+    alert("Unable to connect, please try again");
     return;
   }
 
   try{
-    // v8 or v9 compatible write
-    if(dbx.collection){
-      await dbx.collection("USER_REQUESTS").doc(mobile).set({
-        name, mobile, pass, status:"pending", createdAt:new Date()
-      });
-    }else{
-      // v9 modular
-      const ref = doc(dbx, "USER_REQUESTS", mobile);
-      await setDoc(ref, {
-        name, mobile, pass, status:"pending", createdAt:new Date()
-      });
-    }
+    await dbx.collection("USER_REQUESTS").doc(mobile).set({
+      name, mobile, pass,
+      status:"pending",
+      createdAt:new Date()
+    });
 
     loader.style.display = "none";
     alert("Request submitted successfully, wait for admin approval");
@@ -5476,11 +5458,10 @@ async function registerUser(){
     document.getElementById("regPass").value="";
   }catch(e){
     loader.style.display = "none";
-    alert("Register failed. Check Firestore rules.");
+    alert("Failed to submit request");
     console.error(e);
   }
 }
-
 
 
 
@@ -5659,34 +5640,38 @@ function waitForDB(maxWaitMs = 3000){
 }
 
 
-/* ===== FIREBASE REAL RESOLVER (v8 + v9 SAFE) ===== */
-async function resolveFirestore(maxWaitMs = 5000){
-  const start = Date.now();
+/* ===== FIREBASE v9 MODULAR COMPAT FIX (NO UI / TABLE CHANGE) =====
+   Handles Firebase v9 modular where globals are not exposed
+*/
+
+function resolveFirestore(){
+  // Firebase v8 / compat
+  if (typeof firebase !== "undefined" && firebase.firestore) {
+    try { return firebase.firestore(); } catch(e){}
+  }
+  // Firebase v9 modular (global import)
+  if (typeof getFirestore === "function") {
+    try { return getFirestore(); } catch(e){}
+  }
+  console.error("Firestore not resolvable");
+  return null;
+}
+
+async function waitForDB(maxWaitMs = 5000){
   return new Promise((resolve)=>{
+    const start = Date.now();
     const timer = setInterval(()=>{
-      try{
-        // v8 compat
-        if (typeof firebase !== "undefined" &&
-            firebase.apps && firebase.apps.length &&
-            firebase.firestore){
-          clearInterval(timer);
-          resolve(firebase.firestore());
-          return;
-        }
-
-        // v9 modular (global imports)
-        if (typeof getFirestore === "function"){
-          clearInterval(timer);
-          resolve(getFirestore());
-          return;
-        }
-      }catch(e){}
-
+      const dbx = resolveFirestore();
+      if (dbx){
+        clearInterval(timer);
+        resolve(dbx);
+        return;
+      }
       if(Date.now() - start > maxWaitMs){
         clearInterval(timer);
         resolve(null);
       }
-    },100);
+    },150);
   });
 }
 
@@ -6095,8 +6080,7 @@ function openRegister(){
 
 
 
-
-/* ===== REGISTER SUBMIT FINAL (FIREBASE VERSION SAFE) ===== */
+/* ===== REGISTER SUBMIT FINAL (WITH LOADER, NO POPUP SPAM) ===== */
 async function registerUser(){
   const name = document.getElementById("regName").value.trim();
   const mobile = document.getElementById("regMobile").value.trim();
@@ -6110,26 +6094,19 @@ async function registerUser(){
 
   loader.style.display = "block";
 
-  const dbx = await resolveFirestore();
+  const dbx = await waitForDB(5000);
   if(!dbx){
     loader.style.display = "none";
-    alert("Firebase not detected. Please check config once.");
+    alert("Unable to connect, please try again");
     return;
   }
 
   try{
-    // v8 or v9 compatible write
-    if(dbx.collection){
-      await dbx.collection("USER_REQUESTS").doc(mobile).set({
-        name, mobile, pass, status:"pending", createdAt:new Date()
-      });
-    }else{
-      // v9 modular
-      const ref = doc(dbx, "USER_REQUESTS", mobile);
-      await setDoc(ref, {
-        name, mobile, pass, status:"pending", createdAt:new Date()
-      });
-    }
+    await dbx.collection("USER_REQUESTS").doc(mobile).set({
+      name, mobile, pass,
+      status:"pending",
+      createdAt:new Date()
+    });
 
     loader.style.display = "none";
     alert("Request submitted successfully, wait for admin approval");
@@ -6139,11 +6116,10 @@ async function registerUser(){
     document.getElementById("regPass").value="";
   }catch(e){
     loader.style.display = "none";
-    alert("Register failed. Check Firestore rules.");
+    alert("Failed to submit request");
     console.error(e);
   }
 }
-
 
 
 
@@ -6322,34 +6298,38 @@ function waitForDB(maxWaitMs = 3000){
 }
 
 
-/* ===== FIREBASE REAL RESOLVER (v8 + v9 SAFE) ===== */
-async function resolveFirestore(maxWaitMs = 5000){
-  const start = Date.now();
+/* ===== FIREBASE v9 MODULAR COMPAT FIX (NO UI / TABLE CHANGE) =====
+   Handles Firebase v9 modular where globals are not exposed
+*/
+
+function resolveFirestore(){
+  // Firebase v8 / compat
+  if (typeof firebase !== "undefined" && firebase.firestore) {
+    try { return firebase.firestore(); } catch(e){}
+  }
+  // Firebase v9 modular (global import)
+  if (typeof getFirestore === "function") {
+    try { return getFirestore(); } catch(e){}
+  }
+  console.error("Firestore not resolvable");
+  return null;
+}
+
+async function waitForDB(maxWaitMs = 5000){
   return new Promise((resolve)=>{
+    const start = Date.now();
     const timer = setInterval(()=>{
-      try{
-        // v8 compat
-        if (typeof firebase !== "undefined" &&
-            firebase.apps && firebase.apps.length &&
-            firebase.firestore){
-          clearInterval(timer);
-          resolve(firebase.firestore());
-          return;
-        }
-
-        // v9 modular (global imports)
-        if (typeof getFirestore === "function"){
-          clearInterval(timer);
-          resolve(getFirestore());
-          return;
-        }
-      }catch(e){}
-
+      const dbx = resolveFirestore();
+      if (dbx){
+        clearInterval(timer);
+        resolve(dbx);
+        return;
+      }
       if(Date.now() - start > maxWaitMs){
         clearInterval(timer);
         resolve(null);
       }
-    },100);
+    },150);
   });
 }
 
