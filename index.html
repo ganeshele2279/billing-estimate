@@ -814,12 +814,17 @@ function firebaseSaveNow(){
   document.querySelectorAll("#body tr").forEach(r=>{
     const t = r.querySelectorAll("td");
     if(t.length>=6){
-      items.push({
-        item:t[1].innerText,
-        qty:t[2].innerText,
-        rate:t[3].innerText,
-        amount:t[5].innerText
-      });
+      const itemName = t[1].innerText.trim();
+      const qtyInput = t[2].querySelector("input");
+      const rateInput = t[3].querySelector("input");
+
+      if(itemName){
+        items.push({
+          item: itemName,
+          qty: qtyInput ? qtyInput.value : "",
+          rate: rateInput ? rateInput.value : ""
+        });
+      }
     }
   });
 
