@@ -4,7 +4,22 @@
 <meta charset="UTF-8">
 <title>ESTIMATE</title>
 <style>
-body{font-family:Arial;background:#f4f4f4;padding:20px}
+body{font-family:Arial;background:#f4f4f4;padding:20px
+  // 🔥 CLOUD SAVE (non-destructive)
+  try{
+    db.collection("estimates").doc(invNo.innerText || Date.now().toString()).set({
+      invoiceNo: invNo.innerText || "",
+      customer: document.getElementById("cust")?.value || "",
+      items: cloudItems,
+      subtotal: document.getElementById("sub")?.innerText || "",
+      gst: document.getElementById("gstAmt")?.innerText || "",
+      grand: document.getElementById("grand")?.innerText || "",
+      notes: document.getElementById("notes")?.value || "",
+      updated: new Date().toISOString()
+    });
+  }catch(e){ console.log(e); }
+}
+
 .box{max-width:800px;margin:auto;background:#fff;padding:20px}
 h2{text-align:center}
 
@@ -432,6 +447,11 @@ button:hover{ filter:brightness(0.9); }
 }
 </style>
 
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
 </head>
 <body>
 <div id="printTaxHeader" class="print-tax-header" style="display:none">TAX INVOICE <span style="font-weight:normal">ORIGINAL FOR RECIPIENT</span></div>
@@ -742,7 +762,7 @@ text-align:center;font-size:24px;font-weight:bold;width:100%">
 
 <script>
 
-/* ===== FIREBASE CLOUD (STABLE FIX) ===== */
+/* ===== FIREBASE INIT ===== */
 const firebaseConfig = {
   apiKey: "AIzaSyCTukiMYfZLm9XKbmIxLd8G5mvuqWJo9ow",
   authDomain: "webbilling-2de51.firebaseapp.com",
@@ -751,50 +771,25 @@ const firebaseConfig = {
   messagingSenderId: "317669956422",
   appId: "1:317669956422:web:7dff8cd4da83735cab2347"
 };
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-let db = null;
-try{
-  firebase.initializeApp(firebaseConfig);
-  db = firebase.firestore();
-  console.log("Firebase initialized");
-}catch(e){
-  console.error("Firebase init error", e);
-}
-
-function cloudSaveEstimateSafe(){
-  if(!db){
-    console.error("Firestore DB not ready");
-    return;
-  }
-  const id = (invNo && invNo.innerText.trim()) ? invNo.innerText.trim() : Date.now().toString();
+/* helper: collect rows safely */
+function collectItems(){
+  const rows = document.querySelectorAll("#body tr");
   const items = [];
-  document.querySelectorAll("#body tr").forEach(r=>{
-    const c = r.querySelectorAll("td");
-    if(c.length >= 6){
+  rows.forEach(r=>{
+    const tds = r.querySelectorAll("td");
+    if(tds.length){
       items.push({
-        item: c[1].innerText.trim(),
-        qty: c[2].innerText.trim(),
-        rate: c[3].innerText.trim(),
-        amount: c[5].innerText.trim()
+        item: tds[1]?.innerText || "",
+        qty: tds[2]?.innerText || "",
+        rate: tds[3]?.innerText || "",
+        amount: tds[5]?.innerText || ""
       });
     }
   });
-
-  db.collection("estimates").doc(id).set({
-    invoiceNo: id,
-    customer: document.getElementById("cust")?.value || "",
-    items: items,
-    subtotal: document.getElementById("sub")?.innerText || "0",
-    gst: document.getElementById("gstAmt")?.innerText || "0",
-    grand: document.getElementById("grand")?.innerText || "0",
-    notes: document.getElementById("notes")?.value || "",
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-  }).then(()=>{
-    console.log("Firebase save SUCCESS");
-  }).catch(err=>{
-    console.error("Firebase save FAILED", err);
-    alert("Firebase Save Error – Check Console");
-  });
+  return items;
 }
 
 
