@@ -870,10 +870,41 @@ function loadDashboard(){
 
 
   
-// ===== EDIT ESTIMATE (OPTION 1 - SAFE RELOAD) =====
+
+// ===== HARD FIX: FULL ITEM INJECTION WITH RECALC =====
 function openEstimate(id){
   localStorage.setItem("EDIT_ESTIMATE_ID", id);
   location.reload();
+}
+
+function loadEstimateForEdit(){
+  const editId = localStorage.getItem("EDIT_ESTIMATE_ID");
+  if(!editId || !db) return;
+
+  db.collection("estimates").doc(editId).get().then(doc=>{
+    if(!doc.exists) return;
+    const d = doc.data();
+
+    invNo.innerText = d.invoiceNo || editId;
+    document.getElementById("cust").value = d.customer || "";
+
+    const body = document.getElementById("body");
+    body.innerHTML = "";
+
+    (d.items || []).forEach(it=>{
+      addRow();
+      const row = body.querySelector("tr:last-child");
+      const tds = row.querySelectorAll("td");
+
+      tds[1].innerText = it.item || "";
+      tds[2].innerText = it.qty || "1";
+      tds[3].innerText = it.rate || "0";
+      if(tds[4]) tds[4].querySelector("input").value = 0;
+    });
+
+    calc(); // 🔥 force full recalculation
+    localStorage.removeItem("EDIT_ESTIMATE_ID");
+  });
 }
 
 function loadEstimateForEdit(){
