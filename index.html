@@ -797,6 +797,7 @@ window.addEventListener("load", ()=>{
     firebase.initializeApp(firebaseConfig);
     db = firebase.firestore();
     console.log("🔥 Firebase initialized");
+    loadDashboard();
   }catch(e){
     console.error("Firebase init error", e);
   }
@@ -833,6 +834,37 @@ function firebaseSaveNow(){
     console.error(err);
     alert("❌ Firebase save failed");
   });
+}
+
+
+// ===== DASHBOARD LOAD (FIX) =====
+function loadDashboard(){
+  if(!db) return;
+
+  db.collection("estimates")
+    .orderBy("time","desc")
+    .onSnapshot(snapshot=>{
+      const tbody = document.getElementById("dashboardBody");
+      tbody.innerHTML = "";
+
+      if(snapshot.empty){
+        tbody.innerHTML =
+          `<tr><td colspan="4" style="text-align:center">No data</td></tr>`;
+        return;
+      }
+
+      snapshot.forEach(doc=>{
+        const d = doc.data();
+        tbody.innerHTML += `
+          <tr>
+            <td>${d.invoiceNo || ""}</td>
+            <td>${d.customer || ""}</td>
+            <td>₹ ${d.total || "0.00"}</td>
+            <td><button onclick="alert('Edit coming soon')">Edit</button></td>
+          </tr>
+        `;
+      });
+    });
 }
 
 
