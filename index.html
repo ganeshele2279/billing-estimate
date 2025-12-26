@@ -880,11 +880,12 @@ function loadDashboard(){
 
       snapshot.forEach(doc=>{
         const d = doc.data();
+        const totalVal = d.grandTotal || d.total || "0.00";
         tbody.innerHTML += `
           <tr>
-            <td>${d.invoiceNo || ""}</td>
+            <td>${d.invoiceNo || doc.id}</td>
             <td>${d.customer || ""}</td>
-            <td>₹ ${d.total || "0.00"}</td>
+            <td>₹ ${totalVal}</td>
             <td><button onclick="openEstimate('${doc.id}')">Edit</button></td>
           </tr>
         `;
