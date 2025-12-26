@@ -812,24 +812,28 @@ function firebaseSaveNow(){
   const id = invNo.innerText.trim() || Date.now().toString();
   const items = [];
   document.querySelectorAll("#body tr").forEach(r=>{
-    const t = r.querySelectorAll("td");
-    if(t.length>=6){
-      // ITEM NAME can be textarea, input, or contenteditable td
+    const tds = r.querySelectorAll("td");
+    if(tds.length >= 6){
+      // Item name (textarea / input / contenteditable)
       let itemName = "";
-      const ta = t[1].querySelector("textarea");
-      const inp = t[1].querySelector("input");
-      if(ta) itemName = ta.value.trim();
-      else if(inp) itemName = inp.value.trim();
-      else itemName = t[1].innerText.trim();
+      const ta = tds[1].querySelector("textarea");
+      const inp = tds[1].querySelector("input");
+      if(ta && ta.value) itemName = ta.value.trim();
+      else if(inp && inp.value) itemName = inp.value.trim();
+      else itemName = tds[1].innerText.trim();
 
-      const qtyInput = t[2].querySelector("input");
-      const rateInput = t[3].querySelector("input");
+      const qtyInput = tds[2].querySelector("input");
+      const rateInput = tds[3].querySelector("input");
 
-      if(itemName){
+      const qty = qtyInput ? qtyInput.value : "";
+      const rate = rateInput ? rateInput.value : "";
+
+      // Push EVERY valid row (not only first)
+      if(itemName !== ""){
         items.push({
           item: itemName,
-          qty: qtyInput ? qtyInput.value : "",
-          rate: rateInput ? rateInput.value : ""
+          qty: qty,
+          rate: rate
         });
       }
     }
@@ -838,16 +842,18 @@ function firebaseSaveNow(){
   db.collection("estimates").doc(id).set({
     invoiceNo: id,
     customer: document.getElementById("cust").value || "",
-    items,
+    invoiceDate: document.getElementById("date")?.innerText || "",
+    invoiceTime: document.getElementById("time")?.innerText || "",
+    items: items,
     gstEnabled: document.getElementById("gstToggle")?.checked || false,
     gstPercent: document.getElementById("gstPer")?.value || "",
-    subTotal: document.getElementById("sub")?.innerText || "",
-    gstAmount: document.getElementById("gstAmt")?.innerText || "",
-    roundOff: document.getElementById("roundoff")?.innerText || "",
-    grandTotal: document.getElementById("grand")?.innerText || "",
+    subTotal: document.getElementById("sub")?.innerText || "0.00",
+    gstAmount: document.getElementById("gstAmt")?.innerText || "0.00",
+    roundOff: document.getElementById("roundoff")?.innerText || "0.00",
+    grandTotal: document.getElementById("grand")?.innerText || "0.00",
     notes: document.getElementById("notes")?.value || "",
-    time: new Date().toISOString()
-  }).then(()=>{
+    updatedAt: new Date().toISOString()
+  }, { merge:true }).then(()=>{
     alert("✅ Saved successfully");
   }).catch(err=>{
     console.error(err);
