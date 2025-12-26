@@ -798,6 +798,7 @@ window.addEventListener("load", ()=>{
     db = firebase.firestore();
     console.log("🔥 Firebase initialized");
     loadDashboard();
+    loadEstimateForEdit();
   }catch(e){
     console.error("Firebase init error", e);
   }
@@ -860,7 +861,7 @@ function loadDashboard(){
             <td>${d.invoiceNo || ""}</td>
             <td>${d.customer || ""}</td>
             <td>₹ ${d.total || "0.00"}</td>
-            <td><button onclick="window.location='index_dashboard_edit.html?edit=' + encodeURIComponent('${doc.id}')">Edit</button></td>
+            <td><button onclick="openEstimate('${doc.id}')">Edit</button></td>
           </tr>
         `;
       });
@@ -869,44 +870,37 @@ function loadDashboard(){
 
 
   
-// ===== URL BASED EDIT LOADER =====
-function loadEstimateById(editId){
-  if(!db || !editId) return;
+// ===== EDIT ESTIMATE (OPTION 1 - SAFE RELOAD) =====
+function openEstimate(id){
+  localStorage.setItem("EDIT_ESTIMATE_ID", id);
+  location.reload();
+}
+
+function loadEstimateForEdit(){
+  const editId = localStorage.getItem("EDIT_ESTIMATE_ID");
+  if(!editId || !db) return;
 
   db.collection("estimates").doc(editId).get().then(doc=>{
-    if(!doc.exists){
-      alert("Invoice not found");
-      return;
-    }
+    if(!doc.exists) return;
     const d = doc.data();
 
-    invNo.innerText = d.invoiceNo || editId;
+    document.getElementById("invNo").innerText = d.invoiceNo || editId;
     document.getElementById("cust").value = d.customer || "";
 
     document.getElementById("body").innerHTML = "";
 
     (d.items || []).forEach(it=>{
       addRow();
-      const row = document.querySelector("#body tr:last-child");
-      const tds = row.querySelectorAll("td");
+      const tds = document.querySelector("#body tr:last-child").querySelectorAll("td");
       tds[1].innerText = it.item || "";
       tds[2].innerText = it.qty || "";
       tds[3].innerText = it.rate || "";
-      tds[5].innerText = it.amount || "";
     });
 
     calc();
-    alert("Editing Invoice: " + editId);
+    localStorage.removeItem("EDIT_ESTIMATE_ID");
   });
 }
-
-window.addEventListener("load", ()=>{
-  const params = new URLSearchParams(window.location.search);
-  const editId = params.get("edit");
-  if(editId){
-    loadEstimateById(editId);
-  }
-});
 
 
 let ADMIN_UNLOCKED = false;
