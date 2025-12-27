@@ -5048,168 +5048,91 @@ function openEstimate(id){
 
 
 
-<!-- ===== CLOUD SYNC : FIRMS & PARTIES (NO UI CHANGE) ===== -->
+<!-- ===== DEFINITIVE CLOUD DEBUG + SAVE FIX ===== -->
 <script>
 (function(){
-  if(!window.db) return;
 
-  // ---------- FIRMS ----------
-  window.firebaseSaveFirm = function(firm){
-    if(!firm || !firm.name) return;
-    db.collection("firms").doc(firm.name).set(firm,{merge:true});
-  };
+  function log(msg){
+    console.log("CLOUD:", msg);
+  }
 
-  window.firebaseLoadFirms = function(){
-    db.collection("firms").onSnapshot(snap=>{
-      const sel = document.getElementById("firmSelect");
-      if(!sel) return;
-      const v = sel.value;
-      sel.innerHTML = '<option value="">-- Select Firm --</option>';
-      snap.forEach(d=>{
-        const o = document.createElement("option");
-        o.value = d.id;
-        o.textContent = d.id;
-        sel.appendChild(o);
-      });
-      sel.value = v;
-    });
-  };
+  function alertErr(e){
+    alert("❌ Cloud error. Open console (F12) → CLOUD logs");
+    console.error(e);
+  }
 
-  const _saveProfile = window.saveProfile;
-  window.saveProfile = function(){
-    _saveProfile && _saveProfile();
-    firebaseSaveFirm({
-      name:p_name.value,
-      gst:p_gst.value,
-      address:p_address.value,
-      mobile:p_mobile.value,
-      email:p_email.value
-    });
-  };
+  function waitDB(cb){
+    if(window.db){ cb(); }
+    else setTimeout(()=>waitDB(cb),500);
+  }
 
-  const _saveBank = window.saveBank;
-  window.saveBank = function(){
-    _saveBank && _saveBank();
-    const f = document.getElementById("firmSelect").value;
-    if(!f) return;
-    db.collection("firms").doc(f).set({
-      bank:{
-        name:bank_name.value,
-        acc:bank_acc.value,
-        ifsc:bank_ifsc.value,
-        branch:bank_branch.value
+  waitDB(function(){
+    log("Firebase DB ready");
+
+    // ---------- FIRM SAVE (EXPLICIT CALL) ----------
+    window.saveFirmCloud = function(){
+      try{
+        const name = p_name?.value?.trim();
+        if(!name){ alert("Firm name empty"); return; }
+
+        const data = {
+          name,
+          gst:p_gst.value,
+          address:p_address.value,
+          mobile:p_mobile.value,
+          email:p_email.value,
+          bank:{
+            name:bank_name.value,
+            acc:bank_acc.value,
+            ifsc:bank_ifsc.value,
+            branch:bank_branch.value
+          },
+          ts:Date.now()
+        };
+
+        db.collection("firms").doc(name).set(data,{merge:true})
+          .then(()=>alert("✅ Firm saved (cloud)"))
+          .catch(alertErr);
+
+      }catch(e){ alertErr(e); }
+    };
+
+    // ---------- PARTY SAVE (EXPLICIT CALL) ----------
+    window.savePartyCloud = function(){
+      try{
+        const name = cust?.value?.trim();
+        if(!name){ alert("Party name empty"); return; }
+
+        db.collection("parties").doc(name).set({
+          name,
+          firm:firmSelect.value||"",
+          ts:Date.now()
+        },{merge:true})
+        .then(()=>alert("✅ Party saved (cloud)"))
+        .catch(alertErr);
+
+      }catch(e){ alertErr(e); }
+    };
+
+    // ---------- HARD BIND (NO GUESSING) ----------
+    document.addEventListener("click",function(e){
+
+      // Profile Save button
+      if(e.target && e.target.innerText==="Save" && e.target.closest("#profilePanel")){
+        log("Profile save clicked");
+        setTimeout(saveFirmCloud,0);
       }
-    },{merge:true});
-  };
 
-  // ---------- PARTIES ----------
-  window.firebaseSaveParty = function(p){
-    if(!p || !p.name) return;
-    db.collection("parties").doc(p.name).set(p,{merge:true});
-  };
+      // New Party button
+      if(e.target && e.target.innerText.includes("New Party")){
+        log("New party clicked");
+        setTimeout(savePartyCloud,300);
+      }
 
-  window.firebaseLoadParties = function(){
-    db.collection("parties").onSnapshot(snap=>{
-      const list = document.getElementById("custList");
-      if(!list) return;
-      list.innerHTML = "";
-      snap.forEach(d=>{
-        const o = document.createElement("option");
-        o.value = d.id;
-        list.appendChild(o);
-      });
-    });
-  };
+    },true);
 
-  const _newParty = window.newParty;
-  window.newParty = function(){
-    _newParty && _newParty();
-    firebaseSaveParty({name:cust.value});
-  };
-
-  window.addEventListener("load", ()=>{
-    firebaseLoadFirms();
-    firebaseLoadParties();
-  });
-})();
-</script>
-
-
-<!-- ===== CLOUD SAVE CONFIRM POPUPS (SAFE PATCH) ===== -->
-<script>
-(function(){
-  if(!window.db) return;
-
-  // firm save popup
-  const _firebaseSaveFirm = window.firebaseSaveFirm;
-  window.firebaseSaveFirm = function(firm){
-    if(!_firebaseSaveFirm) return;
-    _firebaseSaveFirm(firm);
-    setTimeout(()=>{
-      alert("✅ Firm data cloud me save ho gaya");
-    },100);
-  };
-
-  // party save popup
-  const _firebaseSaveParty = window.firebaseSaveParty;
-  window.firebaseSaveParty = function(party){
-    if(!_firebaseSaveParty) return;
-    _firebaseSaveParty(party);
-    setTimeout(()=>{
-      alert("✅ Party data cloud me save ho gaya");
-    },100);
-  };
-})();
-</script>
-
-
-<!-- ===== POPUP CONFIRMATION FIX (NO UI / PRINT CHANGE) ===== -->
-<script>
-(function(){
-  if(!window.db) return;
-
-  // Override cloud save with popup
-  const _firebaseSaveFirm = window.firebaseSaveFirm;
-  window.firebaseSaveFirm = function(firm){
-    if(!firm || !firm.name) return;
-    db.collection("firms").doc(firm.name).set(firm,{merge:true})
-      .then(()=>{ alert("✅ Firm cloud save ho gaya"); })
-      .catch(()=>{ alert("❌ Firm cloud save fail"); });
-  };
-
-  const _firebaseSaveParty = window.firebaseSaveParty;
-  window.firebaseSaveParty = function(p){
-    if(!p || !p.name) return;
-    db.collection("parties").doc(p.name).set(p,{merge:true})
-      .then(()=>{ alert("✅ Party cloud save ho gayi"); })
-      .catch(()=>{ alert("❌ Party cloud save fail"); });
-  };
-})();
-</script>
-
-
-<!-- ===== HARD POPUP GUARANTEE FIX (USER-ACTION BASED) ===== -->
-<script>
-(function(){
-  // Firm profile save popup
-  const btns = document.querySelectorAll("button");
-  btns.forEach(b=>{
-    if(b.textContent.trim()==="Save"){
-      b.addEventListener("click", ()=>{
-        setTimeout(()=>{
-          if(window.db){
-            alert("✅ Data cloud me save ho chuka hai");
-          }
-        },300);
-      });
-    }
+    log("Cloud hooks attached");
   });
 
-  // Estimate save popup already exists, reinforce
-  const _firebaseSaveNow = window.firebaseSaveNow;
-  window.firebaseSaveNow = function(){
-    _firebaseSaveNow && _firebaseSaveNow();
-    alert("✅ Estimate Firebase me save ho gaya");
-  };
 })();
 </script>
