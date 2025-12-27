@@ -470,7 +470,8 @@ function openEstimate(id){
       const t = r.querySelectorAll("td");
 
       
-      t[1].innerText = it.item || "";
+      const itemInput = t[1].querySelector('input, textarea');
+      if(itemInput){ itemInput.value = it.item || ""; }
 
       t[2].querySelector("input").value = it.qty || "";
       t[3].querySelector("input").value = it.rate || "";
@@ -523,7 +524,8 @@ function openEstimate(id){
       const t = r.querySelectorAll("td");
 
       
-      t[1].innerText = it.item || "";
+      const itemInput = t[1].querySelector('input, textarea');
+      if(itemInput){ itemInput.value = it.item || ""; }
 
       t[2].querySelector("input").value = it.qty || "";
       t[3].querySelector("input").value = it.rate || "";
@@ -920,7 +922,7 @@ function firebaseSaveNow(){
     const t = r.querySelectorAll("td");
     if(t.length >= 6){
       items.push({
-        item: (t[1].innerText || t[1].textContent || '').trim(),
+        item: t[1].querySelector('input, textarea')?.value || '',
         qty: t[2].querySelector("input")?.value || "",
         rate: t[3].querySelector("input")?.value || "",
         discount: t[4]?.querySelector("input")?.value || "0",
@@ -4183,7 +4185,8 @@ function openEstimate(id){
       const t = r.querySelectorAll("td");
 
       
-      t[1].innerText = it.item || "";
+      const itemInput = t[1].querySelector('input, textarea');
+      if(itemInput){ itemInput.value = it.item || ""; }
 
       t[2].querySelector("input").value = it.qty || "";
       t[3].querySelector("input").value = it.rate || "";
@@ -4466,7 +4469,8 @@ function openEstimate(id){
       const t = r.querySelectorAll("td");
 
       
-      t[1].innerText = it.item || "";
+      const itemInput = t[1].querySelector('input, textarea');
+      if(itemInput){ itemInput.value = it.item || ""; }
 
       t[2].querySelector("input").value = it.qty || "";
       t[3].querySelector("input").value = it.rate || "";
@@ -4699,7 +4703,8 @@ function openEstimate(id){
       const t = r.querySelectorAll("td");
 
       
-      t[1].innerText = it.item || "";
+      const itemInput = t[1].querySelector('input, textarea');
+      if(itemInput){ itemInput.value = it.item || ""; }
 
       t[2].querySelector("input").value = it.qty || "";
       t[3].querySelector("input").value = it.rate || "";
@@ -4978,7 +4983,8 @@ function openEstimate(id){
       const t = r.querySelectorAll("td");
 
       
-      t[1].innerText = it.item || "";
+      const itemInput = t[1].querySelector('input, textarea');
+      if(itemInput){ itemInput.value = it.item || ""; }
 
       t[2].querySelector("input").value = it.qty || "";
       t[3].querySelector("input").value = it.rate || "";
