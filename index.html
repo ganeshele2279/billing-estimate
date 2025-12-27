@@ -3453,13 +3453,12 @@ function openEditParty(){
   document.getElementById("editPartyBox").style.display = "block";
 }
 
-function loadPartyFromList(){
-  const name = document.getElementById("partyList").value;
-  if(!name) return;
-  const data = JSON.parse(localStorage.getItem("party_"+name) || "{}");
-  document.getElementById("ep_name").value = name;
-  document.getElementById("ep_mobile").value = data.mobile || "";
-  document.getElementById("ep_address").value = data.address || "";
+function loadPartiesFromCloud(){
+  db.collection("parties").get().then(snapshot=>{
+    snapshot.forEach(doc=>{
+      // party list / datalist update
+    });
+  });
 }
 
 
@@ -3734,10 +3733,12 @@ function newFirm(){
     email: email || ""
   };
 
-  saveFirms(firms);
-  localStorage.setItem("ACTIVE_FIRM", firmName);
-  refreshFirmList();
-  loadProfile();
+  saveFirmToCloud(firmId, firmData){
+  if(!db){ alert("Firebase not ready"); return; }
+
+  db.collection("firms").doc(firmId).set(firmData)
+    .then(()=>console.log("✅ Firm saved to cloud"))
+    .catch(err=>console.error("❌ Firm save error", err));
 }
 
 function switchFirm(name){
@@ -3890,9 +3891,14 @@ function newParty(){
     email: email || ""
   };
 
-  saveParties(parties);
-  alert("New Party Saved");
+  function savePartyToCloud(partyId, partyData){
+  if(!db){ alert("Firebase not ready"); return; }
+
+  db.collection("parties").doc(partyId).set(partyData)
+    .then(()=>console.log("✅ Party saved to cloud"))
+    .catch(err=>console.error("❌ Party save error", err));
 }
+
 
 
 /* ===== EDIT PARTY (SAME AS EDIT FIRM CONCEPT) ===== */
@@ -5059,21 +5065,13 @@ function openEstimate(id){
     db.collection("firms").doc(firm.name).set(firm,{merge:true});
   };
 
-  window.firebaseLoadFirms = function(){
-    db.collection("firms").onSnapshot(snap=>{
-      const sel = document.getElementById("firmSelect");
-      if(!sel) return;
-      const v = sel.value;
-      sel.innerHTML = '<option value="">-- Select Firm --</option>';
-      snap.forEach(d=>{
-        const o = document.createElement("option");
-        o.value = d.id;
-        o.textContent = d.id;
-        sel.appendChild(o);
-      });
-      sel.value = v;
+ function loadFirmsFromCloud(){
+  db.collection("firms").get().then(snapshot=>{
+    snapshot.forEach(doc=>{
+      // firmSelect / firmPanel me inject kar
     });
-  };
+  });
+}
 
   const _saveProfile = window.saveProfile;
   window.saveProfile = function(){
