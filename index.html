@@ -808,32 +808,45 @@ function firebaseSaveNow(){
     alert("Firebase not ready");
     return;
   }
+
   const id = invNo.innerText.trim() || Date.now().toString();
   const items = [];
+
   document.querySelectorAll("#body tr").forEach(r=>{
     const t = r.querySelectorAll("td");
-    if(t.length>=6){
+    if(t.length >= 6){
       items.push({
-        item:t[1].innerText,
-        qty:t[2].innerText,
-        rate:t[3].innerText,
-        amount:t[5].innerText
+        item: t[1].innerText.trim(),
+        qty: t[2].querySelector("input")?.value || "",
+        rate: t[3].querySelector("input")?.value || "",
+        discount: t[4]?.querySelector("input")?.value || "0",
+        amount: t[5].innerText.trim()
       });
     }
   });
 
-  db.collection("estimates").doc(id).set({
-    invoiceNo:id,
-    customer:document.getElementById("cust").value || "",
-    items,
-    total:document.getElementById("grand").innerText,
-    time:new Date().toISOString()
-  }).then(()=>{
-    alert("✅ Saved successfully");
-  }).catch(err=>{
-    console.error(err);
-    alert("❌ Firebase save failed");
-  });
+  const data = {
+    invoiceNo: id,
+    customer: document.getElementById("cust").value || "",
+    items: items,
+    subTotal: document.getElementById("sub").innerText,
+    gstEnabled: document.getElementById("gstToggle").checked,
+    gstPercent: document.getElementById("gstPer").value,
+    gstAmount: document.getElementById("gstAmt").innerText,
+    roundOff: document.getElementById("roundoff").innerText,
+    grandTotal: document.getElementById("grand").innerText,
+    notes: document.getElementById("notes").value,
+    time: new Date().toISOString()
+  };
+
+  db.collection("estimates").doc(id).set(data)
+    .then(()=>{
+      alert("✅ Full estimate saved");
+    })
+    .catch(err=>{
+      console.error(err);
+      alert("❌ Firebase save failed");
+    });
 }
 
 
@@ -874,9 +887,7 @@ function loadDashboard(){
 
   
 // ===== DASHBOARD WORKFLOW =====
-function openEstimate(id){
-  alert("Edit workflow placeholder for " + id);
-}
+
 
 function printEstimate(id){
   window.print();
