@@ -3738,6 +3738,18 @@ function newFirm(){
   localStorage.setItem("ACTIVE_FIRM", firmName);
   refreshFirmList();
   loadProfile();
+
+  if(db){
+    db.collection("firms").doc(firmName).set({
+      firmName: firmName,
+      name: name || "",
+      gst: gst || "",
+      address: address || "",
+      mobile: mobile || "",
+      email: email || "",
+      createdAt: new Date().toISOString()
+    });
+  }
 }
 
 function switchFirm(name){
@@ -3875,23 +3887,26 @@ function newParty(){
   const partyName = prompt("Enter Party Name");
   if(!partyName) return;
 
-  const name = prompt("Enter Contact Name");
-  const gst = prompt("Enter GST Number");
-  const address = prompt("Enter Address");
   const mobile = prompt("Enter Mobile Number");
-  const email = prompt("Enter Email");
+  const address = prompt("Enter Address");
 
   const parties = getParties();
   parties[partyName] = {
-    name: name || "",
-    gst: gst || "",
-    address: address || "",
     mobile: mobile || "",
-    email: email || ""
+    address: address || ""
   };
 
   saveParties(parties);
-  alert("New Party Saved");
+  refreshPartyList();
+
+  if(db){
+    db.collection("parties").doc(partyName).set({
+      partyName: partyName,
+      mobile: mobile || "",
+      address: address || "",
+      createdAt: new Date().toISOString()
+    });
+  }
 }
 
 
