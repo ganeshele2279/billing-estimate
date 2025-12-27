@@ -469,7 +469,9 @@ function openEstimate(id){
       const r = body.lastElementChild;
       const t = r.querySelectorAll("td");
 
+      
       t[1].innerText = it.item || "";
+
       t[2].querySelector("input").value = it.qty || "";
       t[3].querySelector("input").value = it.rate || "";
       if(t[4]?.querySelector("input")){
@@ -520,7 +522,9 @@ function openEstimate(id){
       const r = body.lastElementChild;
       const t = r.querySelectorAll("td");
 
+      
       t[1].innerText = it.item || "";
+
       t[2].querySelector("input").value = it.qty || "";
       t[3].querySelector("input").value = it.rate || "";
       if(t[4]?.querySelector("input")){
@@ -916,7 +920,7 @@ function firebaseSaveNow(){
     const t = r.querySelectorAll("td");
     if(t.length >= 6){
       items.push({
-        item: t[1].innerText.trim(),
+        item: (t[1].innerText || t[1].textContent || '').trim(),
         qty: t[2].querySelector("input")?.value || "",
         rate: t[3].querySelector("input")?.value || "",
         discount: t[4]?.querySelector("input")?.value || "0",
@@ -972,7 +976,7 @@ function loadDashboard(){
           <tr>
             <td>${d.invoiceNo || ""}</td>
             <td>${d.customer || ""}</td>
-            <td>₹ ${d.total || "0.00"}</td>
+            <td>₹ ${d.grandTotal || d.total || "0.00"}</td>
             <td>
 <button onclick="openEstimate('${doc.id}')">Edit</button>
 <button onclick="printEstimate('${doc.id}')">Print</button>
@@ -4178,7 +4182,9 @@ function openEstimate(id){
       const r = body.lastElementChild;
       const t = r.querySelectorAll("td");
 
+      
       t[1].innerText = it.item || "";
+
       t[2].querySelector("input").value = it.qty || "";
       t[3].querySelector("input").value = it.rate || "";
       if(t[4]?.querySelector("input")){
@@ -4459,7 +4465,9 @@ function openEstimate(id){
       const r = body.lastElementChild;
       const t = r.querySelectorAll("td");
 
+      
       t[1].innerText = it.item || "";
+
       t[2].querySelector("input").value = it.qty || "";
       t[3].querySelector("input").value = it.rate || "";
       if(t[4]?.querySelector("input")){
@@ -4690,7 +4698,9 @@ function openEstimate(id){
       const r = body.lastElementChild;
       const t = r.querySelectorAll("td");
 
+      
       t[1].innerText = it.item || "";
+
       t[2].querySelector("input").value = it.qty || "";
       t[3].querySelector("input").value = it.rate || "";
       if(t[4]?.querySelector("input")){
@@ -4967,7 +4977,9 @@ function openEstimate(id){
       const r = body.lastElementChild;
       const t = r.querySelectorAll("td");
 
+      
       t[1].innerText = it.item || "";
+
       t[2].querySelector("input").value = it.qty || "";
       t[3].querySelector("input").value = it.rate || "";
       if(t[4]?.querySelector("input")){
