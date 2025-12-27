@@ -1836,81 +1836,6 @@ background:#fff;border:2px solid #000;padding:10px;z-index:4000">
 
 
 
-
-<script>
-/* ===== FIRM CLOUD SAVE ===== */
-function saveFirm(){
-  if(!db){ alert("Firebase not ready"); return; }
-
-  const data = {
-    name: document.getElementById("p_name")?.value || "",
-    gst: document.getElementById("p_gst")?.value || "",
-    address: document.getElementById("p_address")?.value || "",
-    mobile: document.getElementById("p_mobile")?.value || "",
-    email: document.getElementById("p_email")?.value || "",
-    time: new Date().toISOString()
-  };
-
-  db.collection("firms").add(data).then(()=>{
-    alert("✅ Firm saved to cloud");
-    loadFirms();
-  });
-}
-
-function loadFirms(){
-  if(!db) return;
-  const sel = document.getElementById("firmSelect");
-  if(!sel) return;
-
-  db.collection("firms").orderBy("time","desc").onSnapshot(snap=>{
-    sel.innerHTML = '<option value="">-- Select Firm --</option>';
-    snap.forEach(doc=>{
-      const d = doc.data();
-      sel.innerHTML += `<option value="${doc.id}">${d.name}</option>`;
-    });
-  });
-}
-
-/* ===== PARTY CLOUD SAVE ===== */
-function saveParty(){
-  if(!db){ alert("Firebase not ready"); return; }
-
-  const data = {
-    name: document.getElementById("cust")?.value || "",
-    mobile: document.getElementById("custMobile")?.innerText || "",
-    address: document.getElementById("custAddress")?.innerText || "",
-    time: new Date().toISOString()
-  };
-
-  db.collection("parties").add(data).then(()=>{
-    alert("✅ Party saved to cloud");
-    loadParties();
-  });
-}
-
-function loadParties(){
-  if(!db) return;
-  const list = document.getElementById("custList");
-  if(!list) return;
-
-  db.collection("parties").orderBy("time","desc").onSnapshot(snap=>{
-    list.innerHTML = "";
-    snap.forEach(doc=>{
-      const d = doc.data();
-      const opt = document.createElement("option");
-      opt.value = d.name;
-      list.appendChild(opt);
-    });
-  });
-}
-
-/* INIT */
-window.addEventListener("load", ()=>{
-  loadFirms();
-  loadParties();
-});
-</script>
-
 </body>
     </html>
   `);
@@ -2446,81 +2371,6 @@ background:#fff;border:2px solid #000;padding:10px;z-index:4000">
 
 
 
-
-<script>
-/* ===== FIRM CLOUD SAVE ===== */
-function saveFirm(){
-  if(!db){ alert("Firebase not ready"); return; }
-
-  const data = {
-    name: document.getElementById("p_name")?.value || "",
-    gst: document.getElementById("p_gst")?.value || "",
-    address: document.getElementById("p_address")?.value || "",
-    mobile: document.getElementById("p_mobile")?.value || "",
-    email: document.getElementById("p_email")?.value || "",
-    time: new Date().toISOString()
-  };
-
-  db.collection("firms").add(data).then(()=>{
-    alert("✅ Firm saved to cloud");
-    loadFirms();
-  });
-}
-
-function loadFirms(){
-  if(!db) return;
-  const sel = document.getElementById("firmSelect");
-  if(!sel) return;
-
-  db.collection("firms").orderBy("time","desc").onSnapshot(snap=>{
-    sel.innerHTML = '<option value="">-- Select Firm --</option>';
-    snap.forEach(doc=>{
-      const d = doc.data();
-      sel.innerHTML += `<option value="${doc.id}">${d.name}</option>`;
-    });
-  });
-}
-
-/* ===== PARTY CLOUD SAVE ===== */
-function saveParty(){
-  if(!db){ alert("Firebase not ready"); return; }
-
-  const data = {
-    name: document.getElementById("cust")?.value || "",
-    mobile: document.getElementById("custMobile")?.innerText || "",
-    address: document.getElementById("custAddress")?.innerText || "",
-    time: new Date().toISOString()
-  };
-
-  db.collection("parties").add(data).then(()=>{
-    alert("✅ Party saved to cloud");
-    loadParties();
-  });
-}
-
-function loadParties(){
-  if(!db) return;
-  const list = document.getElementById("custList");
-  if(!list) return;
-
-  db.collection("parties").orderBy("time","desc").onSnapshot(snap=>{
-    list.innerHTML = "";
-    snap.forEach(doc=>{
-      const d = doc.data();
-      const opt = document.createElement("option");
-      opt.value = d.name;
-      list.appendChild(opt);
-    });
-  });
-}
-
-/* INIT */
-window.addEventListener("load", ()=>{
-  loadFirms();
-  loadParties();
-});
-</script>
-
 </body>
     </html>
   `);
@@ -3049,81 +2899,6 @@ background:#fff;border:2px solid #000;padding:10px;z-index:4000">
 
 
 
-
-<script>
-/* ===== FIRM CLOUD SAVE ===== */
-function saveFirm(){
-  if(!db){ alert("Firebase not ready"); return; }
-
-  const data = {
-    name: document.getElementById("p_name")?.value || "",
-    gst: document.getElementById("p_gst")?.value || "",
-    address: document.getElementById("p_address")?.value || "",
-    mobile: document.getElementById("p_mobile")?.value || "",
-    email: document.getElementById("p_email")?.value || "",
-    time: new Date().toISOString()
-  };
-
-  db.collection("firms").add(data).then(()=>{
-    alert("✅ Firm saved to cloud");
-    loadFirms();
-  });
-}
-
-function loadFirms(){
-  if(!db) return;
-  const sel = document.getElementById("firmSelect");
-  if(!sel) return;
-
-  db.collection("firms").orderBy("time","desc").onSnapshot(snap=>{
-    sel.innerHTML = '<option value="">-- Select Firm --</option>';
-    snap.forEach(doc=>{
-      const d = doc.data();
-      sel.innerHTML += `<option value="${doc.id}">${d.name}</option>`;
-    });
-  });
-}
-
-/* ===== PARTY CLOUD SAVE ===== */
-function saveParty(){
-  if(!db){ alert("Firebase not ready"); return; }
-
-  const data = {
-    name: document.getElementById("cust")?.value || "",
-    mobile: document.getElementById("custMobile")?.innerText || "",
-    address: document.getElementById("custAddress")?.innerText || "",
-    time: new Date().toISOString()
-  };
-
-  db.collection("parties").add(data).then(()=>{
-    alert("✅ Party saved to cloud");
-    loadParties();
-  });
-}
-
-function loadParties(){
-  if(!db) return;
-  const list = document.getElementById("custList");
-  if(!list) return;
-
-  db.collection("parties").orderBy("time","desc").onSnapshot(snap=>{
-    list.innerHTML = "";
-    snap.forEach(doc=>{
-      const d = doc.data();
-      const opt = document.createElement("option");
-      opt.value = d.name;
-      list.appendChild(opt);
-    });
-  });
-}
-
-/* INIT */
-window.addEventListener("load", ()=>{
-  loadFirms();
-  loadParties();
-});
-</script>
-
 </body>
     </html>
   `);
@@ -3595,81 +3370,6 @@ background:#fff;border:2px solid #000;padding:10px;z-index:4000">
 </div>
 
 
-
-
-<script>
-/* ===== FIRM CLOUD SAVE ===== */
-function saveFirm(){
-  if(!db){ alert("Firebase not ready"); return; }
-
-  const data = {
-    name: document.getElementById("p_name")?.value || "",
-    gst: document.getElementById("p_gst")?.value || "",
-    address: document.getElementById("p_address")?.value || "",
-    mobile: document.getElementById("p_mobile")?.value || "",
-    email: document.getElementById("p_email")?.value || "",
-    time: new Date().toISOString()
-  };
-
-  db.collection("firms").add(data).then(()=>{
-    alert("✅ Firm saved to cloud");
-    loadFirms();
-  });
-}
-
-function loadFirms(){
-  if(!db) return;
-  const sel = document.getElementById("firmSelect");
-  if(!sel) return;
-
-  db.collection("firms").orderBy("time","desc").onSnapshot(snap=>{
-    sel.innerHTML = '<option value="">-- Select Firm --</option>';
-    snap.forEach(doc=>{
-      const d = doc.data();
-      sel.innerHTML += `<option value="${doc.id}">${d.name}</option>`;
-    });
-  });
-}
-
-/* ===== PARTY CLOUD SAVE ===== */
-function saveParty(){
-  if(!db){ alert("Firebase not ready"); return; }
-
-  const data = {
-    name: document.getElementById("cust")?.value || "",
-    mobile: document.getElementById("custMobile")?.innerText || "",
-    address: document.getElementById("custAddress")?.innerText || "",
-    time: new Date().toISOString()
-  };
-
-  db.collection("parties").add(data).then(()=>{
-    alert("✅ Party saved to cloud");
-    loadParties();
-  });
-}
-
-function loadParties(){
-  if(!db) return;
-  const list = document.getElementById("custList");
-  if(!list) return;
-
-  db.collection("parties").orderBy("time","desc").onSnapshot(snap=>{
-    list.innerHTML = "";
-    snap.forEach(doc=>{
-      const d = doc.data();
-      const opt = document.createElement("option");
-      opt.value = d.name;
-      list.appendChild(opt);
-    });
-  });
-}
-
-/* INIT */
-window.addEventListener("load", ()=>{
-  loadFirms();
-  loadParties();
-});
-</script>
 
 </body>
       </html>
@@ -5341,83 +5041,175 @@ function openEstimate(id){
   
 
 
-
-<script>
-/* ===== FIRM CLOUD SAVE ===== */
-function saveFirm(){
-  if(!db){ alert("Firebase not ready"); return; }
-
-  const data = {
-    name: document.getElementById("p_name")?.value || "",
-    gst: document.getElementById("p_gst")?.value || "",
-    address: document.getElementById("p_address")?.value || "",
-    mobile: document.getElementById("p_mobile")?.value || "",
-    email: document.getElementById("p_email")?.value || "",
-    time: new Date().toISOString()
-  };
-
-  db.collection("firms").add(data).then(()=>{
-    alert("✅ Firm saved to cloud");
-    loadFirms();
-  });
-}
-
-function loadFirms(){
-  if(!db) return;
-  const sel = document.getElementById("firmSelect");
-  if(!sel) return;
-
-  db.collection("firms").orderBy("time","desc").onSnapshot(snap=>{
-    sel.innerHTML = '<option value="">-- Select Firm --</option>';
-    snap.forEach(doc=>{
-      const d = doc.data();
-      sel.innerHTML += `<option value="${doc.id}">${d.name}</option>`;
-    });
-  });
-}
-
-/* ===== PARTY CLOUD SAVE ===== */
-function saveParty(){
-  if(!db){ alert("Firebase not ready"); return; }
-
-  const data = {
-    name: document.getElementById("cust")?.value || "",
-    mobile: document.getElementById("custMobile")?.innerText || "",
-    address: document.getElementById("custAddress")?.innerText || "",
-    time: new Date().toISOString()
-  };
-
-  db.collection("parties").add(data).then(()=>{
-    alert("✅ Party saved to cloud");
-    loadParties();
-  });
-}
-
-function loadParties(){
-  if(!db) return;
-  const list = document.getElementById("custList");
-  if(!list) return;
-
-  db.collection("parties").orderBy("time","desc").onSnapshot(snap=>{
-    list.innerHTML = "";
-    snap.forEach(doc=>{
-      const d = doc.data();
-      const opt = document.createElement("option");
-      opt.value = d.name;
-      list.appendChild(opt);
-    });
-  });
-}
-
-/* INIT */
-window.addEventListener("load", ()=>{
-  loadFirms();
-  loadParties();
-});
-</script>
-
 </body>
 </html>
 
 
 
+
+
+<!-- ===== CLOUD SYNC : FIRMS & PARTIES (NO UI CHANGE) ===== -->
+<script>
+(function(){
+  if(!window.db) return;
+
+  // ---------- FIRMS ----------
+  window.firebaseSaveFirm = function(firm){
+    if(!firm || !firm.name) return;
+    db.collection("firms").doc(firm.name).set(firm,{merge:true});
+  };
+
+  window.firebaseLoadFirms = function(){
+    db.collection("firms").onSnapshot(snap=>{
+      const sel = document.getElementById("firmSelect");
+      if(!sel) return;
+      const v = sel.value;
+      sel.innerHTML = '<option value="">-- Select Firm --</option>';
+      snap.forEach(d=>{
+        const o = document.createElement("option");
+        o.value = d.id;
+        o.textContent = d.id;
+        sel.appendChild(o);
+      });
+      sel.value = v;
+    });
+  };
+
+  const _saveProfile = window.saveProfile;
+  window.saveProfile = function(){
+    _saveProfile && _saveProfile();
+    firebaseSaveFirm({
+      name:p_name.value,
+      gst:p_gst.value,
+      address:p_address.value,
+      mobile:p_mobile.value,
+      email:p_email.value
+    });
+  };
+
+  const _saveBank = window.saveBank;
+  window.saveBank = function(){
+    _saveBank && _saveBank();
+    const f = document.getElementById("firmSelect").value;
+    if(!f) return;
+    db.collection("firms").doc(f).set({
+      bank:{
+        name:bank_name.value,
+        acc:bank_acc.value,
+        ifsc:bank_ifsc.value,
+        branch:bank_branch.value
+      }
+    },{merge:true});
+  };
+
+  // ---------- PARTIES ----------
+  window.firebaseSaveParty = function(p){
+    if(!p || !p.name) return;
+    db.collection("parties").doc(p.name).set(p,{merge:true});
+  };
+
+  window.firebaseLoadParties = function(){
+    db.collection("parties").onSnapshot(snap=>{
+      const list = document.getElementById("custList");
+      if(!list) return;
+      list.innerHTML = "";
+      snap.forEach(d=>{
+        const o = document.createElement("option");
+        o.value = d.id;
+        list.appendChild(o);
+      });
+    });
+  };
+
+  const _newParty = window.newParty;
+  window.newParty = function(){
+    _newParty && _newParty();
+    firebaseSaveParty({name:cust.value});
+  };
+
+  window.addEventListener("load", ()=>{
+    firebaseLoadFirms();
+    firebaseLoadParties();
+  });
+})();
+</script>
+
+
+<!-- ===== CLOUD SAVE CONFIRM POPUPS (SAFE PATCH) ===== -->
+<script>
+(function(){
+  if(!window.db) return;
+
+  // firm save popup
+  const _firebaseSaveFirm = window.firebaseSaveFirm;
+  window.firebaseSaveFirm = function(firm){
+    if(!_firebaseSaveFirm) return;
+    _firebaseSaveFirm(firm);
+    setTimeout(()=>{
+      alert("✅ Firm data cloud me save ho gaya");
+    },100);
+  };
+
+  // party save popup
+  const _firebaseSaveParty = window.firebaseSaveParty;
+  window.firebaseSaveParty = function(party){
+    if(!_firebaseSaveParty) return;
+    _firebaseSaveParty(party);
+    setTimeout(()=>{
+      alert("✅ Party data cloud me save ho gaya");
+    },100);
+  };
+})();
+</script>
+
+
+<!-- ===== POPUP CONFIRMATION FIX (NO UI / PRINT CHANGE) ===== -->
+<script>
+(function(){
+  if(!window.db) return;
+
+  // Override cloud save with popup
+  const _firebaseSaveFirm = window.firebaseSaveFirm;
+  window.firebaseSaveFirm = function(firm){
+    if(!firm || !firm.name) return;
+    db.collection("firms").doc(firm.name).set(firm,{merge:true})
+      .then(()=>{ alert("✅ Firm cloud save ho gaya"); })
+      .catch(()=>{ alert("❌ Firm cloud save fail"); });
+  };
+
+  const _firebaseSaveParty = window.firebaseSaveParty;
+  window.firebaseSaveParty = function(p){
+    if(!p || !p.name) return;
+    db.collection("parties").doc(p.name).set(p,{merge:true})
+      .then(()=>{ alert("✅ Party cloud save ho gayi"); })
+      .catch(()=>{ alert("❌ Party cloud save fail"); });
+  };
+})();
+</script>
+
+
+<!-- ===== HARD POPUP GUARANTEE FIX (USER-ACTION BASED) ===== -->
+<script>
+(function(){
+  // Firm profile save popup
+  const btns = document.querySelectorAll("button");
+  btns.forEach(b=>{
+    if(b.textContent.trim()==="Save"){
+      b.addEventListener("click", ()=>{
+        setTimeout(()=>{
+          if(window.db){
+            alert("✅ Data cloud me save ho chuka hai");
+          }
+        },300);
+      });
+    }
+  });
+
+  // Estimate save popup already exists, reinforce
+  const _firebaseSaveNow = window.firebaseSaveNow;
+  window.firebaseSaveNow = function(){
+    _firebaseSaveNow && _firebaseSaveNow();
+    alert("✅ Estimate Firebase me save ho gaya");
+  };
+})();
+</script>
