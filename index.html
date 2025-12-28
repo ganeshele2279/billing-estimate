@@ -487,6 +487,41 @@ function openEstimate(id){
   });
 }
 
+
+// ===== FIX: LOAD FIRMS FROM CLOUD =====
+function loadFirms(){
+  if(!db) return;
+  const sel = document.getElementById("firmSelect");
+  sel.innerHTML = '<option value="">-- Select Firm --</option>';
+  db.collection("firms").orderBy("name").get().then(snap=>{
+    snap.forEach(doc=>{
+      const o = document.createElement("option");
+      o.value = doc.id;
+      o.textContent = doc.data().name || doc.id;
+      sel.appendChild(o);
+    });
+  });
+}
+
+function switchFirm(id){
+  if(!id || !db) return;
+  db.collection("firms").doc(id).get().then(doc=>{
+    if(!doc.exists) return;
+    const d = doc.data();
+    document.getElementById("firmHeader").style.display = "block";
+    document.getElementById("firmName").innerText = d.name || "";
+    document.getElementById("firmDetails").innerText =
+      (d.address||"") + "\nGST: " + (d.gst||"") + "\nPh: " + (d.mobile||"");
+  });
+}
+
+// Auto load firms after firebase ready
+const _oldLoad = window.onload;
+window.onload = function(){
+  if(_oldLoad) _oldLoad();
+  setTimeout(loadFirms, 500);
+};
+
 </script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js">
 // ===== DASHBOARD EDIT : LOAD FULL ESTIMATE =====
