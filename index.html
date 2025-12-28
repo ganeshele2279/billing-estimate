@@ -436,12 +436,110 @@ button:hover{ filter:brightness(0.9); }
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">
 // ===== DASHBOARD EDIT : LOAD FULL ESTIMATE =====
+function openEstimate(id){
+  if(!db){
+    alert("Firebase not ready");
+    return;
+  }
 
+  db.collection("estimates").doc(id).get().then(doc=>{
+    if(!doc.exists){
+      alert("Estimate not found");
+      return;
+    }
+
+    const d = doc.data();
+
+    // Header
+    invNo.innerText = d.invoiceNo || id;
+    document.getElementById("cust").value = d.customer || "";
+    document.getElementById("notes").value = d.notes || "";
+
+    // GST
+    document.getElementById("gstToggle").checked = !!d.gstEnabled;
+    document.getElementById("gstPer").value = d.gstPercent || 0;
+
+    // Clear items
+    const body = document.getElementById("body");
+    body.innerHTML = "";
+
+    // Inject items
+    (d.items || []).forEach(it=>{
+      addRow();
+      const r = body.lastElementChild;
+      const t = r.querySelectorAll("td");
+
+      
+      const itemInput = t[1].querySelector('input, textarea');
+      if(itemInput){ itemInput.value = it.item || ""; }
+
+      t[2].querySelector("input").value = it.qty || "";
+      t[3].querySelector("input").value = it.rate || "";
+      if(t[4]?.querySelector("input")){
+        t[4].querySelector("input").value = it.discount || 0;
+      }
+    });
+
+    calc();
+  }).catch(err=>{
+    console.error(err);
+    alert("Error loading estimate");
+  });
+}
 
 </script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js">
 // ===== DASHBOARD EDIT : LOAD FULL ESTIMATE =====
+function openEstimate(id){
+  if(!db){
+    alert("Firebase not ready");
+    return;
+  }
 
+  db.collection("estimates").doc(id).get().then(doc=>{
+    if(!doc.exists){
+      alert("Estimate not found");
+      return;
+    }
+
+    const d = doc.data();
+
+    // Header
+    invNo.innerText = d.invoiceNo || id;
+    document.getElementById("cust").value = d.customer || "";
+    document.getElementById("notes").value = d.notes || "";
+
+    // GST
+    document.getElementById("gstToggle").checked = !!d.gstEnabled;
+    document.getElementById("gstPer").value = d.gstPercent || 0;
+
+    // Clear items
+    const body = document.getElementById("body");
+    body.innerHTML = "";
+
+    // Inject items
+    (d.items || []).forEach(it=>{
+      addRow();
+      const r = body.lastElementChild;
+      const t = r.querySelectorAll("td");
+
+      
+      const itemInput = t[1].querySelector('input, textarea');
+      if(itemInput){ itemInput.value = it.item || ""; }
+
+      t[2].querySelector("input").value = it.qty || "";
+      t[3].querySelector("input").value = it.rate || "";
+      if(t[4]?.querySelector("input")){
+        t[4].querySelector("input").value = it.discount || 0;
+      }
+    });
+
+    calc();
+  }).catch(err=>{
+    console.error(err);
+    alert("Error loading estimate");
+  });
+}
 
 </script>
 
@@ -4103,7 +4201,56 @@ window.addEventListener("load",updateEwayVisibility);
 
 
 // ===== DASHBOARD EDIT : LOAD FULL ESTIMATE =====
+function openEstimate(id){
+  if(!db){
+    alert("Firebase not ready");
+    return;
+  }
 
+  db.collection("estimates").doc(id).get().then(doc=>{
+    if(!doc.exists){
+      alert("Estimate not found");
+      return;
+    }
+
+    const d = doc.data();
+
+    // Header
+    invNo.innerText = d.invoiceNo || id;
+    document.getElementById("cust").value = d.customer || "";
+    document.getElementById("notes").value = d.notes || "";
+
+    // GST
+    document.getElementById("gstToggle").checked = !!d.gstEnabled;
+    document.getElementById("gstPer").value = d.gstPercent || 0;
+
+    // Clear items
+    const body = document.getElementById("body");
+    body.innerHTML = "";
+
+    // Inject items
+    (d.items || []).forEach(it=>{
+      addRow();
+      const r = body.lastElementChild;
+      const t = r.querySelectorAll("td");
+
+      
+      const itemInput = t[1].querySelector('input, textarea');
+      if(itemInput){ itemInput.value = it.item || ""; }
+
+      t[2].querySelector("input").value = it.qty || "";
+      t[3].querySelector("input").value = it.rate || "";
+      if(t[4]?.querySelector("input")){
+        t[4].querySelector("input").value = it.discount || 0;
+      }
+    });
+
+    calc();
+  }).catch(err=>{
+    console.error(err);
+    alert("Error loading estimate");
+  });
+}
 
 </script>
 
@@ -4338,7 +4485,56 @@ window.addEventListener("load",updateEwayVisibility);
 
 
 // ===== DASHBOARD EDIT : LOAD FULL ESTIMATE =====
+function openEstimate(id){
+  if(!db){
+    alert("Firebase not ready");
+    return;
+  }
 
+  db.collection("estimates").doc(id).get().then(doc=>{
+    if(!doc.exists){
+      alert("Estimate not found");
+      return;
+    }
+
+    const d = doc.data();
+
+    // Header
+    invNo.innerText = d.invoiceNo || id;
+    document.getElementById("cust").value = d.customer || "";
+    document.getElementById("notes").value = d.notes || "";
+
+    // GST
+    document.getElementById("gstToggle").checked = !!d.gstEnabled;
+    document.getElementById("gstPer").value = d.gstPercent || 0;
+
+    // Clear items
+    const body = document.getElementById("body");
+    body.innerHTML = "";
+
+    // Inject items
+    (d.items || []).forEach(it=>{
+      addRow();
+      const r = body.lastElementChild;
+      const t = r.querySelectorAll("td");
+
+      
+      const itemInput = t[1].querySelector('input, textarea');
+      if(itemInput){ itemInput.value = it.item || ""; }
+
+      t[2].querySelector("input").value = it.qty || "";
+      t[3].querySelector("input").value = it.rate || "";
+      if(t[4]?.querySelector("input")){
+        t[4].querySelector("input").value = it.discount || 0;
+      }
+    });
+
+    calc();
+  }).catch(err=>{
+    console.error(err);
+    alert("Error loading estimate");
+  });
+}
 
 </script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js">
@@ -4523,7 +4719,56 @@ window.addEventListener("load",updateEwayVisibility);
 
 
 // ===== DASHBOARD EDIT : LOAD FULL ESTIMATE =====
+function openEstimate(id){
+  if(!db){
+    alert("Firebase not ready");
+    return;
+  }
 
+  db.collection("estimates").doc(id).get().then(doc=>{
+    if(!doc.exists){
+      alert("Estimate not found");
+      return;
+    }
+
+    const d = doc.data();
+
+    // Header
+    invNo.innerText = d.invoiceNo || id;
+    document.getElementById("cust").value = d.customer || "";
+    document.getElementById("notes").value = d.notes || "";
+
+    // GST
+    document.getElementById("gstToggle").checked = !!d.gstEnabled;
+    document.getElementById("gstPer").value = d.gstPercent || 0;
+
+    // Clear items
+    const body = document.getElementById("body");
+    body.innerHTML = "";
+
+    // Inject items
+    (d.items || []).forEach(it=>{
+      addRow();
+      const r = body.lastElementChild;
+      const t = r.querySelectorAll("td");
+
+      
+      const itemInput = t[1].querySelector('input, textarea');
+      if(itemInput){ itemInput.value = it.item || ""; }
+
+      t[2].querySelector("input").value = it.qty || "";
+      t[3].querySelector("input").value = it.rate || "";
+      if(t[4]?.querySelector("input")){
+        t[4].querySelector("input").value = it.discount || 0;
+      }
+    });
+
+    calc();
+  }).catch(err=>{
+    console.error(err);
+    alert("Error loading estimate");
+  });
+}
 
 </script>
 
@@ -4754,7 +4999,56 @@ window.addEventListener("load",updateEwayVisibility);
 
 
 // ===== DASHBOARD EDIT : LOAD FULL ESTIMATE =====
+function openEstimate(id){
+  if(!db){
+    alert("Firebase not ready");
+    return;
+  }
 
+  db.collection("estimates").doc(id).get().then(doc=>{
+    if(!doc.exists){
+      alert("Estimate not found");
+      return;
+    }
+
+    const d = doc.data();
+
+    // Header
+    invNo.innerText = d.invoiceNo || id;
+    document.getElementById("cust").value = d.customer || "";
+    document.getElementById("notes").value = d.notes || "";
+
+    // GST
+    document.getElementById("gstToggle").checked = !!d.gstEnabled;
+    document.getElementById("gstPer").value = d.gstPercent || 0;
+
+    // Clear items
+    const body = document.getElementById("body");
+    body.innerHTML = "";
+
+    // Inject items
+    (d.items || []).forEach(it=>{
+      addRow();
+      const r = body.lastElementChild;
+      const t = r.querySelectorAll("td");
+
+      
+      const itemInput = t[1].querySelector('input, textarea');
+      if(itemInput){ itemInput.value = it.item || ""; }
+
+      t[2].querySelector("input").value = it.qty || "";
+      t[3].querySelector("input").value = it.rate || "";
+      if(t[4]?.querySelector("input")){
+        t[4].querySelector("input").value = it.discount || 0;
+      }
+    });
+
+    calc();
+  }).catch(err=>{
+    console.error(err);
+    alert("Error loading estimate");
+  });
+}
 
 </script>
 <!-- 🔥 FIREBASE END -->
