@@ -910,7 +910,7 @@ window.addEventListener("load", ()=>{
     firebase.initializeApp(firebaseConfig);
     db = firebase.firestore();
     console.log("🔥 Firebase initialized");
-// ===== FIRM FIRESTORE LOAD FIX (NO STRUCTURE CHANGE) =====
+// ===== FINAL FIRM LOAD FIX (CORRECT COLLECTION) =====
 function loadFirms(){
   if(!db) return;
   const sel = document.getElementById("firmSelect");
@@ -918,28 +918,34 @@ function loadFirms(){
 
   sel.innerHTML = '<option value="">-- Select Firm --</option>';
 
-  db.collection("firms").get().then(snapshot=>{
-    snapshot.forEach(doc=>{
-      const opt = document.createElement("option");
-      opt.value = doc.id;
-      opt.textContent = doc.data().name || doc.id;
-      sel.appendChild(opt);
+  db.collection("meta").doc("firms").get().then(doc=>{
+    if(!doc.exists) return;
+    const firms = doc.data().firms || {};
+    Object.keys(firms).forEach(id=>{
+      const o = document.createElement("option");
+      o.value = id;
+      o.textContent = firms[id].name || id;
+      sel.appendChild(o);
     });
-  }).catch(e=>console.error("Firm load error", e));
+  });
 }
 
 function switchFirm(id){
   if(!id || !db) return;
-  db.collection("firms").doc(id).get().then(doc=>{
+  db.collection("meta").doc("firms").get().then(doc=>{
     if(!doc.exists) return;
-    const d = doc.data();
+    const f = (doc.data().firms||{})[id];
+    if(!f) return;
 
     document.getElementById("firmHeader").style.display = "block";
-    document.getElementById("firmName").innerText = d.name || "";
+    document.getElementById("firmName").innerText = f.name || "";
     document.getElementById("firmDetails").innerText =
-      (d.address||"") + "\nGST: " + (d.gst||"") + "\nPh: " + (d.mobile||"");
+      (f.address||"") + "\nGST: " + (f.gst||"") + "\nPh: " + (f.mobile||"");
   });
 }
+
+// auto trigger AFTER firebase ready
+setTimeout(loadFirms, 800);
 
     loadDashboard();
   }catch(e){
