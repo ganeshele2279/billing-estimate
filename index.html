@@ -274,7 +274,7 @@ button:hover{ filter:brightness(0.9); }
     gap: 0;
     border-top: 1px solid #000;
     margin-top: 8mm;
-    min-height: 80mm;
+    min-height: auto;
   }
   .print-bottom-left,
   .print-bottom-right {
@@ -430,6 +430,18 @@ button:hover{ filter:brightness(0.9); }
     user-select: text !important;
   }
 }
+
+<style>
+/* FIX: Customer name & address must always print (GST ON / OFF) */
+@media print{
+  .print-only,
+  #printAddress,
+  #custMobile,
+  #custAddress{
+    display:block !important;
+  }
+}
+</style>
 </style>
 
 
@@ -567,7 +579,7 @@ body.ledger-open .no-print{
 
 </head>
 <body>
-<div id="printTaxHeader" class="print-tax-header" style="display:none">TAX INVOICE <span style="font-weight:normal">ORIGINAL FOR RECIPIENT</span></div>
+
 
 <div class="print-page-border"></div>
 
@@ -1039,7 +1051,7 @@ function addRow(){
  </td>
  <td class="col-qty"><input type="number" class="qty" value="1"></td>
  <td class="col-rate"><input type="number" class="rate" value="0"></td>
- <td class="col-disc no-print"><input type="number" class="disc" value="0"></td>
+ <td class="col-disc no-print"><input type="text" class="disc" value="0"></td>
  <td class="amt col-amt">0.00</td>
  <td class="col-x no-print"><button onclick="this.closest('tr').remove();calc()">X</button></td>
  `;
@@ -1083,9 +1095,14 @@ function calc(){
  [...body.children].forEach(tr=>{
   const q=+tr.querySelector(".qty").value||0;
   const r=+tr.querySelector(".rate").value||0;
-  let d=+tr.querySelector(".disc").value||0;
-  if(d>100)d=100;if(d<0)d=0;
-  const net=r*(1-d/100);
+  let dRaw = tr.querySelector(".disc").value || "0";
+  let d = Math.abs(+dRaw) || 0;
+  if(d>100)d=100;
+
+  // if user types + discount, ADD percentage instead of subtract
+  const net = dRaw.trim().startsWith("+")
+    ? r*(1 + d/100)
+    : r*(1 - d/100);
   const amt=net*q;
   tr.querySelector(".amt").innerText=amt.toFixed(2);
   subT+=amt;
@@ -1102,7 +1119,9 @@ function calc(){
 
  let gstAmt = gstOn ? subT*gstPer/100 : 0;
  document.getElementById("gstAmt").innerText=gstAmt.toFixed(2);
- document.getElementById("grand").innerText=(subT+gstAmt).toFixed(2);
+ const total = subT + gstAmt;
+document.getElementById("roundoff").innerText = (Math.round(total) - total).toFixed(2);
+document.getElementById("grand").innerText = Math.round(total).toFixed(2);
 }
 async function saveEstimate(){
  const name = cust.value.trim();
@@ -1598,7 +1617,7 @@ button:hover{ filter:brightness(0.9); }
     gap: 0;
     border-top: 1px solid #000;
     margin-top: 8mm;
-    min-height: 80mm;
+    min-height: auto;
   }
   .print-bottom-left,
   .print-bottom-right {
@@ -2140,7 +2159,7 @@ button:hover{ filter:brightness(0.9); }
     gap: 0;
     border-top: 1px solid #000;
     margin-top: 8mm;
-    min-height: 80mm;
+    min-height: auto;
   }
   .print-bottom-left,
   .print-bottom-right {
@@ -2658,7 +2677,7 @@ button:hover{ filter:brightness(0.9); }
     gap: 0;
     border-top: 1px solid #000;
     margin-top: 8mm;
-    min-height: 80mm;
+    min-height: auto;
   }
   .print-bottom-left,
   .print-bottom-right {
@@ -3152,7 +3171,7 @@ button:hover{ filter:brightness(0.9); }
     gap: 0;
     border-top: 1px solid #000;
     margin-top: 8mm;
-    min-height: 80mm;
+    min-height: auto;
   }
   .print-bottom-left,
   .print-bottom-right {
