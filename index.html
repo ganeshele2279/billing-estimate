@@ -196,6 +196,17 @@ button:hover{ filter:brightness(0.9); }
   background:#dff0e2;
 }
 
+
+
+
+
+/* ===== PRINT FIX : HIDE PARTY DASHBOARD ===== */
+@media print{
+  #partyDashboardPanel{
+    display:none !important;
+  }
+}
+
 </style>
 
 <style>
@@ -208,6 +219,9 @@ button:hover{ filter:brightness(0.9); }
 @media screen{
   .print-only{display:none;}
 }
+
+
+
 </style>
 
 
@@ -236,6 +250,9 @@ button:hover{ filter:brightness(0.9); }
     display: none !important;
   }
 }
+
+
+
 </style>
 
 
@@ -263,6 +280,9 @@ button:hover{ filter:brightness(0.9); }
     z-index: 1;
   }
 }
+
+
+
 </style>
 
 
@@ -285,11 +305,17 @@ button:hover{ filter:brightness(0.9); }
     border-left: none;
   }
 }
+
+
+
 </style>
 
 
 <style>
 .gst-dependent{display:none;}
+
+
+
 </style>
 
 
@@ -308,6 +334,9 @@ button:hover{ filter:brightness(0.9); }
     text-align:center;
   }
 }
+
+
+
 </style>
 
 
@@ -317,6 +346,9 @@ button:hover{ filter:brightness(0.9); }
     margin-top:40px; /* move sign text a bit down */
   }
 }
+
+
+
 </style>
 
 
@@ -330,6 +362,9 @@ button:hover{ filter:brightness(0.9); }
     margin-top:0 !important;
   }
 }
+
+
+
 </style>
 
 
@@ -341,6 +376,9 @@ button:hover{ filter:brightness(0.9); }
     border-right:none !important;
   }
 }
+
+
+
 </style>
 
 
@@ -352,6 +390,9 @@ button:hover{ filter:brightness(0.9); }
     text-align:center !important;
   }
 }
+
+
+
 </style>
 
 
@@ -366,6 +407,9 @@ button:hover{ filter:brightness(0.9); }
     display:block !important;
   }
 }
+
+
+
 </style>
 
 
@@ -375,6 +419,9 @@ button:hover{ filter:brightness(0.9); }
     border:2px solid #000 !important;
   }
 }
+
+
+
 </style>
 
 
@@ -389,6 +436,9 @@ button:hover{ filter:brightness(0.9); }
 .invoice-edit-area, .header, .header *{
   pointer-events:auto !important;
 }
+
+
+
 </style>
 
 
@@ -406,6 +456,9 @@ button:hover{ filter:brightness(0.9); }
   border:1px solid #000 !important;
   cursor:text !important;
 }
+
+
+
 </style>
 
 
@@ -416,6 +469,9 @@ button:hover{ filter:brightness(0.9); }
     pointer-events: auto !important;
   }
 }
+
+
+
 </style>
 
 
@@ -441,7 +497,13 @@ button:hover{ filter:brightness(0.9); }
     display:block !important;
   }
 }
+
+
+
 </style>
+
+
+
 </style>
 
 
@@ -449,6 +511,8 @@ button:hover{ filter:brightness(0.9); }
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">
 // ===== DASHBOARD EDIT : LOAD FULL ESTIMATE =====
 function openEstimate(id){
+  EDIT_MODE = true; // editing existing estimate
+
   if(!db){
     alert("Firebase not ready");
     return;
@@ -498,6 +562,587 @@ function openEstimate(id){
     alert("Error loading estimate");
   });
 }
+
+
+/* ===== FIRM / PARTY (DETAILS BASED - FAILPROOF) ===== */
+function saveFirmParty(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const firm = fp_firm.value.trim();
+  const name = fp_name.value.trim();
+  if(!firm || !name){ alert("Firm & Party name required"); return; }
+
+  db.collection("firms").doc(firm).collection("parties").doc(name).set({
+    firm, name,
+    mobile: fp_mobile.value || "",
+    gst: fp_gst.value || "",
+    address: fp_address.value || "",
+    time: new Date().toISOString()
+  }).then(()=>{
+    alert("Saved");
+    loadFirmParties();
+  });
+}
+
+function loadFirmParties(){
+  if(!db) return;
+  const firm = fp_firm.value.trim();
+  if(!firm){ alert("Enter firm name"); return; }
+
+  fp_list.innerHTML = "Loading...";
+  db.collection("firms").doc(firm).collection("parties")
+    .orderBy("time","desc").get()
+    .then(snap=>{
+      fp_list.innerHTML = "";
+      if(snap.empty){ fp_list.innerHTML="<i>No data</i>"; return; }
+      snap.forEach(d=>{
+        const x = d.data();
+        fp_list.innerHTML += `
+          <div style="padding:6px;border-bottom:1px solid #ddd;cursor:pointer"
+           onclick="cust.value='${x.name}';custMobile.innerText='${x.mobile||""}';custAddress.innerText='${x.address||""}'">
+           <b>${x.name}</b><br>${x.mobile||""} ${x.gst||""}
+          </div>`;
+      });
+    });
+}
+
+
+/* ===== FIRM & PARTY MANAGER (SEPARATE) ===== */
+function saveFirm(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const firm = fm_firm.value.trim();
+  if(!firm){ alert("Firm name required"); return; }
+  db.collection("firms").doc(firm).set({ name: firm, time: new Date().toISOString() })
+    .then(()=>{ alert("Firm saved"); loadFirms(); });
+}
+
+function loadFirms(){
+  if(!db) return;
+  firm_list.innerHTML = "Loading...";
+  fp_firm_select.innerHTML = '<option value="">-- Select Firm --</option>';
+  db.collection("firms").orderBy("time","desc").get().then(snap=>{
+    firm_list.innerHTML = "";
+    snap.forEach(doc=>{
+      const f = doc.id;
+      firm_list.innerHTML += `<div style="cursor:pointer">${f}</div>`;
+      fp_firm_select.innerHTML += `<option value="${f}">${f}</option>`;
+    });
+  });
+}
+
+function saveFirmParty(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const firm = fp_firm_select.value;
+  const name = fp_name.value.trim();
+  if(!firm || !name){ alert("Select firm & enter party"); return; }
+
+  db.collection("firms").doc(firm).collection("parties").doc(name).set({
+    name,
+    mobile: fp_mobile.value || "",
+    gst: fp_gst.value || "",
+    address: fp_address.value || "",
+    time: new Date().toISOString()
+  }).then(()=>{
+    alert("Party saved");
+    loadFirmParties();
+  });
+}
+
+function loadFirmParties(){
+  if(!db) return;
+  const firm = fp_firm_select.value;
+  if(!firm){ fp_list.innerHTML=""; return; }
+  fp_list.innerHTML = "Loading...";
+  db.collection("firms").doc(firm).collection("parties")
+    .orderBy("time","desc").get().then(snap=>{
+      fp_list.innerHTML="";
+      snap.forEach(d=>{
+        const x = d.data();
+        fp_list.innerHTML += `
+          <div style="padding:6px;border-bottom:1px solid #ddd;cursor:pointer"
+           onclick="cust.value='${x.name}';custMobile.innerText='${x.mobile||""}';custAddress.innerText='${x.address||""}'">
+           <b>${x.name}</b><br>${x.mobile||""} ${x.gst||""}
+          </div>`;
+      });
+    });
+}
+
+
+/* ===== FIRM MASTER WITH DETAILS ===== */
+function saveFirm(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const name = fm_name.value.trim();
+  if(!name){ alert("Firm name required"); return; }
+
+  db.collection("firms").doc(name).set({
+    name: name,
+    mobile: fm_mobile.value || "",
+    gst: fm_gst.value || "",
+    email: fm_email.value || "",
+    address: fm_address.value || "",
+    time: new Date().toISOString()
+  }).then(()=>{
+    alert("Firm saved");
+    loadFirms();
+  });
+}
+
+function loadFirms(){
+  if(!db) return;
+  firm_list.innerHTML = "Loading...";
+  activeFirm.innerHTML = '<option value="">-- Select Firm --</option>';
+  fp_firm_select.innerHTML = '<option value="">-- Select Firm --</option>';
+
+  db.collection("firms").orderBy("time","desc").get().then(snap=>{
+    firm_list.innerHTML = "";
+    snap.forEach(doc=>{
+      const f = doc.data();
+      firm_list.innerHTML += `<div style="cursor:pointer">${f.name}</div>`;
+      activeFirm.innerHTML += `<option value="${f.name}">${f.name}</option>`;
+      fp_firm_select.innerHTML += `<option value="${f.name}">${f.name}</option>`;
+    });
+  });
+}
+
+/* ===== FIRM → CUSTOMER FILTER ===== */
+function onFirmChange(){
+  const firm = activeFirm.value;
+  const list = document.getElementById("custList");
+  list.innerHTML = "";
+  if(!firm || !db) return;
+
+  db.collection("firms").doc(firm).collection("parties").get().then(snap=>{
+    snap.forEach(doc=>{
+      const p = doc.data();
+      const opt = document.createElement("option");
+      opt.value = p.name;
+      list.appendChild(opt);
+    });
+  });
+}
+
+
+/* ===== ACTIVE FIRM (PERSISTENT) ===== */
+function onFirmChange(save=true){
+  const firm = activeFirm.value;
+  if(save){
+    localStorage.setItem("ACTIVE_FIRM", firm || "");
+  }
+  const list = document.getElementById("custList");
+  if(list) list.innerHTML = "";
+  if(!firm || !db) return;
+
+  db.collection("firms").doc(firm).collection("parties").get().then(snap=>{
+    snap.forEach(doc=>{
+      const p = doc.data();
+      const opt = document.createElement("option");
+      opt.value = p.name;
+      list.appendChild(opt);
+    });
+  });
+}
+
+// restore firm on page load
+window.addEventListener("load", ()=>{
+  const savedFirm = localStorage.getItem("ACTIVE_FIRM");
+  if(savedFirm){
+    setTimeout(()=>{
+      const opt = [...activeFirm.options].find(o=>o.value===savedFirm);
+      if(opt){
+        activeFirm.value = savedFirm;
+        onFirmChange(false);
+      }
+    }, 800);
+  }
+});
+
+
+/* ===== SINGLE ACTIVE FIRM SOURCE ===== */
+
+
+
+let _FIRMS_LOADED = false;
+
+
+let _FIRMS_LOADING = false;
+
+function loadFirmsAuto(){
+  if(_FIRMS_LOADING) return;
+  _FIRMS_LOADING = true;
+  if(!db) return;
+
+  // HARD RESET dropdown
+  const select = document.getElementById("activeFirm");
+  if(!select) return;
+
+  // remove everything
+  select.innerHTML = '<option value="">-- Select Firm --</option>';
+
+  db.collection("firms").get().then(snap=>{
+    const seen = new Set();
+    let optionsHTML = '<option value="">-- Select Firm --</option>';
+
+    snap.forEach(doc=>{
+      const name = (doc.data().name || doc.id || "").trim();
+      if(name && !seen.has(name)){
+        seen.add(name);
+        optionsHTML += `<option value="${name}">${name}</option>`;
+      }
+    });
+
+    // SINGLE assignment (no append)
+    select.innerHTML = optionsHTML;
+
+    // restore saved firm
+    const saved = localStorage.getItem("ACTIVE_FIRM");
+    if(saved && seen.has(saved)){
+      select.value = saved;
+      onFirmChange(false);
+    }
+  });
+}
+    });
+
+    const saved = localStorage.getItem("ACTIVE_FIRM");
+    if(saved && firmSet.has(saved)){
+      activeFirm.value = saved;
+      onFirmChange(false);
+    }
+  });
+}
+    });
+
+    // restore saved firm safely
+    const saved = localStorage.getItem("ACTIVE_FIRM");
+    if(saved && firmSet.has(saved)){
+      activeFirm.value = saved;
+      onFirmChange(false);
+    }
+  });
+}
+  });
+}
+
+function saveFirmParty(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const firm = activeFirm.value;
+  const name = fp_name.value.trim();
+  if(!firm || !name){
+    alert("Select Active Firm once, then add parties");
+    return;
+  }
+
+  db.collection("firms").doc(firm).collection("parties").doc(name).set({
+    name,
+    mobile: fp_mobile.value || "",
+    gst: fp_gst.value || "",
+    address: fp_address.value || "",
+    time: new Date().toISOString()
+  }).then(()=>{
+    alert("Party saved");
+    loadFirmParties();
+  });
+}
+
+function loadFirmParties(){
+  if(!db) return;
+  const firm = activeFirm.value;
+  if(!firm){ fp_list.innerHTML=""; return; }
+
+  fp_list.innerHTML = "Loading...";
+  db.collection("firms").doc(firm).collection("parties")
+    .orderBy("time","desc").get().then(snap=>{
+      fp_list.innerHTML="";
+      snap.forEach(d=>{
+        const x = d.data();
+        fp_list.innerHTML += `
+          <div style="padding:6px;border-bottom:1px solid #ddd;cursor:pointer"
+           onclick="cust.value='${x.name}';custMobile.innerText='${x.mobile||""}';custAddress.innerText='${x.address||""}'">
+           <b>${x.name}</b><br>${x.mobile||""} ${x.gst||""}
+          </div>`;
+      });
+    });
+}
+
+// auto load firms on startup
+window.addEventListener("load", ()=>{
+  setTimeout(loadFirmsAuto, 500);
+});
+
+
+/* ===== DASHBOARD : ALL PARTIES ===== */
+function loadPartyDashboard(){
+  if(!db) return;
+  const tbody = document.getElementById("partyDashboardBody");
+  if(!tbody) return;
+
+  tbody.innerHTML = "<tr><td colspan='5' style='text-align:center'>Loading…</td></tr>";
+
+  db.collection("firms").get().then(firmsSnap=>{
+    tbody.innerHTML = "";
+    let found = false;
+
+    firmsSnap.forEach(firmDoc=>{
+      const firmName = firmDoc.id;
+      firmDoc.ref.collection("parties").get().then(partiesSnap=>{
+        partiesSnap.forEach(pDoc=>{
+          found = true;
+          const p = pDoc.data();
+          tbody.innerHTML += `
+            
+            
+            <tr id="prow_${firmName}_${pDoc.id}">
+              <td><input value="${p.name||""}" id="pn_${firmName}_${pDoc.id}" style="width:100%" disabled></td>
+              <td><input value="${p.address||""}" id="pa_${firmName}_${pDoc.id}" style="width:100%" disabled></td>
+              <td><input value="${p.gst||""}" id="pg_${firmName}_${pDoc.id}" style="width:100%" disabled></td>
+              <td><input value="${p.mobile||""}" id="pm_${firmName}_${pDoc.id}" style="width:100%" disabled></td>
+              <td>
+                <button onclick="enablePartyEdit('${firmName}','${pDoc.id}')">Edit</button>
+                <button onclick="savePartyInline('${firmName}','${pDoc.id}')" style="display:none" id="ps_${firmName}_${pDoc.id}">Save</button>
+                <button onclick="deletePartyFromDashboard('${firmName}','${pDoc.id}')">Delete</button>
+              </td>
+            </tr>`;
+    
+    
+        });
+      });
+    });
+
+    setTimeout(()=>{
+      if(!found){
+        tbody.innerHTML = "<tr><td colspan='5' style='text-align:center'>No parties</td></tr>";
+      }
+    }, 800);
+  });
+}
+
+function editPartyFromDashboard(firm, partyId){
+  if(!db) return;
+  db.collection("firms").doc(firm).collection("parties").doc(partyId).get().then(doc=>{
+    if(!doc.exists){ alert("Party not found"); return; }
+    const d = doc.data();
+
+    activeFirm.value = firm;
+    localStorage.setItem("ACTIVE_FIRM", firm);
+    onFirmChange(false);
+
+    fp_name.value = d.name || "";
+    fp_mobile.value = d.mobile || "";
+    fp_gst.value = d.gst || "";
+    fp_address.value = d.address || "";
+
+    window.scrollTo({top:0,behavior:"smooth"});
+  });
+}
+
+function deletePartyFromDashboard(firm, partyId){
+  if(!confirm("Delete this party?")) return;
+  db.collection("firms").doc(firm).collection("parties").doc(partyId).delete().then(()=>{
+    loadPartyDashboard();
+  });
+}
+
+
+
+/* ===== PARTY DASHBOARD EDIT MODE ===== */
+function enablePartyEdit(firm, partyId){
+  ["pn","pa","pg","pm"].forEach(p=>{
+    const el = document.getElementById(p+"_"+firm+"_"+partyId);
+    if(el) el.disabled = false;
+  });
+  const saveBtn = document.getElementById("ps_"+firm+"_"+partyId);
+  if(saveBtn) saveBtn.style.display = "inline-block";
+}
+
+function savePartyInline(firm, partyId){
+  const name = document.getElementById("pn_"+firm+"_"+partyId).value;
+  const address = document.getElementById("pa_"+firm+"_"+partyId).value;
+  const gst = document.getElementById("pg_"+firm+"_"+partyId).value;
+  const mobile = document.getElementById("pm_"+firm+"_"+partyId).value;
+
+  db.collection("firms").doc(firm).collection("parties").doc(partyId).update({
+    name, address, gst, mobile
+  }).then(()=>{
+    ["pn","pa","pg","pm"].forEach(p=>{
+      const el = document.getElementById(p+"_"+firm+"_"+partyId);
+      if(el) el.disabled = true;
+    });
+    const saveBtn = document.getElementById("ps_"+firm+"_"+partyId);
+    if(saveBtn) saveBtn.style.display = "none";
+    alert("Party updated");
+  });
+}
+
+
+
+/* ===== USER LOG SYSTEM (HARDENED & SAFE) ===== */
+async function getIP(){
+  try{
+    const r = await fetch("https://api.ipify.org?format=json");
+    const j = await r.json();
+    return j.ip || "unknown";
+  }catch(e){
+    return "unknown";
+  }
+}
+
+// wait until firebase db is ready
+function waitForDB(){
+  return new Promise(resolve=>{
+    const t = setInterval(()=>{
+      if(window.db){
+        clearInterval(t);
+        resolve();
+      }
+    },300);
+  });
+}
+
+async function checkUserGate(){
+  await waitForDB();
+  const ip = await getIP();
+  window._USER_IP = ip;
+
+  // check via query instead of doc-id dependency
+  const snap = await db.collection("user_logs").where("ip","==",ip).limit(1).get();
+  if(snap.empty){
+    document.getElementById("userGate").style.display = "block";
+  }
+}
+
+async function submitUserGate(){
+  const name = ug_name.value.trim();
+  const mobile = ug_mobile.value.trim();
+  if(!name || !mobile){
+    alert("Name & Mobile required");
+    return;
+  }
+  await waitForDB();
+  const ip = window._USER_IP || "unknown";
+
+  await db.collection("user_logs").add({
+    name,
+    mobile,
+    ip,
+    time: new Date().toISOString(),
+    ua: navigator.userAgent
+  });
+
+  document.getElementById("userGate").style.display = "none";
+}
+
+/* Admin: view logs */
+function openUserLogs(){
+  if(!db){ alert("DB not ready"); return; }
+  db.collection("user_logs").orderBy("time","desc").get().then(snap=>{
+    if(snap.empty){
+      alert("No user log data found");
+      return;
+    }
+    let msg = "USER LOGS
+----------------
+";
+    snap.forEach(d=>{
+      const x = d.data();
+      msg += `${x.name} | ${x.mobile} | ${x.ip}
+`;
+    });
+    alert(msg);
+  });
+}
+
+// auto check after load
+window.addEventListener("load", ()=>{
+  setTimeout(checkUserGate, 1500);
+});
+});
+
+
+/* ===== FINAL SAFETY NET : FORCE DEDUP ACTIVE FIRM ===== */
+function dedupeActiveFirm(){
+  const sel = document.getElementById("activeFirm");
+  if(!sel) return;
+
+  const seen = new Set();
+  const opts = Array.from(sel.options);
+
+  sel.innerHTML = "";
+
+  opts.forEach(o=>{
+    if(!seen.has(o.value)){
+      seen.add(o.value);
+      sel.appendChild(o);
+    }
+  });
+}
+
+// run multiple times to beat async race conditions
+window.addEventListener("load", ()=>{
+  setTimeout(dedupeActiveFirm, 300);
+  setTimeout(dedupeActiveFirm, 800);
+  setTimeout(dedupeActiveFirm, 1500);
+});
+
+
+/* ===== FINAL SAFETY NET : FORCE DEDUP CUSTOMER LIST ===== */
+function dedupeCustomerList(){
+  const list = document.getElementById("custList");
+  if(!list) return;
+
+  const seen = new Set();
+  const opts = Array.from(list.options);
+
+  list.innerHTML = "";
+
+  opts.forEach(o=>{
+    if(!seen.has(o.value)){
+      seen.add(o.value);
+      list.appendChild(o);
+    }
+  });
+}
+
+// run multiple times to beat async race conditions
+window.addEventListener("load", ()=>{
+  setTimeout(dedupeCustomerList, 400);
+  setTimeout(dedupeCustomerList, 900);
+  setTimeout(dedupeCustomerList, 1600);
+});
+
+
+/* ===== CUSTOMER FULL LOAD ON SELECT ===== */
+function loadCustomerDetailsByName(name){
+  if(!db) return;
+  const firm = document.getElementById("activeFirm")?.value;
+  if(!firm || !name) return;
+
+  db.collection("firms").doc(firm).collection("parties")
+    .where("name","==",name).limit(1).get()
+    .then(snap=>{
+      if(snap.empty) return;
+      const d = snap.docs[0].data();
+
+      if(typeof cust !== "undefined") cust.value = d.name || "";
+let bn=document.getElementById("custNameBold");if(bn){bn.innerText=d.name||"";}
+      if(typeof custMobile !== "undefined") custMobile.innerText = d.mobile || "";
+      if(typeof custAddress !== "undefined") custAddress.innerText = d.address || "";
+if(!document.getElementById("custNameBold")){
+ const div=document.createElement("div");
+ div.style.fontWeight="bold";div.style.marginTop="4px";
+ div.id="custNameBold";div.innerText=d.name||"";
+ custAddress.parentNode.insertBefore(div,custAddress);
+}
+    });
+}
+
+// hook into customer input change safely
+window.addEventListener("load", ()=>{
+  const custInput = document.getElementById("cust");
+  if(custInput){
+    custInput.addEventListener("change", ()=>{
+      loadCustomerDetailsByName(custInput.value);
+    });
+  }
+});
 
 </script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js">
@@ -553,6 +1198,516 @@ function openEstimate(id){
   });
 }
 
+
+/* ===== FIRM / PARTY (DETAILS BASED - FAILPROOF) ===== */
+function saveFirmParty(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const firm = fp_firm.value.trim();
+  const name = fp_name.value.trim();
+  if(!firm || !name){ alert("Firm & Party name required"); return; }
+
+  db.collection("firms").doc(firm).collection("parties").doc(name).set({
+    firm, name,
+    mobile: fp_mobile.value || "",
+    gst: fp_gst.value || "",
+    address: fp_address.value || "",
+    time: new Date().toISOString()
+  }).then(()=>{
+    alert("Saved");
+    loadFirmParties();
+  });
+}
+
+function loadFirmParties(){
+  if(!db) return;
+  const firm = fp_firm.value.trim();
+  if(!firm){ alert("Enter firm name"); return; }
+
+  fp_list.innerHTML = "Loading...";
+  db.collection("firms").doc(firm).collection("parties")
+    .orderBy("time","desc").get()
+    .then(snap=>{
+      fp_list.innerHTML = "";
+      if(snap.empty){ fp_list.innerHTML="<i>No data</i>"; return; }
+      snap.forEach(d=>{
+        const x = d.data();
+        fp_list.innerHTML += `
+          <div style="padding:6px;border-bottom:1px solid #ddd;cursor:pointer"
+           onclick="cust.value='${x.name}';custMobile.innerText='${x.mobile||""}';custAddress.innerText='${x.address||""}'">
+           <b>${x.name}</b><br>${x.mobile||""} ${x.gst||""}
+          </div>`;
+      });
+    });
+}
+
+
+/* ===== FIRM & PARTY MANAGER (SEPARATE) ===== */
+function saveFirm(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const firm = fm_firm.value.trim();
+  if(!firm){ alert("Firm name required"); return; }
+  db.collection("firms").doc(firm).set({ name: firm, time: new Date().toISOString() })
+    .then(()=>{ alert("Firm saved"); loadFirms(); });
+}
+
+function loadFirms(){
+  if(!db) return;
+  firm_list.innerHTML = "Loading...";
+  fp_firm_select.innerHTML = '<option value="">-- Select Firm --</option>';
+  db.collection("firms").orderBy("time","desc").get().then(snap=>{
+    firm_list.innerHTML = "";
+    snap.forEach(doc=>{
+      const f = doc.id;
+      firm_list.innerHTML += `<div style="cursor:pointer">${f}</div>`;
+      fp_firm_select.innerHTML += `<option value="${f}">${f}</option>`;
+    });
+  });
+}
+
+function saveFirmParty(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const firm = fp_firm_select.value;
+  const name = fp_name.value.trim();
+  if(!firm || !name){ alert("Select firm & enter party"); return; }
+
+  db.collection("firms").doc(firm).collection("parties").doc(name).set({
+    name,
+    mobile: fp_mobile.value || "",
+    gst: fp_gst.value || "",
+    address: fp_address.value || "",
+    time: new Date().toISOString()
+  }).then(()=>{
+    alert("Party saved");
+    loadFirmParties();
+  });
+}
+
+function loadFirmParties(){
+  if(!db) return;
+  const firm = fp_firm_select.value;
+  if(!firm){ fp_list.innerHTML=""; return; }
+  fp_list.innerHTML = "Loading...";
+  db.collection("firms").doc(firm).collection("parties")
+    .orderBy("time","desc").get().then(snap=>{
+      fp_list.innerHTML="";
+      snap.forEach(d=>{
+        const x = d.data();
+        fp_list.innerHTML += `
+          <div style="padding:6px;border-bottom:1px solid #ddd;cursor:pointer"
+           onclick="cust.value='${x.name}';custMobile.innerText='${x.mobile||""}';custAddress.innerText='${x.address||""}'">
+           <b>${x.name}</b><br>${x.mobile||""} ${x.gst||""}
+          </div>`;
+      });
+    });
+}
+
+
+/* ===== FIRM MASTER WITH DETAILS ===== */
+function saveFirm(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const name = fm_name.value.trim();
+  if(!name){ alert("Firm name required"); return; }
+
+  db.collection("firms").doc(name).set({
+    name: name,
+    mobile: fm_mobile.value || "",
+    gst: fm_gst.value || "",
+    email: fm_email.value || "",
+    address: fm_address.value || "",
+    time: new Date().toISOString()
+  }).then(()=>{
+    alert("Firm saved");
+    loadFirms();
+  });
+}
+
+function loadFirms(){
+  if(!db) return;
+  firm_list.innerHTML = "Loading...";
+  activeFirm.innerHTML = '<option value="">-- Select Firm --</option>';
+  fp_firm_select.innerHTML = '<option value="">-- Select Firm --</option>';
+
+  db.collection("firms").orderBy("time","desc").get().then(snap=>{
+    firm_list.innerHTML = "";
+    snap.forEach(doc=>{
+      const f = doc.data();
+      firm_list.innerHTML += `<div style="cursor:pointer">${f.name}</div>`;
+      activeFirm.innerHTML += `<option value="${f.name}">${f.name}</option>`;
+      fp_firm_select.innerHTML += `<option value="${f.name}">${f.name}</option>`;
+    });
+  });
+}
+
+/* ===== FIRM → CUSTOMER FILTER ===== */
+function onFirmChange(){
+  const firm = activeFirm.value;
+  const list = document.getElementById("custList");
+  list.innerHTML = "";
+  if(!firm || !db) return;
+
+  db.collection("firms").doc(firm).collection("parties").get().then(snap=>{
+    snap.forEach(doc=>{
+      const p = doc.data();
+      const opt = document.createElement("option");
+      opt.value = p.name;
+      list.appendChild(opt);
+    });
+  });
+}
+
+
+/* ===== ACTIVE FIRM (PERSISTENT) ===== */
+function onFirmChange(save=true){
+  const firm = activeFirm.value;
+  if(save){
+    localStorage.setItem("ACTIVE_FIRM", firm || "");
+  }
+  const list = document.getElementById("custList");
+  if(list) list.innerHTML = "";
+  if(!firm || !db) return;
+
+  db.collection("firms").doc(firm).collection("parties").get().then(snap=>{
+    snap.forEach(doc=>{
+      const p = doc.data();
+      const opt = document.createElement("option");
+      opt.value = p.name;
+      list.appendChild(opt);
+    });
+  });
+}
+
+// restore firm on page load
+window.addEventListener("load", ()=>{
+  const savedFirm = localStorage.getItem("ACTIVE_FIRM");
+  if(savedFirm){
+    setTimeout(()=>{
+      const opt = [...activeFirm.options].find(o=>o.value===savedFirm);
+      if(opt){
+        activeFirm.value = savedFirm;
+        onFirmChange(false);
+      }
+    }, 800);
+  }
+});
+
+
+/* ===== SINGLE ACTIVE FIRM SOURCE ===== */
+
+function loadFirmsAuto(){
+  if(!db) return;
+  activeFirm.innerHTML = '<option value="">-- Select Firm --</option>';
+
+  db.collection("firms").orderBy("time","desc").get().then(snap=>{
+    snap.forEach(doc=>{
+      const f = doc.data().name;
+      activeFirm.innerHTML += `<option value="${f}">${f}</option>`;
+    });
+
+    // restore saved firm
+    const saved = localStorage.getItem("ACTIVE_FIRM");
+    if(saved){
+      activeFirm.value = saved;
+      onFirmChange(false);
+    }
+  });
+}
+
+function saveFirmParty(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const firm = activeFirm.value;
+  const name = fp_name.value.trim();
+  if(!firm || !name){
+    alert("Select Active Firm once, then add parties");
+    return;
+  }
+
+  db.collection("firms").doc(firm).collection("parties").doc(name).set({
+    name,
+    mobile: fp_mobile.value || "",
+    gst: fp_gst.value || "",
+    address: fp_address.value || "",
+    time: new Date().toISOString()
+  }).then(()=>{
+    alert("Party saved");
+    loadFirmParties();
+  });
+}
+
+function loadFirmParties(){
+  if(!db) return;
+  const firm = activeFirm.value;
+  if(!firm){ fp_list.innerHTML=""; return; }
+
+  fp_list.innerHTML = "Loading...";
+  db.collection("firms").doc(firm).collection("parties")
+    .orderBy("time","desc").get().then(snap=>{
+      fp_list.innerHTML="";
+      snap.forEach(d=>{
+        const x = d.data();
+        fp_list.innerHTML += `
+          <div style="padding:6px;border-bottom:1px solid #ddd;cursor:pointer"
+           onclick="cust.value='${x.name}';custMobile.innerText='${x.mobile||""}';custAddress.innerText='${x.address||""}'">
+           <b>${x.name}</b><br>${x.mobile||""} ${x.gst||""}
+          </div>`;
+      });
+    });
+}
+
+// auto load firms on startup
+window.addEventListener("load", ()=>{
+  setTimeout(loadFirmsAuto, 500);
+});
+
+
+/* ===== DASHBOARD : ALL PARTIES ===== */
+function loadPartyDashboard(){
+  if(!db) return;
+  const tbody = document.getElementById("partyDashboardBody");
+  if(!tbody) return;
+
+  tbody.innerHTML = "<tr><td colspan='5' style='text-align:center'>Loading…</td></tr>";
+
+  db.collection("firms").get().then(firmsSnap=>{
+    tbody.innerHTML = "";
+    let found = false;
+
+    firmsSnap.forEach(firmDoc=>{
+      const firmName = firmDoc.id;
+      firmDoc.ref.collection("parties").get().then(partiesSnap=>{
+        partiesSnap.forEach(pDoc=>{
+          found = true;
+          const p = pDoc.data();
+          tbody.innerHTML += `
+            
+            
+            <tr id="prow_${firmName}_${pDoc.id}">
+              <td><input value="${p.name||""}" id="pn_${firmName}_${pDoc.id}" style="width:100%" disabled></td>
+              <td><input value="${p.address||""}" id="pa_${firmName}_${pDoc.id}" style="width:100%" disabled></td>
+              <td><input value="${p.gst||""}" id="pg_${firmName}_${pDoc.id}" style="width:100%" disabled></td>
+              <td><input value="${p.mobile||""}" id="pm_${firmName}_${pDoc.id}" style="width:100%" disabled></td>
+              <td>
+                <button onclick="enablePartyEdit('${firmName}','${pDoc.id}')">Edit</button>
+                <button onclick="savePartyInline('${firmName}','${pDoc.id}')" style="display:none" id="ps_${firmName}_${pDoc.id}">Save</button>
+                <button onclick="deletePartyFromDashboard('${firmName}','${pDoc.id}')">Delete</button>
+              </td>
+            </tr>`;
+    
+    
+        });
+      });
+    });
+
+    setTimeout(()=>{
+      if(!found){
+        tbody.innerHTML = "<tr><td colspan='5' style='text-align:center'>No parties</td></tr>";
+      }
+    }, 800);
+  });
+}
+
+function editPartyFromDashboard(firm, partyId){
+  if(!db) return;
+  db.collection("firms").doc(firm).collection("parties").doc(partyId).get().then(doc=>{
+    if(!doc.exists){ alert("Party not found"); return; }
+    const d = doc.data();
+
+    activeFirm.value = firm;
+    localStorage.setItem("ACTIVE_FIRM", firm);
+    onFirmChange(false);
+
+    fp_name.value = d.name || "";
+    fp_mobile.value = d.mobile || "";
+    fp_gst.value = d.gst || "";
+    fp_address.value = d.address || "";
+
+    window.scrollTo({top:0,behavior:"smooth"});
+  });
+}
+
+function deletePartyFromDashboard(firm, partyId){
+  if(!confirm("Delete this party?")) return;
+  db.collection("firms").doc(firm).collection("parties").doc(partyId).delete().then(()=>{
+    loadPartyDashboard();
+  });
+}
+
+
+
+/* ===== PARTY DASHBOARD EDIT MODE ===== */
+function enablePartyEdit(firm, partyId){
+  ["pn","pa","pg","pm"].forEach(p=>{
+    const el = document.getElementById(p+"_"+firm+"_"+partyId);
+    if(el) el.disabled = false;
+  });
+  const saveBtn = document.getElementById("ps_"+firm+"_"+partyId);
+  if(saveBtn) saveBtn.style.display = "inline-block";
+}
+
+function savePartyInline(firm, partyId){
+  const name = document.getElementById("pn_"+firm+"_"+partyId).value;
+  const address = document.getElementById("pa_"+firm+"_"+partyId).value;
+  const gst = document.getElementById("pg_"+firm+"_"+partyId).value;
+  const mobile = document.getElementById("pm_"+firm+"_"+partyId).value;
+
+  db.collection("firms").doc(firm).collection("parties").doc(partyId).update({
+    name, address, gst, mobile
+  }).then(()=>{
+    ["pn","pa","pg","pm"].forEach(p=>{
+      const el = document.getElementById(p+"_"+firm+"_"+partyId);
+      if(el) el.disabled = true;
+    });
+    const saveBtn = document.getElementById("ps_"+firm+"_"+partyId);
+    if(saveBtn) saveBtn.style.display = "none";
+    alert("Party updated");
+  });
+}
+
+
+/* ===== USER LOG SYSTEM ===== */
+async function getIP(){
+  try{
+    const r = await fetch("https://api.ipify.org?format=json");
+    const j = await r.json();
+    return j.ip;
+  }catch(e){
+    return "unknown";
+  }
+}
+
+async function checkUserGate(){
+  if(!db) return;
+  const ip = await getIP();
+  window._USER_IP = ip;
+
+  const snap = await db.collection("user_logs").doc(ip).get();
+  if(!snap.exists){
+    document.getElementById("userGate").style.display = "block";
+  }
+}
+
+async function submitUserGate(){
+  const name = ug_name.value.trim();
+  const mobile = ug_mobile.value.trim();
+  if(!name || !mobile){
+    alert("Name & Mobile required");
+    return;
+  }
+  const ip = window._USER_IP || "unknown";
+
+  await db.collection("user_logs").doc(ip).set({
+    name, mobile, ip,
+    time: new Date().toISOString()
+  });
+
+  document.getElementById("userGate").style.display = "none";
+}
+
+/* Admin: view logs */
+function openUserLogs(){
+  if(!db) return;
+  db.collection("user_logs").orderBy("time","desc").get().then(snap=>{
+    let msg = "USER LOGS\n----------------\n";
+    snap.forEach(d=>{
+      const x = d.data();
+      msg += `${x.name} | ${x.mobile} | ${x.ip}\n`;
+    });
+    alert(msg);
+  });
+}
+
+// auto check after load
+window.addEventListener("load", ()=>{
+  setTimeout(checkUserGate, 1200);
+});
+
+
+/* ===== FINAL SAFETY NET : FORCE DEDUP ACTIVE FIRM ===== */
+function dedupeActiveFirm(){
+  const sel = document.getElementById("activeFirm");
+  if(!sel) return;
+
+  const seen = new Set();
+  const opts = Array.from(sel.options);
+
+  sel.innerHTML = "";
+
+  opts.forEach(o=>{
+    if(!seen.has(o.value)){
+      seen.add(o.value);
+      sel.appendChild(o);
+    }
+  });
+}
+
+// run multiple times to beat async race conditions
+window.addEventListener("load", ()=>{
+  setTimeout(dedupeActiveFirm, 300);
+  setTimeout(dedupeActiveFirm, 800);
+  setTimeout(dedupeActiveFirm, 1500);
+});
+
+
+/* ===== FINAL SAFETY NET : FORCE DEDUP CUSTOMER LIST ===== */
+function dedupeCustomerList(){
+  const list = document.getElementById("custList");
+  if(!list) return;
+
+  const seen = new Set();
+  const opts = Array.from(list.options);
+
+  list.innerHTML = "";
+
+  opts.forEach(o=>{
+    if(!seen.has(o.value)){
+      seen.add(o.value);
+      list.appendChild(o);
+    }
+  });
+}
+
+// run multiple times to beat async race conditions
+window.addEventListener("load", ()=>{
+  setTimeout(dedupeCustomerList, 400);
+  setTimeout(dedupeCustomerList, 900);
+  setTimeout(dedupeCustomerList, 1600);
+});
+
+
+/* ===== CUSTOMER FULL LOAD ON SELECT ===== */
+function loadCustomerDetailsByName(name){
+  if(!db) return;
+  const firm = document.getElementById("activeFirm")?.value;
+  if(!firm || !name) return;
+
+  db.collection("firms").doc(firm).collection("parties")
+    .where("name","==",name).limit(1).get()
+    .then(snap=>{
+      if(snap.empty) return;
+      const d = snap.docs[0].data();
+
+      if(typeof cust !== "undefined") cust.value = d.name || "";
+let bn=document.getElementById("custNameBold");if(bn){bn.innerText=d.name||"";}
+      if(typeof custMobile !== "undefined") custMobile.innerText = d.mobile || "";
+      if(typeof custAddress !== "undefined") custAddress.innerText = d.address || "";
+if(!document.getElementById("custNameBold")){
+ const div=document.createElement("div");
+ div.style.fontWeight="bold";div.style.marginTop="4px";
+ div.id="custNameBold";div.innerText=d.name||"";
+ custAddress.parentNode.insertBefore(div,custAddress);
+}
+    });
+}
+
+// hook into customer input change safely
+window.addEventListener("load", ()=>{
+  const custInput = document.getElementById("cust");
+  if(custInput){
+    custInput.addEventListener("change", ()=>{
+      loadCustomerDetailsByName(custInput.value);
+    });
+  }
+});
+
 </script>
 
 
@@ -568,6 +1723,9 @@ function openEstimate(id){
 body.ledger-open .no-print{
   display:none !important; /* hide left/right floating buttons */
 }
+
+
+
 </style>
 
 
@@ -575,6 +1733,9 @@ body.ledger-open .no-print{
 @media print{
   #dashboardPanel{display:none !important;}
 }
+
+
+
 </style>
 
 </head>
@@ -586,81 +1747,50 @@ body.ledger-open .no-print{
 
 
 <div class="no-print" style="position:fixed;top:10px;left:10px;z-index:3000">
+<!-- BANK DETAILS BUTTON -->
 <div style="margin-top:6px">
-
-
-
-
-<div style="margin-bottom:6px">
-  <select id="firmSelect" onchange="switchFirm(this.value)" style="width:100%;font-size:11px;padding:4px">
+  <label style="font-size:11px;font-weight:bold">Active Firm</label>
+  <select id="activeFirm" style="width:100%;font-size:11px;margin-top:2px"
+          onchange="onFirmChange(true)">
     <option value="">-- Select Firm --</option>
   </select>
-  <button class="theme-btn" style="width:auto;display:block;margin-top:4px;font-size:10px;padding:3px 6px" onclick="newFirm()">+ New Firm</button>
-  <button class="theme-btn" style="width:auto;display:block;margin-top:4px;font-size:10px;padding:3px 6px" onclick="editFirm()">✏️ Edit Firm</button>
 </div>
+<!-- ===== FIRM MANAGER ===== -->
+<details style="margin-top:6px;border:1px solid #999;padding:6px;border-radius:6px;background:#fff">
+  <summary style="cursor:pointer;font-weight:bold">Firm Manager</summary>
+  <div style="margin-top:8px">
+    <input id="fm_name" placeholder="Firm Name"><br><br>
+    <input id="fm_mobile" placeholder="Mobile Number"><br><br>
+    <input id="fm_gst" placeholder="GST Number"><br><br>
+    <input id="fm_email" placeholder="Email"><br><br>
+    <textarea id="fm_address" placeholder="Address"></textarea><br><br>
 
-  <button class="theme-btn" onclick="document.getElementById('profilePanel').style.display='block';loadProfile()">Profile</button>
-</div>
+    <button onclick="saveFirm()">Save Firm</button>
+    <button onclick="loadFirms()">Load Firms</button>
 
-<div id="profilePanel" style="
-display:none;
-margin-top:6px;
-background:#fff;
-border:2px solid #000;
-padding:10px;
-border-radius:6px;
-width:260px;
-">
-<b>PROFILE DETAILS</b><br><br>
-<input id="p_name" placeholder="Name"><br><br>
-<input id="p_gst" placeholder="GST"><br><br>
-<textarea id="p_address" placeholder="Address"></textarea><br><br>
-<input id="p_mobile" placeholder="Mobile"><br><br>
-<input id="p_email" placeholder="Gmail"><br><br>
-<button onclick="saveProfile()">Save</button>
-<button onclick="this.parentNode.style.display='none'">Close</button>
-</div>
-
-<!-- BANK DETAILS BUTTON -->
-<button class="theme-btn" style="display:block;margin-top:6px" onclick="toggleBankPanel()">🏦 Bank</button>
-
-<div id="bankPanel" style="
-  display:none;
-  margin-top:6px;
-  background:#fff;
-  border:2px solid #000;
-  padding:10px;
-  border-radius:6px;
-  width:260px;
-">
-<b>BANK DETAILS</b><br><br>
-<input id="bank_name" placeholder="Bank Name"><br><br>
-<input id="bank_acc" placeholder="Account Number"><br><br>
-<input id="bank_ifsc" placeholder="IFSC Code"><br><br>
-<input id="bank_branch" placeholder="Branch Name"><br><br>
-<button onclick="saveBank()">Save</button>
-<button onclick="toggleBankPanel()">Close</button>
-</div>
+    <div id="firm_list" style="margin-top:8px"></div>
+  </div>
+</details>
 
 
-  <button class="theme-btn" onclick="openAdmin()">Admin</button>
-<div style="margin-top:6px">
-  <button class="theme-btn" style="display:block;width:auto;padding:3px 6px" onclick="newParty()">+ New Party</button>
-  <button class="theme-btn" style="display:block;width:auto;margin-top:4px;font-size:10px;padding:3px 6px" onclick="editParty()">✏️ Edit Party</button>
-<button class="theme-btn" style="display:block;margin-top:6px" onclick="toggleFirmPanel()">Firm List</button>
-<button class="theme-btn" style="display:block;margin-top:4px" onclick="togglePartyPanel()">Party List</button>
+<!-- ===== PARTY MANAGER ===== -->
+<details style="margin-top:6px;border:1px solid #999;padding:6px;border-radius:6px;background:#fff">
+  <summary style="cursor:pointer;font-weight:bold">Party Manager</summary>
+  <div style="margin-top:8px">
 
-<div id="firmPanel" style="
-  display:none;
-  margin-top:6px;
-  background:#fff;
-  border:1px solid #ccc;
-  padding:6px;
-  border-radius:6px;
-  max-height:220px;
-  overflow:auto;
-">
-</div>
+    <div style="font-size:11px;margin-bottom:6px">Using Active Firm</div>
+
+    <input id="fp_name" placeholder="Party Name"><br><br>
+    <input id="fp_mobile" placeholder="Mobile"><br><br>
+    <input id="fp_gst" placeholder="GST"><br><br>
+    <textarea id="fp_address" placeholder="Address"></textarea><br><br>
+
+    <button onclick="saveFirmParty()">Save Party</button>
+
+    <div id="fp_list" style="margin-top:10px;max-height:200px;overflow:auto;border-top:1px solid #ccc"></div>
+  </div>
+</details>
+
 
 <div id="partyPanel" style="
   display:none;
@@ -709,7 +1839,10 @@ width:260px;
 
     <div style="font-size:11px;font-weight:bold;margin-bottom:6px;color:#555">
       USER
-    </div>
+    
+<hr style="margin:8px 0">
+<button class="theme-btn" style="width:100%" onclick="openUserLogs()">User Log</button>
+</div>
 
     <button class="theme-btn" style="width:100%;margin-bottom:4px" onclick="exportBackup()">Export</button>
     <button class="theme-btn" style="width:100%;margin-bottom:4px" onclick="importBackup()">Import</button>
@@ -743,6 +1876,7 @@ width:260px;
   <button class="theme-btn support" onclick="openSupport()">Support</button>
 
 <button class="theme-btn review" onclick="openReview()">Review</button>
+<button class="theme-btn" style="margin-top:6px" onclick="openAdmin()">Admin</button>
 
 </div>
 
@@ -869,7 +2003,8 @@ text-align:center;font-size:24px;font-weight:bold;width:100%">
 
 <!-- ===== DASHBOARD : ALL CLOUD ESTIMATES ===== -->
 <div id="dashboardPanel" style="margin-top:20px;border-top:2px solid #000;padding-top:10px">
-  <h3>Dashboard (All Estimates)</h3>
+  <h3>Dashboard (All Estimates)
+</h3>
   <table style="width:100%;border-collapse:collapse;font-size:13px">
     <thead>
       <tr>
@@ -884,6 +2019,28 @@ text-align:center;font-size:24px;font-weight:bold;width:100%">
     </tbody>
   </table>
 </div>
+
+<!-- ===== DASHBOARD : ALL PARTIES ===== -->
+<div id="partyDashboardPanel" style="margin-top:20px;border-top:2px solid #000;padding-top:10px">
+  <h3>Dashboard (All Parties)</h3>
+  <table style="width:100%;border-collapse:collapse;font-size:13px">
+    <thead>
+      <tr>
+        
+        <th style="border:1px solid #ccc;padding:4px">Party Name</th>
+        <th style="border:1px solid #ccc;padding:4px">Address</th>
+        <th style="border:1px solid #ccc;padding:4px">GST</th>
+        <th style="border:1px solid #ccc;padding:4px">Mobile</th>
+        <th style="border:1px solid #ccc;padding:4px">Action</th>
+      </tr>
+    </thead>
+    <tbody id="partyDashboardBody">
+      <tr><td colspan="5" style="text-align:center">Loading…</td></tr>
+    </tbody>
+  </table>
+</div>
+
+
 
 </div>
 
@@ -917,12 +2074,15 @@ const firebaseConfig = {
 };
 
 let db = null;
+let EDIT_MODE = false; // true only when editing existing estimate
+
 window.addEventListener("load", ()=>{
   try{
     firebase.initializeApp(firebaseConfig);
     db = firebase.firestore();
     console.log("🔥 Firebase initialized");
     loadDashboard();
+    loadPartyDashboard();
   }catch(e){
     console.error("Firebase init error", e);
   }
@@ -934,7 +2094,13 @@ function firebaseSaveNow(){
     return;
   }
 
-  const id = invNo.innerText.trim() || Date.now().toString();
+  
+  const id = invNo.innerText.trim();
+  if(!id){
+    alert("Invoice number required");
+    return;
+  }
+
   const items = [];
 
   document.querySelectorAll("#body tr").forEach(r=>{
@@ -964,7 +2130,24 @@ function firebaseSaveNow(){
     time: new Date().toISOString()
   };
 
+  
+  if(!EDIT_MODE){
+    db.collection("estimates").doc(id).get().then(existDoc=>{
+      if(existDoc.exists){
+        alert("❌ Ye estimate number pehle se exist karta hai. Edit karne ke liye dashboard se open karo.");
+        return;
+      }else{
+        db.collection("estimates").doc(id).set(data)
+          .then(()=>alert("✅ New estimate saved"))
+          .catch(err=>alert("Save failed"));
+      }
+    });
+    return;
+  }
+
+  // EDIT MODE – overwrite allowed
   db.collection("estimates").doc(id).set(data)
+
     .then(()=>{
       alert("✅ Full estimate saved");
     })
@@ -1306,7 +2489,9 @@ function printFromLedger(p,i){
   },150);
 }
 function closeLedger(){ document.body.classList.remove('ledger-open');ledgerBox.style.display="none";}
-function newEstimate(){inv++;localStorage.setItem("EST_NO",inv);body.innerHTML="";cust.value="";notes.value="";gstToggle.checked=false;setHeader();addRow();calc();}
+function newEstimate(){
+  EDIT_MODE = false; // new estimate mode
+inv++;localStorage.setItem("EST_NO",inv);body.innerHTML="";cust.value="";notes.value="";gstToggle.checked=false;setHeader();addRow();calc();}
 
 refreshCustomers();
 addRow();
@@ -1539,6 +2724,9 @@ button:hover{ filter:brightness(0.9); }
   background:#dff0e2;
 }
 
+
+
+
 </style>
     
 <style>
@@ -1551,6 +2739,9 @@ button:hover{ filter:brightness(0.9); }
 @media screen{
   .print-only{display:none;}
 }
+
+
+
 </style>
 
 
@@ -1579,6 +2770,9 @@ button:hover{ filter:brightness(0.9); }
     display: none !important;
   }
 }
+
+
+
 </style>
 
 
@@ -1606,6 +2800,9 @@ button:hover{ filter:brightness(0.9); }
     z-index: 1;
   }
 }
+
+
+
 </style>
 
 
@@ -1628,11 +2825,17 @@ button:hover{ filter:brightness(0.9); }
     border-left: none;
   }
 }
+
+
+
 </style>
 
 
 <style>
 .gst-dependent{display:none;}
+
+
+
 </style>
 
 
@@ -1651,6 +2854,9 @@ button:hover{ filter:brightness(0.9); }
     text-align:center;
   }
 }
+
+
+
 </style>
 
 
@@ -1660,6 +2866,9 @@ button:hover{ filter:brightness(0.9); }
     margin-top:40px; /* move sign text a bit down */
   }
 }
+
+
+
 </style>
 
 
@@ -1673,6 +2882,9 @@ button:hover{ filter:brightness(0.9); }
     margin-top:0 !important;
   }
 }
+
+
+
 </style>
 
 
@@ -1684,6 +2896,9 @@ button:hover{ filter:brightness(0.9); }
     border-right:none !important;
   }
 }
+
+
+
 </style>
 
 
@@ -1695,6 +2910,9 @@ button:hover{ filter:brightness(0.9); }
     text-align:center !important;
   }
 }
+
+
+
 </style>
 
 
@@ -1709,6 +2927,9 @@ button:hover{ filter:brightness(0.9); }
     display:block !important;
   }
 }
+
+
+
 </style>
 
 
@@ -1718,6 +2939,9 @@ button:hover{ filter:brightness(0.9); }
     border:2px solid #000 !important;
   }
 }
+
+
+
 </style>
 
 
@@ -1732,6 +2956,9 @@ button:hover{ filter:brightness(0.9); }
 .invoice-edit-area, .header, .header *{
   pointer-events:auto !important;
 }
+
+
+
 </style>
 
 
@@ -1749,6 +2976,9 @@ button:hover{ filter:brightness(0.9); }
   border:1px solid #000 !important;
   cursor:text !important;
 }
+
+
+
 </style>
 
 
@@ -1759,6 +2989,9 @@ button:hover{ filter:brightness(0.9); }
     pointer-events: auto !important;
   }
 }
+
+
+
 </style>
 
 
@@ -1773,6 +3006,9 @@ button:hover{ filter:brightness(0.9); }
     user-select: text !important;
   }
 }
+
+
+
 </style>
 
 
@@ -1780,6 +3016,9 @@ button:hover{ filter:brightness(0.9); }
 @media print{
   #dashboardPanel{display:none !important;}
 }
+
+
+
 </style>
 
 </head>
@@ -1854,6 +3093,31 @@ background:#fff;border:2px solid #000;padding:10px;z-index:4000">
 </div>
 
 
+
+
+<!-- ===== USER LOG GATE (AUTO) ===== -->
+<div id="userGate" style="
+display:none;
+position:fixed;
+top:0;left:0;
+width:100%;height:100%;
+background:#000000cc;
+z-index:99999;
+">
+  <div style="
+    background:#fff;
+    width:90%;
+    max-width:360px;
+    margin:10% auto;
+    padding:16px;
+    border-radius:8px;
+  ">
+    <h3>User Verification</h3>
+    <input id="ug_name" placeholder="Your Name"><br><br>
+    <input id="ug_mobile" placeholder="Mobile Number"><br><br>
+    <button onclick="submitUserGate()">Continue</button>
+  </div>
+</div>
 
 </body>
     </html>
@@ -2081,6 +3345,9 @@ button:hover{ filter:brightness(0.9); }
   background:#dff0e2;
 }
 
+
+
+
 </style>
     
 <style>
@@ -2093,6 +3360,9 @@ button:hover{ filter:brightness(0.9); }
 @media screen{
   .print-only{display:none;}
 }
+
+
+
 </style>
 
 
@@ -2121,6 +3391,9 @@ button:hover{ filter:brightness(0.9); }
     display: none !important;
   }
 }
+
+
+
 </style>
 
 
@@ -2148,6 +3421,9 @@ button:hover{ filter:brightness(0.9); }
     z-index: 1;
   }
 }
+
+
+
 </style>
 
 
@@ -2170,11 +3446,17 @@ button:hover{ filter:brightness(0.9); }
     border-left: none;
   }
 }
+
+
+
 </style>
 
 
 <style>
 .gst-dependent{display:none;}
+
+
+
 </style>
 
 
@@ -2193,6 +3475,9 @@ button:hover{ filter:brightness(0.9); }
     text-align:center;
   }
 }
+
+
+
 </style>
 
 
@@ -2202,6 +3487,9 @@ button:hover{ filter:brightness(0.9); }
     margin-top:40px; /* move sign text a bit down */
   }
 }
+
+
+
 </style>
 
 
@@ -2215,6 +3503,9 @@ button:hover{ filter:brightness(0.9); }
     margin-top:0 !important;
   }
 }
+
+
+
 </style>
 
 
@@ -2226,6 +3517,9 @@ button:hover{ filter:brightness(0.9); }
     border-right:none !important;
   }
 }
+
+
+
 </style>
 
 
@@ -2237,6 +3531,9 @@ button:hover{ filter:brightness(0.9); }
     text-align:center !important;
   }
 }
+
+
+
 </style>
 
 
@@ -2251,6 +3548,9 @@ button:hover{ filter:brightness(0.9); }
     display:block !important;
   }
 }
+
+
+
 </style>
 
 
@@ -2260,6 +3560,9 @@ button:hover{ filter:brightness(0.9); }
     border:2px solid #000 !important;
   }
 }
+
+
+
 </style>
 
 
@@ -2274,6 +3577,9 @@ button:hover{ filter:brightness(0.9); }
 .invoice-edit-area, .header, .header *{
   pointer-events:auto !important;
 }
+
+
+
 </style>
 
 
@@ -2291,6 +3597,9 @@ button:hover{ filter:brightness(0.9); }
   border:1px solid #000 !important;
   cursor:text !important;
 }
+
+
+
 </style>
 
 
@@ -2301,6 +3610,9 @@ button:hover{ filter:brightness(0.9); }
     pointer-events: auto !important;
   }
 }
+
+
+
 </style>
 
 
@@ -2315,6 +3627,9 @@ button:hover{ filter:brightness(0.9); }
     user-select: text !important;
   }
 }
+
+
+
 </style>
 
 
@@ -2322,6 +3637,9 @@ button:hover{ filter:brightness(0.9); }
 @media print{
   #dashboardPanel{display:none !important;}
 }
+
+
+
 </style>
 
 </head>
@@ -2389,6 +3707,31 @@ background:#fff;border:2px solid #000;padding:10px;z-index:4000">
 </div>
 
 
+
+
+<!-- ===== USER LOG GATE (AUTO) ===== -->
+<div id="userGate" style="
+display:none;
+position:fixed;
+top:0;left:0;
+width:100%;height:100%;
+background:#000000cc;
+z-index:99999;
+">
+  <div style="
+    background:#fff;
+    width:90%;
+    max-width:360px;
+    margin:10% auto;
+    padding:16px;
+    border-radius:8px;
+  ">
+    <h3>User Verification</h3>
+    <input id="ug_name" placeholder="Your Name"><br><br>
+    <input id="ug_mobile" placeholder="Mobile Number"><br><br>
+    <button onclick="submitUserGate()">Continue</button>
+  </div>
+</div>
 
 </body>
     </html>
@@ -2599,6 +3942,9 @@ button:hover{ filter:brightness(0.9); }
   background:#dff0e2;
 }
 
+
+
+
 </style>
     
 <style>
@@ -2611,6 +3957,9 @@ button:hover{ filter:brightness(0.9); }
 @media screen{
   .print-only{display:none;}
 }
+
+
+
 </style>
 
 
@@ -2639,6 +3988,9 @@ button:hover{ filter:brightness(0.9); }
     display: none !important;
   }
 }
+
+
+
 </style>
 
 
@@ -2666,6 +4018,9 @@ button:hover{ filter:brightness(0.9); }
     z-index: 1;
   }
 }
+
+
+
 </style>
 
 
@@ -2688,11 +4043,17 @@ button:hover{ filter:brightness(0.9); }
     border-left: none;
   }
 }
+
+
+
 </style>
 
 
 <style>
 .gst-dependent{display:none;}
+
+
+
 </style>
 
 
@@ -2711,6 +4072,9 @@ button:hover{ filter:brightness(0.9); }
     text-align:center;
   }
 }
+
+
+
 </style>
 
 
@@ -2720,6 +4084,9 @@ button:hover{ filter:brightness(0.9); }
     margin-top:40px; /* move sign text a bit down */
   }
 }
+
+
+
 </style>
 
 
@@ -2733,6 +4100,9 @@ button:hover{ filter:brightness(0.9); }
     margin-top:0 !important;
   }
 }
+
+
+
 </style>
 
 
@@ -2744,6 +4114,9 @@ button:hover{ filter:brightness(0.9); }
     border-right:none !important;
   }
 }
+
+
+
 </style>
 
 
@@ -2755,6 +4128,9 @@ button:hover{ filter:brightness(0.9); }
     text-align:center !important;
   }
 }
+
+
+
 </style>
 
 
@@ -2769,6 +4145,9 @@ button:hover{ filter:brightness(0.9); }
     display:block !important;
   }
 }
+
+
+
 </style>
 
 
@@ -2778,6 +4157,9 @@ button:hover{ filter:brightness(0.9); }
     border:2px solid #000 !important;
   }
 }
+
+
+
 </style>
 
 
@@ -2792,6 +4174,9 @@ button:hover{ filter:brightness(0.9); }
 .invoice-edit-area, .header, .header *{
   pointer-events:auto !important;
 }
+
+
+
 </style>
 
 
@@ -2809,6 +4194,9 @@ button:hover{ filter:brightness(0.9); }
   border:1px solid #000 !important;
   cursor:text !important;
 }
+
+
+
 </style>
 
 
@@ -2819,6 +4207,9 @@ button:hover{ filter:brightness(0.9); }
     pointer-events: auto !important;
   }
 }
+
+
+
 </style>
 
 
@@ -2833,6 +4224,9 @@ button:hover{ filter:brightness(0.9); }
     user-select: text !important;
   }
 }
+
+
+
 </style>
 
 
@@ -2840,6 +4234,9 @@ button:hover{ filter:brightness(0.9); }
 @media print{
   #dashboardPanel{display:none !important;}
 }
+
+
+
 </style>
 
 </head>
@@ -2917,6 +4314,31 @@ background:#fff;border:2px solid #000;padding:10px;z-index:4000">
 </div>
 
 
+
+
+<!-- ===== USER LOG GATE (AUTO) ===== -->
+<div id="userGate" style="
+display:none;
+position:fixed;
+top:0;left:0;
+width:100%;height:100%;
+background:#000000cc;
+z-index:99999;
+">
+  <div style="
+    background:#fff;
+    width:90%;
+    max-width:360px;
+    margin:10% auto;
+    padding:16px;
+    border-radius:8px;
+  ">
+    <h3>User Verification</h3>
+    <input id="ug_name" placeholder="Your Name"><br><br>
+    <input id="ug_mobile" placeholder="Mobile Number"><br><br>
+    <button onclick="submitUserGate()">Continue</button>
+  </div>
+</div>
 
 </body>
     </html>
@@ -3093,6 +4515,9 @@ button:hover{ filter:brightness(0.9); }
   background:#dff0e2;
 }
 
+
+
+
 </style>
         
 <style>
@@ -3105,6 +4530,9 @@ button:hover{ filter:brightness(0.9); }
 @media screen{
   .print-only{display:none;}
 }
+
+
+
 </style>
 
 
@@ -3133,6 +4561,9 @@ button:hover{ filter:brightness(0.9); }
     display: none !important;
   }
 }
+
+
+
 </style>
 
 
@@ -3160,6 +4591,9 @@ button:hover{ filter:brightness(0.9); }
     z-index: 1;
   }
 }
+
+
+
 </style>
 
 
@@ -3182,11 +4616,17 @@ button:hover{ filter:brightness(0.9); }
     border-left: none;
   }
 }
+
+
+
 </style>
 
 
 <style>
 .gst-dependent{display:none;}
+
+
+
 </style>
 
 
@@ -3205,6 +4645,9 @@ button:hover{ filter:brightness(0.9); }
     text-align:center;
   }
 }
+
+
+
 </style>
 
 
@@ -3214,6 +4657,9 @@ button:hover{ filter:brightness(0.9); }
     margin-top:40px; /* move sign text a bit down */
   }
 }
+
+
+
 </style>
 
 
@@ -3227,6 +4673,9 @@ button:hover{ filter:brightness(0.9); }
     margin-top:0 !important;
   }
 }
+
+
+
 </style>
 
 
@@ -3238,6 +4687,9 @@ button:hover{ filter:brightness(0.9); }
     border-right:none !important;
   }
 }
+
+
+
 </style>
 
 
@@ -3249,6 +4701,9 @@ button:hover{ filter:brightness(0.9); }
     text-align:center !important;
   }
 }
+
+
+
 </style>
 
 
@@ -3263,6 +4718,9 @@ button:hover{ filter:brightness(0.9); }
     display:block !important;
   }
 }
+
+
+
 </style>
 
 
@@ -3272,6 +4730,9 @@ button:hover{ filter:brightness(0.9); }
     border:2px solid #000 !important;
   }
 }
+
+
+
 </style>
 
 
@@ -3286,6 +4747,9 @@ button:hover{ filter:brightness(0.9); }
 .invoice-edit-area, .header, .header *{
   pointer-events:auto !important;
 }
+
+
+
 </style>
 
 
@@ -3303,6 +4767,9 @@ button:hover{ filter:brightness(0.9); }
   border:1px solid #000 !important;
   cursor:text !important;
 }
+
+
+
 </style>
 
 
@@ -3313,6 +4780,9 @@ button:hover{ filter:brightness(0.9); }
     pointer-events: auto !important;
   }
 }
+
+
+
 </style>
 
 
@@ -3327,6 +4797,9 @@ button:hover{ filter:brightness(0.9); }
     user-select: text !important;
   }
 }
+
+
+
 </style>
 
 
@@ -3334,6 +4807,9 @@ button:hover{ filter:brightness(0.9); }
 @media print{
   #dashboardPanel{display:none !important;}
 }
+
+
+
 </style>
 
 </head>
@@ -3389,6 +4865,31 @@ background:#fff;border:2px solid #000;padding:10px;z-index:4000">
 </div>
 
 
+
+
+<!-- ===== USER LOG GATE (AUTO) ===== -->
+<div id="userGate" style="
+display:none;
+position:fixed;
+top:0;left:0;
+width:100%;height:100%;
+background:#000000cc;
+z-index:99999;
+">
+  <div style="
+    background:#fff;
+    width:90%;
+    max-width:360px;
+    margin:10% auto;
+    padding:16px;
+    border-radius:8px;
+  ">
+    <h3>User Verification</h3>
+    <input id="ug_name" placeholder="Your Name"><br><br>
+    <input id="ug_mobile" placeholder="Mobile Number"><br><br>
+    <button onclick="submitUserGate()">Continue</button>
+  </div>
+</div>
 
 </body>
       </html>
@@ -3734,103 +5235,16 @@ function refreshFirmList(){
   sel.value = localStorage.getItem("ACTIVE_FIRM") || "";
 }
 
-function newFirm(){
-  const firmName = prompt("Enter Firm Name");
-  if(!firmName) return;
-
-  const name = prompt("Enter Owner / Firm Display Name");
-  const gst = prompt("Enter GST Number");
-  const address = prompt("Enter Address");
-  const mobile = prompt("Enter Mobile Number");
-  const email = prompt("Enter Gmail");
-
-  const firms = getFirms();
-  firms[firmName] = {
-    name: name || "",
-    gst: gst || "",
-    address: address || "",
-    mobile: mobile || "",
-    email: email || ""
-  };
-
-  saveFirms(firms);
-  localStorage.setItem("ACTIVE_FIRM", firmName);
-  refreshFirmList();
-  loadProfile();
-
-  if(db){
-    db.collection("firms").doc(firmName).set({
-      firmName: firmName,
-      name: name || "",
-      gst: gst || "",
-      address: address || "",
-      mobile: mobile || "",
-      email: email || "",
-      createdAt: new Date().toISOString()
-    });
-  }
-}
-
-function switchFirm(name){
-  if(!name) return;
-  localStorage.setItem("ACTIVE_FIRM", name);
-  loadProfile();
-}
-
-function saveProfile(){
-  const firm = localStorage.getItem("ACTIVE_FIRM");
-  if(!firm){ alert("Select or create a firm first"); return; }
-  const firms = getFirms();
-  firms[firm] = {
-    name:p_name.value,
-    gst:p_gst.value,
-    address:p_address.value,
-    mobile:p_mobile.value,
-    email:p_email.value
-  };
-  saveFirms(firms);
-  alert("Firm Profile Saved");
-}
 
 
-function editFirm(){
-  const firm = localStorage.getItem("ACTIVE_FIRM");
-  if(!firm){ alert("Select a firm first"); return; }
 
-  const firms = getFirms();
-  const f = firms[firm] || {};
 
-  const name = prompt("Edit Owner / Firm Display Name", f.name || "");
-  const gst = prompt("Edit GST Number", f.gst || "");
-  const address = prompt("Edit Address", f.address || "");
-  const mobile = prompt("Edit Mobile Number", f.mobile || "");
-  const email = prompt("Edit Gmail", f.email || "");
 
-  firms[firm] = {
-    name: name || "",
-    gst: gst || "",
-    address: address || "",
-    mobile: mobile || "",
-    email: email || ""
-  };
 
-  saveFirms(firms);
-  alert("Firm Updated");
-  loadProfile();
-}
 
-function loadProfile(){
-  refreshFirmList();
-  const firm = localStorage.getItem("ACTIVE_FIRM");
-  if(!firm) return;
-  const firms = getFirms();
-  const p = firms[firm] || {};
-  p_name.value=p.name||"";
-  p_gst.value=p.gst||"";
-  p_address.value=p.address||"";
-  p_mobile.value=p.mobile||"";
-  p_email.value=p.email||"";
-}
+
+
+
 
 /* ===== BACKUP INCLUDE FIRMS ===== */
 function exportBackup(){
@@ -3902,70 +5316,11 @@ function saveParties(obj){
   localStorage.setItem("PARTIES", JSON.stringify(obj));
 }
 
-function newParty(){
-  const partyName = prompt("Enter Party Name");
-  if(!partyName) return;
 
-  const mobile = prompt("Enter Mobile Number");
-  const address = prompt("Enter Address");
-
-  const parties = getParties();
-  parties[partyName] = {
-    mobile: mobile || "",
-    address: address || ""
-  };
-
-  saveParties(parties);
-  refreshPartyList();
-
-  if(db){
-    db.collection("parties").doc(partyName).set({
-      partyName: partyName,
-      mobile: mobile || "",
-      address: address || "",
-      createdAt: new Date().toISOString()
-    });
-  }
-}
 
 
 /* ===== EDIT PARTY (SAME AS EDIT FIRM CONCEPT) ===== */
-function editParty(){
-  const parties = JSON.parse(localStorage.getItem("PARTIES") || "{}");
-  const keys = Object.keys(parties);
 
-  if(keys.length === 0){
-    alert("No party available to edit");
-    return;
-  }
-
-  const partyName = prompt(
-    "Enter Party Name to Edit:\n" + keys.join("\n")
-  );
-  if(!partyName || !parties[partyName]){
-    alert("Party not found");
-    return;
-  }
-
-  const p = parties[partyName];
-
-  const name = prompt("Edit Contact Name", p.name || "");
-  const gst = prompt("Edit GST Number", p.gst || "");
-  const address = prompt("Edit Address", p.address || "");
-  const mobile = prompt("Edit Mobile Number", p.mobile || "");
-  const email = prompt("Edit Email", p.email || "");
-
-  parties[partyName] = {
-    name: name || "",
-    gst: gst || "",
-    address: address || "",
-    mobile: mobile || "",
-    email: email || ""
-  };
-
-  localStorage.setItem("PARTIES", JSON.stringify(parties));
-  alert("Party Updated Successfully");
-}
 
 
 /* ===== OPEN FIRM & PARTY LISTS ===== */
@@ -4104,27 +5459,9 @@ window.addEventListener("beforeprint", updatePrintTaxHeader);
 
 
 /* BANK DETAILS */
-function toggleBankPanel(){
-  const p=document.getElementById("bankPanel");
-  p.style.display = p.style.display==="block"?"none":"block";
-  const d=JSON.parse(localStorage.getItem("BANK_DATA")||"{}");
-  if(d.name) bank_name.value=d.name;
-  if(d.acc) bank_acc.value=d.acc;
-  if(d.ifsc) bank_ifsc.value=d.ifsc;
-  if(d.branch) bank_branch.value=d.branch;
-}
 
-function saveBank(){
-  const d={
-    name:bank_name.value,
-    acc:bank_acc.value,
-    ifsc:bank_ifsc.value,
-    branch:bank_branch.value
-  };
-  localStorage.setItem("BANK_DATA",JSON.stringify(d));
-  renderBankPrint();
-  alert("Bank details saved");
-}
+
+
 
 function renderBankPrint(){
   const d=JSON.parse(localStorage.getItem("BANK_DATA")||"{}");
@@ -4270,6 +5607,516 @@ function openEstimate(id){
     alert("Error loading estimate");
   });
 }
+
+
+/* ===== FIRM / PARTY (DETAILS BASED - FAILPROOF) ===== */
+function saveFirmParty(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const firm = fp_firm.value.trim();
+  const name = fp_name.value.trim();
+  if(!firm || !name){ alert("Firm & Party name required"); return; }
+
+  db.collection("firms").doc(firm).collection("parties").doc(name).set({
+    firm, name,
+    mobile: fp_mobile.value || "",
+    gst: fp_gst.value || "",
+    address: fp_address.value || "",
+    time: new Date().toISOString()
+  }).then(()=>{
+    alert("Saved");
+    loadFirmParties();
+  });
+}
+
+function loadFirmParties(){
+  if(!db) return;
+  const firm = fp_firm.value.trim();
+  if(!firm){ alert("Enter firm name"); return; }
+
+  fp_list.innerHTML = "Loading...";
+  db.collection("firms").doc(firm).collection("parties")
+    .orderBy("time","desc").get()
+    .then(snap=>{
+      fp_list.innerHTML = "";
+      if(snap.empty){ fp_list.innerHTML="<i>No data</i>"; return; }
+      snap.forEach(d=>{
+        const x = d.data();
+        fp_list.innerHTML += `
+          <div style="padding:6px;border-bottom:1px solid #ddd;cursor:pointer"
+           onclick="cust.value='${x.name}';custMobile.innerText='${x.mobile||""}';custAddress.innerText='${x.address||""}'">
+           <b>${x.name}</b><br>${x.mobile||""} ${x.gst||""}
+          </div>`;
+      });
+    });
+}
+
+
+/* ===== FIRM & PARTY MANAGER (SEPARATE) ===== */
+function saveFirm(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const firm = fm_firm.value.trim();
+  if(!firm){ alert("Firm name required"); return; }
+  db.collection("firms").doc(firm).set({ name: firm, time: new Date().toISOString() })
+    .then(()=>{ alert("Firm saved"); loadFirms(); });
+}
+
+function loadFirms(){
+  if(!db) return;
+  firm_list.innerHTML = "Loading...";
+  fp_firm_select.innerHTML = '<option value="">-- Select Firm --</option>';
+  db.collection("firms").orderBy("time","desc").get().then(snap=>{
+    firm_list.innerHTML = "";
+    snap.forEach(doc=>{
+      const f = doc.id;
+      firm_list.innerHTML += `<div style="cursor:pointer">${f}</div>`;
+      fp_firm_select.innerHTML += `<option value="${f}">${f}</option>`;
+    });
+  });
+}
+
+function saveFirmParty(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const firm = fp_firm_select.value;
+  const name = fp_name.value.trim();
+  if(!firm || !name){ alert("Select firm & enter party"); return; }
+
+  db.collection("firms").doc(firm).collection("parties").doc(name).set({
+    name,
+    mobile: fp_mobile.value || "",
+    gst: fp_gst.value || "",
+    address: fp_address.value || "",
+    time: new Date().toISOString()
+  }).then(()=>{
+    alert("Party saved");
+    loadFirmParties();
+  });
+}
+
+function loadFirmParties(){
+  if(!db) return;
+  const firm = fp_firm_select.value;
+  if(!firm){ fp_list.innerHTML=""; return; }
+  fp_list.innerHTML = "Loading...";
+  db.collection("firms").doc(firm).collection("parties")
+    .orderBy("time","desc").get().then(snap=>{
+      fp_list.innerHTML="";
+      snap.forEach(d=>{
+        const x = d.data();
+        fp_list.innerHTML += `
+          <div style="padding:6px;border-bottom:1px solid #ddd;cursor:pointer"
+           onclick="cust.value='${x.name}';custMobile.innerText='${x.mobile||""}';custAddress.innerText='${x.address||""}'">
+           <b>${x.name}</b><br>${x.mobile||""} ${x.gst||""}
+          </div>`;
+      });
+    });
+}
+
+
+/* ===== FIRM MASTER WITH DETAILS ===== */
+function saveFirm(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const name = fm_name.value.trim();
+  if(!name){ alert("Firm name required"); return; }
+
+  db.collection("firms").doc(name).set({
+    name: name,
+    mobile: fm_mobile.value || "",
+    gst: fm_gst.value || "",
+    email: fm_email.value || "",
+    address: fm_address.value || "",
+    time: new Date().toISOString()
+  }).then(()=>{
+    alert("Firm saved");
+    loadFirms();
+  });
+}
+
+function loadFirms(){
+  if(!db) return;
+  firm_list.innerHTML = "Loading...";
+  activeFirm.innerHTML = '<option value="">-- Select Firm --</option>';
+  fp_firm_select.innerHTML = '<option value="">-- Select Firm --</option>';
+
+  db.collection("firms").orderBy("time","desc").get().then(snap=>{
+    firm_list.innerHTML = "";
+    snap.forEach(doc=>{
+      const f = doc.data();
+      firm_list.innerHTML += `<div style="cursor:pointer">${f.name}</div>`;
+      activeFirm.innerHTML += `<option value="${f.name}">${f.name}</option>`;
+      fp_firm_select.innerHTML += `<option value="${f.name}">${f.name}</option>`;
+    });
+  });
+}
+
+/* ===== FIRM → CUSTOMER FILTER ===== */
+function onFirmChange(){
+  const firm = activeFirm.value;
+  const list = document.getElementById("custList");
+  list.innerHTML = "";
+  if(!firm || !db) return;
+
+  db.collection("firms").doc(firm).collection("parties").get().then(snap=>{
+    snap.forEach(doc=>{
+      const p = doc.data();
+      const opt = document.createElement("option");
+      opt.value = p.name;
+      list.appendChild(opt);
+    });
+  });
+}
+
+
+/* ===== ACTIVE FIRM (PERSISTENT) ===== */
+function onFirmChange(save=true){
+  const firm = activeFirm.value;
+  if(save){
+    localStorage.setItem("ACTIVE_FIRM", firm || "");
+  }
+  const list = document.getElementById("custList");
+  if(list) list.innerHTML = "";
+  if(!firm || !db) return;
+
+  db.collection("firms").doc(firm).collection("parties").get().then(snap=>{
+    snap.forEach(doc=>{
+      const p = doc.data();
+      const opt = document.createElement("option");
+      opt.value = p.name;
+      list.appendChild(opt);
+    });
+  });
+}
+
+// restore firm on page load
+window.addEventListener("load", ()=>{
+  const savedFirm = localStorage.getItem("ACTIVE_FIRM");
+  if(savedFirm){
+    setTimeout(()=>{
+      const opt = [...activeFirm.options].find(o=>o.value===savedFirm);
+      if(opt){
+        activeFirm.value = savedFirm;
+        onFirmChange(false);
+      }
+    }, 800);
+  }
+});
+
+
+/* ===== SINGLE ACTIVE FIRM SOURCE ===== */
+
+function loadFirmsAuto(){
+  if(!db) return;
+  activeFirm.innerHTML = '<option value="">-- Select Firm --</option>';
+
+  db.collection("firms").orderBy("time","desc").get().then(snap=>{
+    snap.forEach(doc=>{
+      const f = doc.data().name;
+      activeFirm.innerHTML += `<option value="${f}">${f}</option>`;
+    });
+
+    // restore saved firm
+    const saved = localStorage.getItem("ACTIVE_FIRM");
+    if(saved){
+      activeFirm.value = saved;
+      onFirmChange(false);
+    }
+  });
+}
+
+function saveFirmParty(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const firm = activeFirm.value;
+  const name = fp_name.value.trim();
+  if(!firm || !name){
+    alert("Select Active Firm once, then add parties");
+    return;
+  }
+
+  db.collection("firms").doc(firm).collection("parties").doc(name).set({
+    name,
+    mobile: fp_mobile.value || "",
+    gst: fp_gst.value || "",
+    address: fp_address.value || "",
+    time: new Date().toISOString()
+  }).then(()=>{
+    alert("Party saved");
+    loadFirmParties();
+  });
+}
+
+function loadFirmParties(){
+  if(!db) return;
+  const firm = activeFirm.value;
+  if(!firm){ fp_list.innerHTML=""; return; }
+
+  fp_list.innerHTML = "Loading...";
+  db.collection("firms").doc(firm).collection("parties")
+    .orderBy("time","desc").get().then(snap=>{
+      fp_list.innerHTML="";
+      snap.forEach(d=>{
+        const x = d.data();
+        fp_list.innerHTML += `
+          <div style="padding:6px;border-bottom:1px solid #ddd;cursor:pointer"
+           onclick="cust.value='${x.name}';custMobile.innerText='${x.mobile||""}';custAddress.innerText='${x.address||""}'">
+           <b>${x.name}</b><br>${x.mobile||""} ${x.gst||""}
+          </div>`;
+      });
+    });
+}
+
+// auto load firms on startup
+window.addEventListener("load", ()=>{
+  setTimeout(loadFirmsAuto, 500);
+});
+
+
+/* ===== DASHBOARD : ALL PARTIES ===== */
+function loadPartyDashboard(){
+  if(!db) return;
+  const tbody = document.getElementById("partyDashboardBody");
+  if(!tbody) return;
+
+  tbody.innerHTML = "<tr><td colspan='5' style='text-align:center'>Loading…</td></tr>";
+
+  db.collection("firms").get().then(firmsSnap=>{
+    tbody.innerHTML = "";
+    let found = false;
+
+    firmsSnap.forEach(firmDoc=>{
+      const firmName = firmDoc.id;
+      firmDoc.ref.collection("parties").get().then(partiesSnap=>{
+        partiesSnap.forEach(pDoc=>{
+          found = true;
+          const p = pDoc.data();
+          tbody.innerHTML += `
+            
+            
+            <tr id="prow_${firmName}_${pDoc.id}">
+              <td><input value="${p.name||""}" id="pn_${firmName}_${pDoc.id}" style="width:100%" disabled></td>
+              <td><input value="${p.address||""}" id="pa_${firmName}_${pDoc.id}" style="width:100%" disabled></td>
+              <td><input value="${p.gst||""}" id="pg_${firmName}_${pDoc.id}" style="width:100%" disabled></td>
+              <td><input value="${p.mobile||""}" id="pm_${firmName}_${pDoc.id}" style="width:100%" disabled></td>
+              <td>
+                <button onclick="enablePartyEdit('${firmName}','${pDoc.id}')">Edit</button>
+                <button onclick="savePartyInline('${firmName}','${pDoc.id}')" style="display:none" id="ps_${firmName}_${pDoc.id}">Save</button>
+                <button onclick="deletePartyFromDashboard('${firmName}','${pDoc.id}')">Delete</button>
+              </td>
+            </tr>`;
+    
+    
+        });
+      });
+    });
+
+    setTimeout(()=>{
+      if(!found){
+        tbody.innerHTML = "<tr><td colspan='5' style='text-align:center'>No parties</td></tr>";
+      }
+    }, 800);
+  });
+}
+
+function editPartyFromDashboard(firm, partyId){
+  if(!db) return;
+  db.collection("firms").doc(firm).collection("parties").doc(partyId).get().then(doc=>{
+    if(!doc.exists){ alert("Party not found"); return; }
+    const d = doc.data();
+
+    activeFirm.value = firm;
+    localStorage.setItem("ACTIVE_FIRM", firm);
+    onFirmChange(false);
+
+    fp_name.value = d.name || "";
+    fp_mobile.value = d.mobile || "";
+    fp_gst.value = d.gst || "";
+    fp_address.value = d.address || "";
+
+    window.scrollTo({top:0,behavior:"smooth"});
+  });
+}
+
+function deletePartyFromDashboard(firm, partyId){
+  if(!confirm("Delete this party?")) return;
+  db.collection("firms").doc(firm).collection("parties").doc(partyId).delete().then(()=>{
+    loadPartyDashboard();
+  });
+}
+
+
+
+/* ===== PARTY DASHBOARD EDIT MODE ===== */
+function enablePartyEdit(firm, partyId){
+  ["pn","pa","pg","pm"].forEach(p=>{
+    const el = document.getElementById(p+"_"+firm+"_"+partyId);
+    if(el) el.disabled = false;
+  });
+  const saveBtn = document.getElementById("ps_"+firm+"_"+partyId);
+  if(saveBtn) saveBtn.style.display = "inline-block";
+}
+
+function savePartyInline(firm, partyId){
+  const name = document.getElementById("pn_"+firm+"_"+partyId).value;
+  const address = document.getElementById("pa_"+firm+"_"+partyId).value;
+  const gst = document.getElementById("pg_"+firm+"_"+partyId).value;
+  const mobile = document.getElementById("pm_"+firm+"_"+partyId).value;
+
+  db.collection("firms").doc(firm).collection("parties").doc(partyId).update({
+    name, address, gst, mobile
+  }).then(()=>{
+    ["pn","pa","pg","pm"].forEach(p=>{
+      const el = document.getElementById(p+"_"+firm+"_"+partyId);
+      if(el) el.disabled = true;
+    });
+    const saveBtn = document.getElementById("ps_"+firm+"_"+partyId);
+    if(saveBtn) saveBtn.style.display = "none";
+    alert("Party updated");
+  });
+}
+
+
+/* ===== USER LOG SYSTEM ===== */
+async function getIP(){
+  try{
+    const r = await fetch("https://api.ipify.org?format=json");
+    const j = await r.json();
+    return j.ip;
+  }catch(e){
+    return "unknown";
+  }
+}
+
+async function checkUserGate(){
+  if(!db) return;
+  const ip = await getIP();
+  window._USER_IP = ip;
+
+  const snap = await db.collection("user_logs").doc(ip).get();
+  if(!snap.exists){
+    document.getElementById("userGate").style.display = "block";
+  }
+}
+
+async function submitUserGate(){
+  const name = ug_name.value.trim();
+  const mobile = ug_mobile.value.trim();
+  if(!name || !mobile){
+    alert("Name & Mobile required");
+    return;
+  }
+  const ip = window._USER_IP || "unknown";
+
+  await db.collection("user_logs").doc(ip).set({
+    name, mobile, ip,
+    time: new Date().toISOString()
+  });
+
+  document.getElementById("userGate").style.display = "none";
+}
+
+/* Admin: view logs */
+function openUserLogs(){
+  if(!db) return;
+  db.collection("user_logs").orderBy("time","desc").get().then(snap=>{
+    let msg = "USER LOGS\n----------------\n";
+    snap.forEach(d=>{
+      const x = d.data();
+      msg += `${x.name} | ${x.mobile} | ${x.ip}\n`;
+    });
+    alert(msg);
+  });
+}
+
+// auto check after load
+window.addEventListener("load", ()=>{
+  setTimeout(checkUserGate, 1200);
+});
+
+
+/* ===== FINAL SAFETY NET : FORCE DEDUP ACTIVE FIRM ===== */
+function dedupeActiveFirm(){
+  const sel = document.getElementById("activeFirm");
+  if(!sel) return;
+
+  const seen = new Set();
+  const opts = Array.from(sel.options);
+
+  sel.innerHTML = "";
+
+  opts.forEach(o=>{
+    if(!seen.has(o.value)){
+      seen.add(o.value);
+      sel.appendChild(o);
+    }
+  });
+}
+
+// run multiple times to beat async race conditions
+window.addEventListener("load", ()=>{
+  setTimeout(dedupeActiveFirm, 300);
+  setTimeout(dedupeActiveFirm, 800);
+  setTimeout(dedupeActiveFirm, 1500);
+});
+
+
+/* ===== FINAL SAFETY NET : FORCE DEDUP CUSTOMER LIST ===== */
+function dedupeCustomerList(){
+  const list = document.getElementById("custList");
+  if(!list) return;
+
+  const seen = new Set();
+  const opts = Array.from(list.options);
+
+  list.innerHTML = "";
+
+  opts.forEach(o=>{
+    if(!seen.has(o.value)){
+      seen.add(o.value);
+      list.appendChild(o);
+    }
+  });
+}
+
+// run multiple times to beat async race conditions
+window.addEventListener("load", ()=>{
+  setTimeout(dedupeCustomerList, 400);
+  setTimeout(dedupeCustomerList, 900);
+  setTimeout(dedupeCustomerList, 1600);
+});
+
+
+/* ===== CUSTOMER FULL LOAD ON SELECT ===== */
+function loadCustomerDetailsByName(name){
+  if(!db) return;
+  const firm = document.getElementById("activeFirm")?.value;
+  if(!firm || !name) return;
+
+  db.collection("firms").doc(firm).collection("parties")
+    .where("name","==",name).limit(1).get()
+    .then(snap=>{
+      if(snap.empty) return;
+      const d = snap.docs[0].data();
+
+      if(typeof cust !== "undefined") cust.value = d.name || "";
+let bn=document.getElementById("custNameBold");if(bn){bn.innerText=d.name||"";}
+      if(typeof custMobile !== "undefined") custMobile.innerText = d.mobile || "";
+      if(typeof custAddress !== "undefined") custAddress.innerText = d.address || "";
+if(!document.getElementById("custNameBold")){
+ const div=document.createElement("div");
+ div.style.fontWeight="bold";div.style.marginTop="4px";
+ div.id="custNameBold";div.innerText=d.name||"";
+ custAddress.parentNode.insertBefore(div,custAddress);
+}
+    });
+}
+
+// hook into customer input change safely
+window.addEventListener("load", ()=>{
+  const custInput = document.getElementById("cust");
+  if(custInput){
+    custInput.addEventListener("change", ()=>{
+      loadCustomerDetailsByName(custInput.value);
+    });
+  }
+});
 
 </script>
 
@@ -4388,27 +6235,9 @@ window.addEventListener("beforeprint", updatePrintTaxHeader);
 
 
 /* BANK DETAILS */
-function toggleBankPanel(){
-  const p=document.getElementById("bankPanel");
-  p.style.display = p.style.display==="block"?"none":"block";
-  const d=JSON.parse(localStorage.getItem("BANK_DATA")||"{}");
-  if(d.name) bank_name.value=d.name;
-  if(d.acc) bank_acc.value=d.acc;
-  if(d.ifsc) bank_ifsc.value=d.ifsc;
-  if(d.branch) bank_branch.value=d.branch;
-}
 
-function saveBank(){
-  const d={
-    name:bank_name.value,
-    acc:bank_acc.value,
-    ifsc:bank_ifsc.value,
-    branch:bank_branch.value
-  };
-  localStorage.setItem("BANK_DATA",JSON.stringify(d));
-  renderBankPrint();
-  alert("Bank details saved");
-}
+
+
 
 function renderBankPrint(){
   const d=JSON.parse(localStorage.getItem("BANK_DATA")||"{}");
@@ -4554,6 +6383,516 @@ function openEstimate(id){
     alert("Error loading estimate");
   });
 }
+
+
+/* ===== FIRM / PARTY (DETAILS BASED - FAILPROOF) ===== */
+function saveFirmParty(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const firm = fp_firm.value.trim();
+  const name = fp_name.value.trim();
+  if(!firm || !name){ alert("Firm & Party name required"); return; }
+
+  db.collection("firms").doc(firm).collection("parties").doc(name).set({
+    firm, name,
+    mobile: fp_mobile.value || "",
+    gst: fp_gst.value || "",
+    address: fp_address.value || "",
+    time: new Date().toISOString()
+  }).then(()=>{
+    alert("Saved");
+    loadFirmParties();
+  });
+}
+
+function loadFirmParties(){
+  if(!db) return;
+  const firm = fp_firm.value.trim();
+  if(!firm){ alert("Enter firm name"); return; }
+
+  fp_list.innerHTML = "Loading...";
+  db.collection("firms").doc(firm).collection("parties")
+    .orderBy("time","desc").get()
+    .then(snap=>{
+      fp_list.innerHTML = "";
+      if(snap.empty){ fp_list.innerHTML="<i>No data</i>"; return; }
+      snap.forEach(d=>{
+        const x = d.data();
+        fp_list.innerHTML += `
+          <div style="padding:6px;border-bottom:1px solid #ddd;cursor:pointer"
+           onclick="cust.value='${x.name}';custMobile.innerText='${x.mobile||""}';custAddress.innerText='${x.address||""}'">
+           <b>${x.name}</b><br>${x.mobile||""} ${x.gst||""}
+          </div>`;
+      });
+    });
+}
+
+
+/* ===== FIRM & PARTY MANAGER (SEPARATE) ===== */
+function saveFirm(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const firm = fm_firm.value.trim();
+  if(!firm){ alert("Firm name required"); return; }
+  db.collection("firms").doc(firm).set({ name: firm, time: new Date().toISOString() })
+    .then(()=>{ alert("Firm saved"); loadFirms(); });
+}
+
+function loadFirms(){
+  if(!db) return;
+  firm_list.innerHTML = "Loading...";
+  fp_firm_select.innerHTML = '<option value="">-- Select Firm --</option>';
+  db.collection("firms").orderBy("time","desc").get().then(snap=>{
+    firm_list.innerHTML = "";
+    snap.forEach(doc=>{
+      const f = doc.id;
+      firm_list.innerHTML += `<div style="cursor:pointer">${f}</div>`;
+      fp_firm_select.innerHTML += `<option value="${f}">${f}</option>`;
+    });
+  });
+}
+
+function saveFirmParty(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const firm = fp_firm_select.value;
+  const name = fp_name.value.trim();
+  if(!firm || !name){ alert("Select firm & enter party"); return; }
+
+  db.collection("firms").doc(firm).collection("parties").doc(name).set({
+    name,
+    mobile: fp_mobile.value || "",
+    gst: fp_gst.value || "",
+    address: fp_address.value || "",
+    time: new Date().toISOString()
+  }).then(()=>{
+    alert("Party saved");
+    loadFirmParties();
+  });
+}
+
+function loadFirmParties(){
+  if(!db) return;
+  const firm = fp_firm_select.value;
+  if(!firm){ fp_list.innerHTML=""; return; }
+  fp_list.innerHTML = "Loading...";
+  db.collection("firms").doc(firm).collection("parties")
+    .orderBy("time","desc").get().then(snap=>{
+      fp_list.innerHTML="";
+      snap.forEach(d=>{
+        const x = d.data();
+        fp_list.innerHTML += `
+          <div style="padding:6px;border-bottom:1px solid #ddd;cursor:pointer"
+           onclick="cust.value='${x.name}';custMobile.innerText='${x.mobile||""}';custAddress.innerText='${x.address||""}'">
+           <b>${x.name}</b><br>${x.mobile||""} ${x.gst||""}
+          </div>`;
+      });
+    });
+}
+
+
+/* ===== FIRM MASTER WITH DETAILS ===== */
+function saveFirm(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const name = fm_name.value.trim();
+  if(!name){ alert("Firm name required"); return; }
+
+  db.collection("firms").doc(name).set({
+    name: name,
+    mobile: fm_mobile.value || "",
+    gst: fm_gst.value || "",
+    email: fm_email.value || "",
+    address: fm_address.value || "",
+    time: new Date().toISOString()
+  }).then(()=>{
+    alert("Firm saved");
+    loadFirms();
+  });
+}
+
+function loadFirms(){
+  if(!db) return;
+  firm_list.innerHTML = "Loading...";
+  activeFirm.innerHTML = '<option value="">-- Select Firm --</option>';
+  fp_firm_select.innerHTML = '<option value="">-- Select Firm --</option>';
+
+  db.collection("firms").orderBy("time","desc").get().then(snap=>{
+    firm_list.innerHTML = "";
+    snap.forEach(doc=>{
+      const f = doc.data();
+      firm_list.innerHTML += `<div style="cursor:pointer">${f.name}</div>`;
+      activeFirm.innerHTML += `<option value="${f.name}">${f.name}</option>`;
+      fp_firm_select.innerHTML += `<option value="${f.name}">${f.name}</option>`;
+    });
+  });
+}
+
+/* ===== FIRM → CUSTOMER FILTER ===== */
+function onFirmChange(){
+  const firm = activeFirm.value;
+  const list = document.getElementById("custList");
+  list.innerHTML = "";
+  if(!firm || !db) return;
+
+  db.collection("firms").doc(firm).collection("parties").get().then(snap=>{
+    snap.forEach(doc=>{
+      const p = doc.data();
+      const opt = document.createElement("option");
+      opt.value = p.name;
+      list.appendChild(opt);
+    });
+  });
+}
+
+
+/* ===== ACTIVE FIRM (PERSISTENT) ===== */
+function onFirmChange(save=true){
+  const firm = activeFirm.value;
+  if(save){
+    localStorage.setItem("ACTIVE_FIRM", firm || "");
+  }
+  const list = document.getElementById("custList");
+  if(list) list.innerHTML = "";
+  if(!firm || !db) return;
+
+  db.collection("firms").doc(firm).collection("parties").get().then(snap=>{
+    snap.forEach(doc=>{
+      const p = doc.data();
+      const opt = document.createElement("option");
+      opt.value = p.name;
+      list.appendChild(opt);
+    });
+  });
+}
+
+// restore firm on page load
+window.addEventListener("load", ()=>{
+  const savedFirm = localStorage.getItem("ACTIVE_FIRM");
+  if(savedFirm){
+    setTimeout(()=>{
+      const opt = [...activeFirm.options].find(o=>o.value===savedFirm);
+      if(opt){
+        activeFirm.value = savedFirm;
+        onFirmChange(false);
+      }
+    }, 800);
+  }
+});
+
+
+/* ===== SINGLE ACTIVE FIRM SOURCE ===== */
+
+function loadFirmsAuto(){
+  if(!db) return;
+  activeFirm.innerHTML = '<option value="">-- Select Firm --</option>';
+
+  db.collection("firms").orderBy("time","desc").get().then(snap=>{
+    snap.forEach(doc=>{
+      const f = doc.data().name;
+      activeFirm.innerHTML += `<option value="${f}">${f}</option>`;
+    });
+
+    // restore saved firm
+    const saved = localStorage.getItem("ACTIVE_FIRM");
+    if(saved){
+      activeFirm.value = saved;
+      onFirmChange(false);
+    }
+  });
+}
+
+function saveFirmParty(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const firm = activeFirm.value;
+  const name = fp_name.value.trim();
+  if(!firm || !name){
+    alert("Select Active Firm once, then add parties");
+    return;
+  }
+
+  db.collection("firms").doc(firm).collection("parties").doc(name).set({
+    name,
+    mobile: fp_mobile.value || "",
+    gst: fp_gst.value || "",
+    address: fp_address.value || "",
+    time: new Date().toISOString()
+  }).then(()=>{
+    alert("Party saved");
+    loadFirmParties();
+  });
+}
+
+function loadFirmParties(){
+  if(!db) return;
+  const firm = activeFirm.value;
+  if(!firm){ fp_list.innerHTML=""; return; }
+
+  fp_list.innerHTML = "Loading...";
+  db.collection("firms").doc(firm).collection("parties")
+    .orderBy("time","desc").get().then(snap=>{
+      fp_list.innerHTML="";
+      snap.forEach(d=>{
+        const x = d.data();
+        fp_list.innerHTML += `
+          <div style="padding:6px;border-bottom:1px solid #ddd;cursor:pointer"
+           onclick="cust.value='${x.name}';custMobile.innerText='${x.mobile||""}';custAddress.innerText='${x.address||""}'">
+           <b>${x.name}</b><br>${x.mobile||""} ${x.gst||""}
+          </div>`;
+      });
+    });
+}
+
+// auto load firms on startup
+window.addEventListener("load", ()=>{
+  setTimeout(loadFirmsAuto, 500);
+});
+
+
+/* ===== DASHBOARD : ALL PARTIES ===== */
+function loadPartyDashboard(){
+  if(!db) return;
+  const tbody = document.getElementById("partyDashboardBody");
+  if(!tbody) return;
+
+  tbody.innerHTML = "<tr><td colspan='5' style='text-align:center'>Loading…</td></tr>";
+
+  db.collection("firms").get().then(firmsSnap=>{
+    tbody.innerHTML = "";
+    let found = false;
+
+    firmsSnap.forEach(firmDoc=>{
+      const firmName = firmDoc.id;
+      firmDoc.ref.collection("parties").get().then(partiesSnap=>{
+        partiesSnap.forEach(pDoc=>{
+          found = true;
+          const p = pDoc.data();
+          tbody.innerHTML += `
+            
+            
+            <tr id="prow_${firmName}_${pDoc.id}">
+              <td><input value="${p.name||""}" id="pn_${firmName}_${pDoc.id}" style="width:100%" disabled></td>
+              <td><input value="${p.address||""}" id="pa_${firmName}_${pDoc.id}" style="width:100%" disabled></td>
+              <td><input value="${p.gst||""}" id="pg_${firmName}_${pDoc.id}" style="width:100%" disabled></td>
+              <td><input value="${p.mobile||""}" id="pm_${firmName}_${pDoc.id}" style="width:100%" disabled></td>
+              <td>
+                <button onclick="enablePartyEdit('${firmName}','${pDoc.id}')">Edit</button>
+                <button onclick="savePartyInline('${firmName}','${pDoc.id}')" style="display:none" id="ps_${firmName}_${pDoc.id}">Save</button>
+                <button onclick="deletePartyFromDashboard('${firmName}','${pDoc.id}')">Delete</button>
+              </td>
+            </tr>`;
+    
+    
+        });
+      });
+    });
+
+    setTimeout(()=>{
+      if(!found){
+        tbody.innerHTML = "<tr><td colspan='5' style='text-align:center'>No parties</td></tr>";
+      }
+    }, 800);
+  });
+}
+
+function editPartyFromDashboard(firm, partyId){
+  if(!db) return;
+  db.collection("firms").doc(firm).collection("parties").doc(partyId).get().then(doc=>{
+    if(!doc.exists){ alert("Party not found"); return; }
+    const d = doc.data();
+
+    activeFirm.value = firm;
+    localStorage.setItem("ACTIVE_FIRM", firm);
+    onFirmChange(false);
+
+    fp_name.value = d.name || "";
+    fp_mobile.value = d.mobile || "";
+    fp_gst.value = d.gst || "";
+    fp_address.value = d.address || "";
+
+    window.scrollTo({top:0,behavior:"smooth"});
+  });
+}
+
+function deletePartyFromDashboard(firm, partyId){
+  if(!confirm("Delete this party?")) return;
+  db.collection("firms").doc(firm).collection("parties").doc(partyId).delete().then(()=>{
+    loadPartyDashboard();
+  });
+}
+
+
+
+/* ===== PARTY DASHBOARD EDIT MODE ===== */
+function enablePartyEdit(firm, partyId){
+  ["pn","pa","pg","pm"].forEach(p=>{
+    const el = document.getElementById(p+"_"+firm+"_"+partyId);
+    if(el) el.disabled = false;
+  });
+  const saveBtn = document.getElementById("ps_"+firm+"_"+partyId);
+  if(saveBtn) saveBtn.style.display = "inline-block";
+}
+
+function savePartyInline(firm, partyId){
+  const name = document.getElementById("pn_"+firm+"_"+partyId).value;
+  const address = document.getElementById("pa_"+firm+"_"+partyId).value;
+  const gst = document.getElementById("pg_"+firm+"_"+partyId).value;
+  const mobile = document.getElementById("pm_"+firm+"_"+partyId).value;
+
+  db.collection("firms").doc(firm).collection("parties").doc(partyId).update({
+    name, address, gst, mobile
+  }).then(()=>{
+    ["pn","pa","pg","pm"].forEach(p=>{
+      const el = document.getElementById(p+"_"+firm+"_"+partyId);
+      if(el) el.disabled = true;
+    });
+    const saveBtn = document.getElementById("ps_"+firm+"_"+partyId);
+    if(saveBtn) saveBtn.style.display = "none";
+    alert("Party updated");
+  });
+}
+
+
+/* ===== USER LOG SYSTEM ===== */
+async function getIP(){
+  try{
+    const r = await fetch("https://api.ipify.org?format=json");
+    const j = await r.json();
+    return j.ip;
+  }catch(e){
+    return "unknown";
+  }
+}
+
+async function checkUserGate(){
+  if(!db) return;
+  const ip = await getIP();
+  window._USER_IP = ip;
+
+  const snap = await db.collection("user_logs").doc(ip).get();
+  if(!snap.exists){
+    document.getElementById("userGate").style.display = "block";
+  }
+}
+
+async function submitUserGate(){
+  const name = ug_name.value.trim();
+  const mobile = ug_mobile.value.trim();
+  if(!name || !mobile){
+    alert("Name & Mobile required");
+    return;
+  }
+  const ip = window._USER_IP || "unknown";
+
+  await db.collection("user_logs").doc(ip).set({
+    name, mobile, ip,
+    time: new Date().toISOString()
+  });
+
+  document.getElementById("userGate").style.display = "none";
+}
+
+/* Admin: view logs */
+function openUserLogs(){
+  if(!db) return;
+  db.collection("user_logs").orderBy("time","desc").get().then(snap=>{
+    let msg = "USER LOGS\n----------------\n";
+    snap.forEach(d=>{
+      const x = d.data();
+      msg += `${x.name} | ${x.mobile} | ${x.ip}\n`;
+    });
+    alert(msg);
+  });
+}
+
+// auto check after load
+window.addEventListener("load", ()=>{
+  setTimeout(checkUserGate, 1200);
+});
+
+
+/* ===== FINAL SAFETY NET : FORCE DEDUP ACTIVE FIRM ===== */
+function dedupeActiveFirm(){
+  const sel = document.getElementById("activeFirm");
+  if(!sel) return;
+
+  const seen = new Set();
+  const opts = Array.from(sel.options);
+
+  sel.innerHTML = "";
+
+  opts.forEach(o=>{
+    if(!seen.has(o.value)){
+      seen.add(o.value);
+      sel.appendChild(o);
+    }
+  });
+}
+
+// run multiple times to beat async race conditions
+window.addEventListener("load", ()=>{
+  setTimeout(dedupeActiveFirm, 300);
+  setTimeout(dedupeActiveFirm, 800);
+  setTimeout(dedupeActiveFirm, 1500);
+});
+
+
+/* ===== FINAL SAFETY NET : FORCE DEDUP CUSTOMER LIST ===== */
+function dedupeCustomerList(){
+  const list = document.getElementById("custList");
+  if(!list) return;
+
+  const seen = new Set();
+  const opts = Array.from(list.options);
+
+  list.innerHTML = "";
+
+  opts.forEach(o=>{
+    if(!seen.has(o.value)){
+      seen.add(o.value);
+      list.appendChild(o);
+    }
+  });
+}
+
+// run multiple times to beat async race conditions
+window.addEventListener("load", ()=>{
+  setTimeout(dedupeCustomerList, 400);
+  setTimeout(dedupeCustomerList, 900);
+  setTimeout(dedupeCustomerList, 1600);
+});
+
+
+/* ===== CUSTOMER FULL LOAD ON SELECT ===== */
+function loadCustomerDetailsByName(name){
+  if(!db) return;
+  const firm = document.getElementById("activeFirm")?.value;
+  if(!firm || !name) return;
+
+  db.collection("firms").doc(firm).collection("parties")
+    .where("name","==",name).limit(1).get()
+    .then(snap=>{
+      if(snap.empty) return;
+      const d = snap.docs[0].data();
+
+      if(typeof cust !== "undefined") cust.value = d.name || "";
+let bn=document.getElementById("custNameBold");if(bn){bn.innerText=d.name||"";}
+      if(typeof custMobile !== "undefined") custMobile.innerText = d.mobile || "";
+      if(typeof custAddress !== "undefined") custAddress.innerText = d.address || "";
+if(!document.getElementById("custNameBold")){
+ const div=document.createElement("div");
+ div.style.fontWeight="bold";div.style.marginTop="4px";
+ div.id="custNameBold";div.innerText=d.name||"";
+ custAddress.parentNode.insertBefore(div,custAddress);
+}
+    });
+}
+
+// hook into customer input change safely
+window.addEventListener("load", ()=>{
+  const custInput = document.getElementById("cust");
+  if(custInput){
+    custInput.addEventListener("change", ()=>{
+      loadCustomerDetailsByName(custInput.value);
+    });
+  }
+});
 
 </script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js">
@@ -4622,27 +6961,9 @@ window.addEventListener("beforeprint", updatePrintTaxHeader);
 
 
 /* BANK DETAILS */
-function toggleBankPanel(){
-  const p=document.getElementById("bankPanel");
-  p.style.display = p.style.display==="block"?"none":"block";
-  const d=JSON.parse(localStorage.getItem("BANK_DATA")||"{}");
-  if(d.name) bank_name.value=d.name;
-  if(d.acc) bank_acc.value=d.acc;
-  if(d.ifsc) bank_ifsc.value=d.ifsc;
-  if(d.branch) bank_branch.value=d.branch;
-}
 
-function saveBank(){
-  const d={
-    name:bank_name.value,
-    acc:bank_acc.value,
-    ifsc:bank_ifsc.value,
-    branch:bank_branch.value
-  };
-  localStorage.setItem("BANK_DATA",JSON.stringify(d));
-  renderBankPrint();
-  alert("Bank details saved");
-}
+
+
 
 function renderBankPrint(){
   const d=JSON.parse(localStorage.getItem("BANK_DATA")||"{}");
@@ -4788,6 +7109,516 @@ function openEstimate(id){
     alert("Error loading estimate");
   });
 }
+
+
+/* ===== FIRM / PARTY (DETAILS BASED - FAILPROOF) ===== */
+function saveFirmParty(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const firm = fp_firm.value.trim();
+  const name = fp_name.value.trim();
+  if(!firm || !name){ alert("Firm & Party name required"); return; }
+
+  db.collection("firms").doc(firm).collection("parties").doc(name).set({
+    firm, name,
+    mobile: fp_mobile.value || "",
+    gst: fp_gst.value || "",
+    address: fp_address.value || "",
+    time: new Date().toISOString()
+  }).then(()=>{
+    alert("Saved");
+    loadFirmParties();
+  });
+}
+
+function loadFirmParties(){
+  if(!db) return;
+  const firm = fp_firm.value.trim();
+  if(!firm){ alert("Enter firm name"); return; }
+
+  fp_list.innerHTML = "Loading...";
+  db.collection("firms").doc(firm).collection("parties")
+    .orderBy("time","desc").get()
+    .then(snap=>{
+      fp_list.innerHTML = "";
+      if(snap.empty){ fp_list.innerHTML="<i>No data</i>"; return; }
+      snap.forEach(d=>{
+        const x = d.data();
+        fp_list.innerHTML += `
+          <div style="padding:6px;border-bottom:1px solid #ddd;cursor:pointer"
+           onclick="cust.value='${x.name}';custMobile.innerText='${x.mobile||""}';custAddress.innerText='${x.address||""}'">
+           <b>${x.name}</b><br>${x.mobile||""} ${x.gst||""}
+          </div>`;
+      });
+    });
+}
+
+
+/* ===== FIRM & PARTY MANAGER (SEPARATE) ===== */
+function saveFirm(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const firm = fm_firm.value.trim();
+  if(!firm){ alert("Firm name required"); return; }
+  db.collection("firms").doc(firm).set({ name: firm, time: new Date().toISOString() })
+    .then(()=>{ alert("Firm saved"); loadFirms(); });
+}
+
+function loadFirms(){
+  if(!db) return;
+  firm_list.innerHTML = "Loading...";
+  fp_firm_select.innerHTML = '<option value="">-- Select Firm --</option>';
+  db.collection("firms").orderBy("time","desc").get().then(snap=>{
+    firm_list.innerHTML = "";
+    snap.forEach(doc=>{
+      const f = doc.id;
+      firm_list.innerHTML += `<div style="cursor:pointer">${f}</div>`;
+      fp_firm_select.innerHTML += `<option value="${f}">${f}</option>`;
+    });
+  });
+}
+
+function saveFirmParty(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const firm = fp_firm_select.value;
+  const name = fp_name.value.trim();
+  if(!firm || !name){ alert("Select firm & enter party"); return; }
+
+  db.collection("firms").doc(firm).collection("parties").doc(name).set({
+    name,
+    mobile: fp_mobile.value || "",
+    gst: fp_gst.value || "",
+    address: fp_address.value || "",
+    time: new Date().toISOString()
+  }).then(()=>{
+    alert("Party saved");
+    loadFirmParties();
+  });
+}
+
+function loadFirmParties(){
+  if(!db) return;
+  const firm = fp_firm_select.value;
+  if(!firm){ fp_list.innerHTML=""; return; }
+  fp_list.innerHTML = "Loading...";
+  db.collection("firms").doc(firm).collection("parties")
+    .orderBy("time","desc").get().then(snap=>{
+      fp_list.innerHTML="";
+      snap.forEach(d=>{
+        const x = d.data();
+        fp_list.innerHTML += `
+          <div style="padding:6px;border-bottom:1px solid #ddd;cursor:pointer"
+           onclick="cust.value='${x.name}';custMobile.innerText='${x.mobile||""}';custAddress.innerText='${x.address||""}'">
+           <b>${x.name}</b><br>${x.mobile||""} ${x.gst||""}
+          </div>`;
+      });
+    });
+}
+
+
+/* ===== FIRM MASTER WITH DETAILS ===== */
+function saveFirm(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const name = fm_name.value.trim();
+  if(!name){ alert("Firm name required"); return; }
+
+  db.collection("firms").doc(name).set({
+    name: name,
+    mobile: fm_mobile.value || "",
+    gst: fm_gst.value || "",
+    email: fm_email.value || "",
+    address: fm_address.value || "",
+    time: new Date().toISOString()
+  }).then(()=>{
+    alert("Firm saved");
+    loadFirms();
+  });
+}
+
+function loadFirms(){
+  if(!db) return;
+  firm_list.innerHTML = "Loading...";
+  activeFirm.innerHTML = '<option value="">-- Select Firm --</option>';
+  fp_firm_select.innerHTML = '<option value="">-- Select Firm --</option>';
+
+  db.collection("firms").orderBy("time","desc").get().then(snap=>{
+    firm_list.innerHTML = "";
+    snap.forEach(doc=>{
+      const f = doc.data();
+      firm_list.innerHTML += `<div style="cursor:pointer">${f.name}</div>`;
+      activeFirm.innerHTML += `<option value="${f.name}">${f.name}</option>`;
+      fp_firm_select.innerHTML += `<option value="${f.name}">${f.name}</option>`;
+    });
+  });
+}
+
+/* ===== FIRM → CUSTOMER FILTER ===== */
+function onFirmChange(){
+  const firm = activeFirm.value;
+  const list = document.getElementById("custList");
+  list.innerHTML = "";
+  if(!firm || !db) return;
+
+  db.collection("firms").doc(firm).collection("parties").get().then(snap=>{
+    snap.forEach(doc=>{
+      const p = doc.data();
+      const opt = document.createElement("option");
+      opt.value = p.name;
+      list.appendChild(opt);
+    });
+  });
+}
+
+
+/* ===== ACTIVE FIRM (PERSISTENT) ===== */
+function onFirmChange(save=true){
+  const firm = activeFirm.value;
+  if(save){
+    localStorage.setItem("ACTIVE_FIRM", firm || "");
+  }
+  const list = document.getElementById("custList");
+  if(list) list.innerHTML = "";
+  if(!firm || !db) return;
+
+  db.collection("firms").doc(firm).collection("parties").get().then(snap=>{
+    snap.forEach(doc=>{
+      const p = doc.data();
+      const opt = document.createElement("option");
+      opt.value = p.name;
+      list.appendChild(opt);
+    });
+  });
+}
+
+// restore firm on page load
+window.addEventListener("load", ()=>{
+  const savedFirm = localStorage.getItem("ACTIVE_FIRM");
+  if(savedFirm){
+    setTimeout(()=>{
+      const opt = [...activeFirm.options].find(o=>o.value===savedFirm);
+      if(opt){
+        activeFirm.value = savedFirm;
+        onFirmChange(false);
+      }
+    }, 800);
+  }
+});
+
+
+/* ===== SINGLE ACTIVE FIRM SOURCE ===== */
+
+function loadFirmsAuto(){
+  if(!db) return;
+  activeFirm.innerHTML = '<option value="">-- Select Firm --</option>';
+
+  db.collection("firms").orderBy("time","desc").get().then(snap=>{
+    snap.forEach(doc=>{
+      const f = doc.data().name;
+      activeFirm.innerHTML += `<option value="${f}">${f}</option>`;
+    });
+
+    // restore saved firm
+    const saved = localStorage.getItem("ACTIVE_FIRM");
+    if(saved){
+      activeFirm.value = saved;
+      onFirmChange(false);
+    }
+  });
+}
+
+function saveFirmParty(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const firm = activeFirm.value;
+  const name = fp_name.value.trim();
+  if(!firm || !name){
+    alert("Select Active Firm once, then add parties");
+    return;
+  }
+
+  db.collection("firms").doc(firm).collection("parties").doc(name).set({
+    name,
+    mobile: fp_mobile.value || "",
+    gst: fp_gst.value || "",
+    address: fp_address.value || "",
+    time: new Date().toISOString()
+  }).then(()=>{
+    alert("Party saved");
+    loadFirmParties();
+  });
+}
+
+function loadFirmParties(){
+  if(!db) return;
+  const firm = activeFirm.value;
+  if(!firm){ fp_list.innerHTML=""; return; }
+
+  fp_list.innerHTML = "Loading...";
+  db.collection("firms").doc(firm).collection("parties")
+    .orderBy("time","desc").get().then(snap=>{
+      fp_list.innerHTML="";
+      snap.forEach(d=>{
+        const x = d.data();
+        fp_list.innerHTML += `
+          <div style="padding:6px;border-bottom:1px solid #ddd;cursor:pointer"
+           onclick="cust.value='${x.name}';custMobile.innerText='${x.mobile||""}';custAddress.innerText='${x.address||""}'">
+           <b>${x.name}</b><br>${x.mobile||""} ${x.gst||""}
+          </div>`;
+      });
+    });
+}
+
+// auto load firms on startup
+window.addEventListener("load", ()=>{
+  setTimeout(loadFirmsAuto, 500);
+});
+
+
+/* ===== DASHBOARD : ALL PARTIES ===== */
+function loadPartyDashboard(){
+  if(!db) return;
+  const tbody = document.getElementById("partyDashboardBody");
+  if(!tbody) return;
+
+  tbody.innerHTML = "<tr><td colspan='5' style='text-align:center'>Loading…</td></tr>";
+
+  db.collection("firms").get().then(firmsSnap=>{
+    tbody.innerHTML = "";
+    let found = false;
+
+    firmsSnap.forEach(firmDoc=>{
+      const firmName = firmDoc.id;
+      firmDoc.ref.collection("parties").get().then(partiesSnap=>{
+        partiesSnap.forEach(pDoc=>{
+          found = true;
+          const p = pDoc.data();
+          tbody.innerHTML += `
+            
+            
+            <tr id="prow_${firmName}_${pDoc.id}">
+              <td><input value="${p.name||""}" id="pn_${firmName}_${pDoc.id}" style="width:100%" disabled></td>
+              <td><input value="${p.address||""}" id="pa_${firmName}_${pDoc.id}" style="width:100%" disabled></td>
+              <td><input value="${p.gst||""}" id="pg_${firmName}_${pDoc.id}" style="width:100%" disabled></td>
+              <td><input value="${p.mobile||""}" id="pm_${firmName}_${pDoc.id}" style="width:100%" disabled></td>
+              <td>
+                <button onclick="enablePartyEdit('${firmName}','${pDoc.id}')">Edit</button>
+                <button onclick="savePartyInline('${firmName}','${pDoc.id}')" style="display:none" id="ps_${firmName}_${pDoc.id}">Save</button>
+                <button onclick="deletePartyFromDashboard('${firmName}','${pDoc.id}')">Delete</button>
+              </td>
+            </tr>`;
+    
+    
+        });
+      });
+    });
+
+    setTimeout(()=>{
+      if(!found){
+        tbody.innerHTML = "<tr><td colspan='5' style='text-align:center'>No parties</td></tr>";
+      }
+    }, 800);
+  });
+}
+
+function editPartyFromDashboard(firm, partyId){
+  if(!db) return;
+  db.collection("firms").doc(firm).collection("parties").doc(partyId).get().then(doc=>{
+    if(!doc.exists){ alert("Party not found"); return; }
+    const d = doc.data();
+
+    activeFirm.value = firm;
+    localStorage.setItem("ACTIVE_FIRM", firm);
+    onFirmChange(false);
+
+    fp_name.value = d.name || "";
+    fp_mobile.value = d.mobile || "";
+    fp_gst.value = d.gst || "";
+    fp_address.value = d.address || "";
+
+    window.scrollTo({top:0,behavior:"smooth"});
+  });
+}
+
+function deletePartyFromDashboard(firm, partyId){
+  if(!confirm("Delete this party?")) return;
+  db.collection("firms").doc(firm).collection("parties").doc(partyId).delete().then(()=>{
+    loadPartyDashboard();
+  });
+}
+
+
+
+/* ===== PARTY DASHBOARD EDIT MODE ===== */
+function enablePartyEdit(firm, partyId){
+  ["pn","pa","pg","pm"].forEach(p=>{
+    const el = document.getElementById(p+"_"+firm+"_"+partyId);
+    if(el) el.disabled = false;
+  });
+  const saveBtn = document.getElementById("ps_"+firm+"_"+partyId);
+  if(saveBtn) saveBtn.style.display = "inline-block";
+}
+
+function savePartyInline(firm, partyId){
+  const name = document.getElementById("pn_"+firm+"_"+partyId).value;
+  const address = document.getElementById("pa_"+firm+"_"+partyId).value;
+  const gst = document.getElementById("pg_"+firm+"_"+partyId).value;
+  const mobile = document.getElementById("pm_"+firm+"_"+partyId).value;
+
+  db.collection("firms").doc(firm).collection("parties").doc(partyId).update({
+    name, address, gst, mobile
+  }).then(()=>{
+    ["pn","pa","pg","pm"].forEach(p=>{
+      const el = document.getElementById(p+"_"+firm+"_"+partyId);
+      if(el) el.disabled = true;
+    });
+    const saveBtn = document.getElementById("ps_"+firm+"_"+partyId);
+    if(saveBtn) saveBtn.style.display = "none";
+    alert("Party updated");
+  });
+}
+
+
+/* ===== USER LOG SYSTEM ===== */
+async function getIP(){
+  try{
+    const r = await fetch("https://api.ipify.org?format=json");
+    const j = await r.json();
+    return j.ip;
+  }catch(e){
+    return "unknown";
+  }
+}
+
+async function checkUserGate(){
+  if(!db) return;
+  const ip = await getIP();
+  window._USER_IP = ip;
+
+  const snap = await db.collection("user_logs").doc(ip).get();
+  if(!snap.exists){
+    document.getElementById("userGate").style.display = "block";
+  }
+}
+
+async function submitUserGate(){
+  const name = ug_name.value.trim();
+  const mobile = ug_mobile.value.trim();
+  if(!name || !mobile){
+    alert("Name & Mobile required");
+    return;
+  }
+  const ip = window._USER_IP || "unknown";
+
+  await db.collection("user_logs").doc(ip).set({
+    name, mobile, ip,
+    time: new Date().toISOString()
+  });
+
+  document.getElementById("userGate").style.display = "none";
+}
+
+/* Admin: view logs */
+function openUserLogs(){
+  if(!db) return;
+  db.collection("user_logs").orderBy("time","desc").get().then(snap=>{
+    let msg = "USER LOGS\n----------------\n";
+    snap.forEach(d=>{
+      const x = d.data();
+      msg += `${x.name} | ${x.mobile} | ${x.ip}\n`;
+    });
+    alert(msg);
+  });
+}
+
+// auto check after load
+window.addEventListener("load", ()=>{
+  setTimeout(checkUserGate, 1200);
+});
+
+
+/* ===== FINAL SAFETY NET : FORCE DEDUP ACTIVE FIRM ===== */
+function dedupeActiveFirm(){
+  const sel = document.getElementById("activeFirm");
+  if(!sel) return;
+
+  const seen = new Set();
+  const opts = Array.from(sel.options);
+
+  sel.innerHTML = "";
+
+  opts.forEach(o=>{
+    if(!seen.has(o.value)){
+      seen.add(o.value);
+      sel.appendChild(o);
+    }
+  });
+}
+
+// run multiple times to beat async race conditions
+window.addEventListener("load", ()=>{
+  setTimeout(dedupeActiveFirm, 300);
+  setTimeout(dedupeActiveFirm, 800);
+  setTimeout(dedupeActiveFirm, 1500);
+});
+
+
+/* ===== FINAL SAFETY NET : FORCE DEDUP CUSTOMER LIST ===== */
+function dedupeCustomerList(){
+  const list = document.getElementById("custList");
+  if(!list) return;
+
+  const seen = new Set();
+  const opts = Array.from(list.options);
+
+  list.innerHTML = "";
+
+  opts.forEach(o=>{
+    if(!seen.has(o.value)){
+      seen.add(o.value);
+      list.appendChild(o);
+    }
+  });
+}
+
+// run multiple times to beat async race conditions
+window.addEventListener("load", ()=>{
+  setTimeout(dedupeCustomerList, 400);
+  setTimeout(dedupeCustomerList, 900);
+  setTimeout(dedupeCustomerList, 1600);
+});
+
+
+/* ===== CUSTOMER FULL LOAD ON SELECT ===== */
+function loadCustomerDetailsByName(name){
+  if(!db) return;
+  const firm = document.getElementById("activeFirm")?.value;
+  if(!firm || !name) return;
+
+  db.collection("firms").doc(firm).collection("parties")
+    .where("name","==",name).limit(1).get()
+    .then(snap=>{
+      if(snap.empty) return;
+      const d = snap.docs[0].data();
+
+      if(typeof cust !== "undefined") cust.value = d.name || "";
+let bn=document.getElementById("custNameBold");if(bn){bn.innerText=d.name||"";}
+      if(typeof custMobile !== "undefined") custMobile.innerText = d.mobile || "";
+      if(typeof custAddress !== "undefined") custAddress.innerText = d.address || "";
+if(!document.getElementById("custNameBold")){
+ const div=document.createElement("div");
+ div.style.fontWeight="bold";div.style.marginTop="4px";
+ div.id="custNameBold";div.innerText=d.name||"";
+ custAddress.parentNode.insertBefore(div,custAddress);
+}
+    });
+}
+
+// hook into customer input change safely
+window.addEventListener("load", ()=>{
+  const custInput = document.getElementById("cust");
+  if(custInput){
+    custInput.addEventListener("change", ()=>{
+      loadCustomerDetailsByName(custInput.value);
+    });
+  }
+});
 
 </script>
 
@@ -4902,27 +7733,9 @@ window.addEventListener("beforeprint", updatePrintTaxHeader);
 
 
 /* BANK DETAILS */
-function toggleBankPanel(){
-  const p=document.getElementById("bankPanel");
-  p.style.display = p.style.display==="block"?"none":"block";
-  const d=JSON.parse(localStorage.getItem("BANK_DATA")||"{}");
-  if(d.name) bank_name.value=d.name;
-  if(d.acc) bank_acc.value=d.acc;
-  if(d.ifsc) bank_ifsc.value=d.ifsc;
-  if(d.branch) bank_branch.value=d.branch;
-}
 
-function saveBank(){
-  const d={
-    name:bank_name.value,
-    acc:bank_acc.value,
-    ifsc:bank_ifsc.value,
-    branch:bank_branch.value
-  };
-  localStorage.setItem("BANK_DATA",JSON.stringify(d));
-  renderBankPrint();
-  alert("Bank details saved");
-}
+
+
 
 function renderBankPrint(){
   const d=JSON.parse(localStorage.getItem("BANK_DATA")||"{}");
@@ -5069,12 +7882,597 @@ function openEstimate(id){
   });
 }
 
+
+/* ===== FIRM / PARTY (DETAILS BASED - FAILPROOF) ===== */
+function saveFirmParty(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const firm = fp_firm.value.trim();
+  const name = fp_name.value.trim();
+  if(!firm || !name){ alert("Firm & Party name required"); return; }
+
+  db.collection("firms").doc(firm).collection("parties").doc(name).set({
+    firm, name,
+    mobile: fp_mobile.value || "",
+    gst: fp_gst.value || "",
+    address: fp_address.value || "",
+    time: new Date().toISOString()
+  }).then(()=>{
+    alert("Saved");
+    loadFirmParties();
+  });
+}
+
+function loadFirmParties(){
+  if(!db) return;
+  const firm = fp_firm.value.trim();
+  if(!firm){ alert("Enter firm name"); return; }
+
+  fp_list.innerHTML = "Loading...";
+  db.collection("firms").doc(firm).collection("parties")
+    .orderBy("time","desc").get()
+    .then(snap=>{
+      fp_list.innerHTML = "";
+      if(snap.empty){ fp_list.innerHTML="<i>No data</i>"; return; }
+      snap.forEach(d=>{
+        const x = d.data();
+        fp_list.innerHTML += `
+          <div style="padding:6px;border-bottom:1px solid #ddd;cursor:pointer"
+           onclick="cust.value='${x.name}';custMobile.innerText='${x.mobile||""}';custAddress.innerText='${x.address||""}'">
+           <b>${x.name}</b><br>${x.mobile||""} ${x.gst||""}
+          </div>`;
+      });
+    });
+}
+
+
+/* ===== FIRM & PARTY MANAGER (SEPARATE) ===== */
+function saveFirm(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const firm = fm_firm.value.trim();
+  if(!firm){ alert("Firm name required"); return; }
+  db.collection("firms").doc(firm).set({ name: firm, time: new Date().toISOString() })
+    .then(()=>{ alert("Firm saved"); loadFirms(); });
+}
+
+function loadFirms(){
+  if(!db) return;
+  firm_list.innerHTML = "Loading...";
+  fp_firm_select.innerHTML = '<option value="">-- Select Firm --</option>';
+  db.collection("firms").orderBy("time","desc").get().then(snap=>{
+    firm_list.innerHTML = "";
+    snap.forEach(doc=>{
+      const f = doc.id;
+      firm_list.innerHTML += `<div style="cursor:pointer">${f}</div>`;
+      fp_firm_select.innerHTML += `<option value="${f}">${f}</option>`;
+    });
+  });
+}
+
+function saveFirmParty(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const firm = fp_firm_select.value;
+  const name = fp_name.value.trim();
+  if(!firm || !name){ alert("Select firm & enter party"); return; }
+
+  db.collection("firms").doc(firm).collection("parties").doc(name).set({
+    name,
+    mobile: fp_mobile.value || "",
+    gst: fp_gst.value || "",
+    address: fp_address.value || "",
+    time: new Date().toISOString()
+  }).then(()=>{
+    alert("Party saved");
+    loadFirmParties();
+  });
+}
+
+function loadFirmParties(){
+  if(!db) return;
+  const firm = fp_firm_select.value;
+  if(!firm){ fp_list.innerHTML=""; return; }
+  fp_list.innerHTML = "Loading...";
+  db.collection("firms").doc(firm).collection("parties")
+    .orderBy("time","desc").get().then(snap=>{
+      fp_list.innerHTML="";
+      snap.forEach(d=>{
+        const x = d.data();
+        fp_list.innerHTML += `
+          <div style="padding:6px;border-bottom:1px solid #ddd;cursor:pointer"
+           onclick="cust.value='${x.name}';custMobile.innerText='${x.mobile||""}';custAddress.innerText='${x.address||""}'">
+           <b>${x.name}</b><br>${x.mobile||""} ${x.gst||""}
+          </div>`;
+      });
+    });
+}
+
+
+/* ===== FIRM MASTER WITH DETAILS ===== */
+function saveFirm(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const name = fm_name.value.trim();
+  if(!name){ alert("Firm name required"); return; }
+
+  db.collection("firms").doc(name).set({
+    name: name,
+    mobile: fm_mobile.value || "",
+    gst: fm_gst.value || "",
+    email: fm_email.value || "",
+    address: fm_address.value || "",
+    time: new Date().toISOString()
+  }).then(()=>{
+    alert("Firm saved");
+    loadFirms();
+  });
+}
+
+function loadFirms(){
+  if(!db) return;
+  firm_list.innerHTML = "Loading...";
+  activeFirm.innerHTML = '<option value="">-- Select Firm --</option>';
+  fp_firm_select.innerHTML = '<option value="">-- Select Firm --</option>';
+
+  db.collection("firms").orderBy("time","desc").get().then(snap=>{
+    firm_list.innerHTML = "";
+    snap.forEach(doc=>{
+      const f = doc.data();
+      firm_list.innerHTML += `<div style="cursor:pointer">${f.name}</div>`;
+      activeFirm.innerHTML += `<option value="${f.name}">${f.name}</option>`;
+      fp_firm_select.innerHTML += `<option value="${f.name}">${f.name}</option>`;
+    });
+  });
+}
+
+/* ===== FIRM → CUSTOMER FILTER ===== */
+function onFirmChange(){
+  const firm = activeFirm.value;
+  const list = document.getElementById("custList");
+  list.innerHTML = "";
+  if(!firm || !db) return;
+
+  db.collection("firms").doc(firm).collection("parties").get().then(snap=>{
+    snap.forEach(doc=>{
+      const p = doc.data();
+      const opt = document.createElement("option");
+      opt.value = p.name;
+      list.appendChild(opt);
+    });
+  });
+}
+
+
+/* ===== ACTIVE FIRM (PERSISTENT) ===== */
+function onFirmChange(save=true){
+  const firm = activeFirm.value;
+  if(save){
+    localStorage.setItem("ACTIVE_FIRM", firm || "");
+  }
+  const list = document.getElementById("custList");
+  if(list) list.innerHTML = "";
+  if(!firm || !db) return;
+
+  db.collection("firms").doc(firm).collection("parties").get().then(snap=>{
+    snap.forEach(doc=>{
+      const p = doc.data();
+      const opt = document.createElement("option");
+      opt.value = p.name;
+      list.appendChild(opt);
+    });
+  });
+}
+
+// restore firm on page load
+window.addEventListener("load", ()=>{
+  const savedFirm = localStorage.getItem("ACTIVE_FIRM");
+  if(savedFirm){
+    setTimeout(()=>{
+      const opt = [...activeFirm.options].find(o=>o.value===savedFirm);
+      if(opt){
+        activeFirm.value = savedFirm;
+        onFirmChange(false);
+      }
+    }, 800);
+  }
+});
+
+
+/* ===== SINGLE ACTIVE FIRM SOURCE ===== */
+
+function loadFirmsAuto(){
+  if(!db) return;
+  activeFirm.innerHTML = '<option value="">-- Select Firm --</option>';
+
+  db.collection("firms").orderBy("time","desc").get().then(snap=>{
+    snap.forEach(doc=>{
+      const f = doc.data().name;
+      activeFirm.innerHTML += `<option value="${f}">${f}</option>`;
+    });
+
+    // restore saved firm
+    const saved = localStorage.getItem("ACTIVE_FIRM");
+    if(saved){
+      activeFirm.value = saved;
+      onFirmChange(false);
+    }
+  });
+}
+
+function saveFirmParty(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const firm = activeFirm.value;
+  const name = fp_name.value.trim();
+  if(!firm || !name){
+    alert("Select Active Firm once, then add parties");
+    return;
+  }
+
+  db.collection("firms").doc(firm).collection("parties").doc(name).set({
+    name,
+    mobile: fp_mobile.value || "",
+    gst: fp_gst.value || "",
+    address: fp_address.value || "",
+    time: new Date().toISOString()
+  }).then(()=>{
+    alert("Party saved");
+    loadFirmParties();
+  });
+}
+
+function loadFirmParties(){
+  if(!db) return;
+  const firm = activeFirm.value;
+  if(!firm){ fp_list.innerHTML=""; return; }
+
+  fp_list.innerHTML = "Loading...";
+  db.collection("firms").doc(firm).collection("parties")
+    .orderBy("time","desc").get().then(snap=>{
+      fp_list.innerHTML="";
+      snap.forEach(d=>{
+        const x = d.data();
+        fp_list.innerHTML += `
+          <div style="padding:6px;border-bottom:1px solid #ddd;cursor:pointer"
+           onclick="cust.value='${x.name}';custMobile.innerText='${x.mobile||""}';custAddress.innerText='${x.address||""}'">
+           <b>${x.name}</b><br>${x.mobile||""} ${x.gst||""}
+          </div>`;
+      });
+    });
+}
+
+// auto load firms on startup
+window.addEventListener("load", ()=>{
+  setTimeout(loadFirmsAuto, 500);
+});
+
+
+/* ===== DASHBOARD : ALL PARTIES ===== */
+function loadPartyDashboard(){
+  if(!db) return;
+  const tbody = document.getElementById("partyDashboardBody");
+  if(!tbody) return;
+
+  tbody.innerHTML = "<tr><td colspan='5' style='text-align:center'>Loading…</td></tr>";
+
+  db.collection("firms").get().then(firmsSnap=>{
+    tbody.innerHTML = "";
+    let found = false;
+
+    firmsSnap.forEach(firmDoc=>{
+      const firmName = firmDoc.id;
+      firmDoc.ref.collection("parties").get().then(partiesSnap=>{
+        partiesSnap.forEach(pDoc=>{
+          found = true;
+          const p = pDoc.data();
+          tbody.innerHTML += `
+            
+            
+            <tr id="prow_${firmName}_${pDoc.id}">
+              <td><input value="${p.name||""}" id="pn_${firmName}_${pDoc.id}" style="width:100%" disabled></td>
+              <td><input value="${p.address||""}" id="pa_${firmName}_${pDoc.id}" style="width:100%" disabled></td>
+              <td><input value="${p.gst||""}" id="pg_${firmName}_${pDoc.id}" style="width:100%" disabled></td>
+              <td><input value="${p.mobile||""}" id="pm_${firmName}_${pDoc.id}" style="width:100%" disabled></td>
+              <td>
+                <button onclick="enablePartyEdit('${firmName}','${pDoc.id}')">Edit</button>
+                <button onclick="savePartyInline('${firmName}','${pDoc.id}')" style="display:none" id="ps_${firmName}_${pDoc.id}">Save</button>
+                <button onclick="deletePartyFromDashboard('${firmName}','${pDoc.id}')">Delete</button>
+              </td>
+            </tr>`;
+    
+    
+        });
+      });
+    });
+
+    setTimeout(()=>{
+      if(!found){
+        tbody.innerHTML = "<tr><td colspan='5' style='text-align:center'>No parties</td></tr>";
+      }
+    }, 800);
+  });
+}
+
+function editPartyFromDashboard(firm, partyId){
+  if(!db) return;
+  db.collection("firms").doc(firm).collection("parties").doc(partyId).get().then(doc=>{
+    if(!doc.exists){ alert("Party not found"); return; }
+    const d = doc.data();
+
+    activeFirm.value = firm;
+    localStorage.setItem("ACTIVE_FIRM", firm);
+    onFirmChange(false);
+
+    fp_name.value = d.name || "";
+    fp_mobile.value = d.mobile || "";
+    fp_gst.value = d.gst || "";
+    fp_address.value = d.address || "";
+
+    window.scrollTo({top:0,behavior:"smooth"});
+  });
+}
+
+function deletePartyFromDashboard(firm, partyId){
+  if(!confirm("Delete this party?")) return;
+  db.collection("firms").doc(firm).collection("parties").doc(partyId).delete().then(()=>{
+    loadPartyDashboard();
+  });
+}
+
+
+
+/* ===== PARTY DASHBOARD EDIT MODE ===== */
+function enablePartyEdit(firm, partyId){
+  ["pn","pa","pg","pm"].forEach(p=>{
+    const el = document.getElementById(p+"_"+firm+"_"+partyId);
+    if(el) el.disabled = false;
+  });
+  const saveBtn = document.getElementById("ps_"+firm+"_"+partyId);
+  if(saveBtn) saveBtn.style.display = "inline-block";
+}
+
+function savePartyInline(firm, partyId){
+  const name = document.getElementById("pn_"+firm+"_"+partyId).value;
+  const address = document.getElementById("pa_"+firm+"_"+partyId).value;
+  const gst = document.getElementById("pg_"+firm+"_"+partyId).value;
+  const mobile = document.getElementById("pm_"+firm+"_"+partyId).value;
+
+  db.collection("firms").doc(firm).collection("parties").doc(partyId).update({
+    name, address, gst, mobile
+  }).then(()=>{
+    ["pn","pa","pg","pm"].forEach(p=>{
+      const el = document.getElementById(p+"_"+firm+"_"+partyId);
+      if(el) el.disabled = true;
+    });
+    const saveBtn = document.getElementById("ps_"+firm+"_"+partyId);
+    if(saveBtn) saveBtn.style.display = "none";
+    alert("Party updated");
+  });
+}
+
+
+/* ===== USER LOG SYSTEM ===== */
+async function getIP(){
+  try{
+    const r = await fetch("https://api.ipify.org?format=json");
+    const j = await r.json();
+    return j.ip;
+  }catch(e){
+    return "unknown";
+  }
+}
+
+async function checkUserGate(){
+  if(!db) return;
+  const ip = await getIP();
+  window._USER_IP = ip;
+
+  const snap = await db.collection("user_logs").doc(ip).get();
+  if(!snap.exists){
+    document.getElementById("userGate").style.display = "block";
+  }
+}
+
+async function submitUserGate(){
+  const name = ug_name.value.trim();
+  const mobile = ug_mobile.value.trim();
+  if(!name || !mobile){
+    alert("Name & Mobile required");
+    return;
+  }
+  const ip = window._USER_IP || "unknown";
+
+  await db.collection("user_logs").doc(ip).set({
+    name, mobile, ip,
+    time: new Date().toISOString()
+  });
+
+  document.getElementById("userGate").style.display = "none";
+}
+
+/* Admin: view logs */
+function openUserLogs(){
+  if(!db) return;
+  db.collection("user_logs").orderBy("time","desc").get().then(snap=>{
+    let msg = "USER LOGS\n----------------\n";
+    snap.forEach(d=>{
+      const x = d.data();
+      msg += `${x.name} | ${x.mobile} | ${x.ip}\n`;
+    });
+    alert(msg);
+  });
+}
+
+// auto check after load
+window.addEventListener("load", ()=>{
+  setTimeout(checkUserGate, 1200);
+});
+
+
+/* ===== FINAL SAFETY NET : FORCE DEDUP ACTIVE FIRM ===== */
+function dedupeActiveFirm(){
+  const sel = document.getElementById("activeFirm");
+  if(!sel) return;
+
+  const seen = new Set();
+  const opts = Array.from(sel.options);
+
+  sel.innerHTML = "";
+
+  opts.forEach(o=>{
+    if(!seen.has(o.value)){
+      seen.add(o.value);
+      sel.appendChild(o);
+    }
+  });
+}
+
+// run multiple times to beat async race conditions
+window.addEventListener("load", ()=>{
+  setTimeout(dedupeActiveFirm, 300);
+  setTimeout(dedupeActiveFirm, 800);
+  setTimeout(dedupeActiveFirm, 1500);
+});
+
+
+/* ===== FINAL SAFETY NET : FORCE DEDUP CUSTOMER LIST ===== */
+function dedupeCustomerList(){
+  const list = document.getElementById("custList");
+  if(!list) return;
+
+  const seen = new Set();
+  const opts = Array.from(list.options);
+
+  list.innerHTML = "";
+
+  opts.forEach(o=>{
+    if(!seen.has(o.value)){
+      seen.add(o.value);
+      list.appendChild(o);
+    }
+  });
+}
+
+// run multiple times to beat async race conditions
+window.addEventListener("load", ()=>{
+  setTimeout(dedupeCustomerList, 400);
+  setTimeout(dedupeCustomerList, 900);
+  setTimeout(dedupeCustomerList, 1600);
+});
+
+
+/* ===== CUSTOMER FULL LOAD ON SELECT ===== */
+function loadCustomerDetailsByName(name){
+  if(!db) return;
+  const firm = document.getElementById("activeFirm")?.value;
+  if(!firm || !name) return;
+
+  db.collection("firms").doc(firm).collection("parties")
+    .where("name","==",name).limit(1).get()
+    .then(snap=>{
+      if(snap.empty) return;
+      const d = snap.docs[0].data();
+
+      if(typeof cust !== "undefined") cust.value = d.name || "";
+let bn=document.getElementById("custNameBold");if(bn){bn.innerText=d.name||"";}
+      if(typeof custMobile !== "undefined") custMobile.innerText = d.mobile || "";
+      if(typeof custAddress !== "undefined") custAddress.innerText = d.address || "";
+if(!document.getElementById("custNameBold")){
+ const div=document.createElement("div");
+ div.style.fontWeight="bold";div.style.marginTop="4px";
+ div.id="custNameBold";div.innerText=d.name||"";
+ custAddress.parentNode.insertBefore(div,custAddress);
+}
+    });
+}
+
+// hook into customer input change safely
+window.addEventListener("load", ()=>{
+  const custInput = document.getElementById("cust");
+  if(custInput){
+    custInput.addEventListener("change", ()=>{
+      loadCustomerDetailsByName(custInput.value);
+    });
+  }
+});
+
 </script>
 <!-- 🔥 FIREBASE END -->
 
   
 
 
+
+<!-- ===== USER LOG GATE (AUTO) ===== -->
+<div id="userGate" style="
+display:none;
+position:fixed;
+top:0;left:0;
+width:100%;height:100%;
+background:#000000cc;
+z-index:99999;
+">
+  <div style="
+    background:#fff;
+    width:90%;
+    max-width:360px;
+    margin:10% auto;
+    padding:16px;
+    border-radius:8px;
+  ">
+    <h3>User Verification</h3>
+    <input id="ug_name" placeholder="Your Name"><br><br>
+    <input id="ug_mobile" placeholder="Mobile Number"><br><br>
+    <button onclick="submitUserGate()">Continue</button>
+  </div>
+</div>
+
+
+<div id="adminOverlay" onclick="closeAdmin()"></div>
+
+<style>
+/* ===== ADMIN PANEL FIX (CENTER MODAL) ===== */
+#adminOverlay{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.5);
+  z-index:9998;
+}
+#adminPanel{
+  display:none;
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  background:#fff;
+  border:2px solid #000;
+  border-radius:8px;
+  padding:12px;
+  min-width:260px;
+  max-width:90vw;
+  z-index:9999;
+}
+@media print{
+  #adminPanel,#adminOverlay{display:none !important;}
+}
+</style>
+
+<script>
+/* ===== ADMIN PANEL FIX JS ===== */
+function openAdmin(){
+  if(!ADMIN_UNLOCKED){
+    const p = prompt("Enter Admin Password");
+    if(p !== ADMIN_PASSWORD){
+      alert("Wrong password");
+      return;
+    }
+    ADMIN_UNLOCKED = true;
+  }
+  document.getElementById("adminOverlay").style.display="block";
+  document.getElementById("adminPanel").style.display="block";
+}
+function closeAdmin(){
+  document.getElementById("adminOverlay").style.display="none";
+  document.getElementById("adminPanel").style.display="none";
+}
+</script>
 </body>
 </html>
 
@@ -5166,6 +8564,516 @@ function openEstimate(id){
     firebaseLoadParties();
   });
 })();
+
+/* ===== FIRM / PARTY (DETAILS BASED - FAILPROOF) ===== */
+function saveFirmParty(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const firm = fp_firm.value.trim();
+  const name = fp_name.value.trim();
+  if(!firm || !name){ alert("Firm & Party name required"); return; }
+
+  db.collection("firms").doc(firm).collection("parties").doc(name).set({
+    firm, name,
+    mobile: fp_mobile.value || "",
+    gst: fp_gst.value || "",
+    address: fp_address.value || "",
+    time: new Date().toISOString()
+  }).then(()=>{
+    alert("Saved");
+    loadFirmParties();
+  });
+}
+
+function loadFirmParties(){
+  if(!db) return;
+  const firm = fp_firm.value.trim();
+  if(!firm){ alert("Enter firm name"); return; }
+
+  fp_list.innerHTML = "Loading...";
+  db.collection("firms").doc(firm).collection("parties")
+    .orderBy("time","desc").get()
+    .then(snap=>{
+      fp_list.innerHTML = "";
+      if(snap.empty){ fp_list.innerHTML="<i>No data</i>"; return; }
+      snap.forEach(d=>{
+        const x = d.data();
+        fp_list.innerHTML += `
+          <div style="padding:6px;border-bottom:1px solid #ddd;cursor:pointer"
+           onclick="cust.value='${x.name}';custMobile.innerText='${x.mobile||""}';custAddress.innerText='${x.address||""}'">
+           <b>${x.name}</b><br>${x.mobile||""} ${x.gst||""}
+          </div>`;
+      });
+    });
+}
+
+
+/* ===== FIRM & PARTY MANAGER (SEPARATE) ===== */
+function saveFirm(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const firm = fm_firm.value.trim();
+  if(!firm){ alert("Firm name required"); return; }
+  db.collection("firms").doc(firm).set({ name: firm, time: new Date().toISOString() })
+    .then(()=>{ alert("Firm saved"); loadFirms(); });
+}
+
+function loadFirms(){
+  if(!db) return;
+  firm_list.innerHTML = "Loading...";
+  fp_firm_select.innerHTML = '<option value="">-- Select Firm --</option>';
+  db.collection("firms").orderBy("time","desc").get().then(snap=>{
+    firm_list.innerHTML = "";
+    snap.forEach(doc=>{
+      const f = doc.id;
+      firm_list.innerHTML += `<div style="cursor:pointer">${f}</div>`;
+      fp_firm_select.innerHTML += `<option value="${f}">${f}</option>`;
+    });
+  });
+}
+
+function saveFirmParty(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const firm = fp_firm_select.value;
+  const name = fp_name.value.trim();
+  if(!firm || !name){ alert("Select firm & enter party"); return; }
+
+  db.collection("firms").doc(firm).collection("parties").doc(name).set({
+    name,
+    mobile: fp_mobile.value || "",
+    gst: fp_gst.value || "",
+    address: fp_address.value || "",
+    time: new Date().toISOString()
+  }).then(()=>{
+    alert("Party saved");
+    loadFirmParties();
+  });
+}
+
+function loadFirmParties(){
+  if(!db) return;
+  const firm = fp_firm_select.value;
+  if(!firm){ fp_list.innerHTML=""; return; }
+  fp_list.innerHTML = "Loading...";
+  db.collection("firms").doc(firm).collection("parties")
+    .orderBy("time","desc").get().then(snap=>{
+      fp_list.innerHTML="";
+      snap.forEach(d=>{
+        const x = d.data();
+        fp_list.innerHTML += `
+          <div style="padding:6px;border-bottom:1px solid #ddd;cursor:pointer"
+           onclick="cust.value='${x.name}';custMobile.innerText='${x.mobile||""}';custAddress.innerText='${x.address||""}'">
+           <b>${x.name}</b><br>${x.mobile||""} ${x.gst||""}
+          </div>`;
+      });
+    });
+}
+
+
+/* ===== FIRM MASTER WITH DETAILS ===== */
+function saveFirm(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const name = fm_name.value.trim();
+  if(!name){ alert("Firm name required"); return; }
+
+  db.collection("firms").doc(name).set({
+    name: name,
+    mobile: fm_mobile.value || "",
+    gst: fm_gst.value || "",
+    email: fm_email.value || "",
+    address: fm_address.value || "",
+    time: new Date().toISOString()
+  }).then(()=>{
+    alert("Firm saved");
+    loadFirms();
+  });
+}
+
+function loadFirms(){
+  if(!db) return;
+  firm_list.innerHTML = "Loading...";
+  activeFirm.innerHTML = '<option value="">-- Select Firm --</option>';
+  fp_firm_select.innerHTML = '<option value="">-- Select Firm --</option>';
+
+  db.collection("firms").orderBy("time","desc").get().then(snap=>{
+    firm_list.innerHTML = "";
+    snap.forEach(doc=>{
+      const f = doc.data();
+      firm_list.innerHTML += `<div style="cursor:pointer">${f.name}</div>`;
+      activeFirm.innerHTML += `<option value="${f.name}">${f.name}</option>`;
+      fp_firm_select.innerHTML += `<option value="${f.name}">${f.name}</option>`;
+    });
+  });
+}
+
+/* ===== FIRM → CUSTOMER FILTER ===== */
+function onFirmChange(){
+  const firm = activeFirm.value;
+  const list = document.getElementById("custList");
+  list.innerHTML = "";
+  if(!firm || !db) return;
+
+  db.collection("firms").doc(firm).collection("parties").get().then(snap=>{
+    snap.forEach(doc=>{
+      const p = doc.data();
+      const opt = document.createElement("option");
+      opt.value = p.name;
+      list.appendChild(opt);
+    });
+  });
+}
+
+
+/* ===== ACTIVE FIRM (PERSISTENT) ===== */
+function onFirmChange(save=true){
+  const firm = activeFirm.value;
+  if(save){
+    localStorage.setItem("ACTIVE_FIRM", firm || "");
+  }
+  const list = document.getElementById("custList");
+  if(list) list.innerHTML = "";
+  if(!firm || !db) return;
+
+  db.collection("firms").doc(firm).collection("parties").get().then(snap=>{
+    snap.forEach(doc=>{
+      const p = doc.data();
+      const opt = document.createElement("option");
+      opt.value = p.name;
+      list.appendChild(opt);
+    });
+  });
+}
+
+// restore firm on page load
+window.addEventListener("load", ()=>{
+  const savedFirm = localStorage.getItem("ACTIVE_FIRM");
+  if(savedFirm){
+    setTimeout(()=>{
+      const opt = [...activeFirm.options].find(o=>o.value===savedFirm);
+      if(opt){
+        activeFirm.value = savedFirm;
+        onFirmChange(false);
+      }
+    }, 800);
+  }
+});
+
+
+/* ===== SINGLE ACTIVE FIRM SOURCE ===== */
+
+function loadFirmsAuto(){
+  if(!db) return;
+  activeFirm.innerHTML = '<option value="">-- Select Firm --</option>';
+
+  db.collection("firms").orderBy("time","desc").get().then(snap=>{
+    snap.forEach(doc=>{
+      const f = doc.data().name;
+      activeFirm.innerHTML += `<option value="${f}">${f}</option>`;
+    });
+
+    // restore saved firm
+    const saved = localStorage.getItem("ACTIVE_FIRM");
+    if(saved){
+      activeFirm.value = saved;
+      onFirmChange(false);
+    }
+  });
+}
+
+function saveFirmParty(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const firm = activeFirm.value;
+  const name = fp_name.value.trim();
+  if(!firm || !name){
+    alert("Select Active Firm once, then add parties");
+    return;
+  }
+
+  db.collection("firms").doc(firm).collection("parties").doc(name).set({
+    name,
+    mobile: fp_mobile.value || "",
+    gst: fp_gst.value || "",
+    address: fp_address.value || "",
+    time: new Date().toISOString()
+  }).then(()=>{
+    alert("Party saved");
+    loadFirmParties();
+  });
+}
+
+function loadFirmParties(){
+  if(!db) return;
+  const firm = activeFirm.value;
+  if(!firm){ fp_list.innerHTML=""; return; }
+
+  fp_list.innerHTML = "Loading...";
+  db.collection("firms").doc(firm).collection("parties")
+    .orderBy("time","desc").get().then(snap=>{
+      fp_list.innerHTML="";
+      snap.forEach(d=>{
+        const x = d.data();
+        fp_list.innerHTML += `
+          <div style="padding:6px;border-bottom:1px solid #ddd;cursor:pointer"
+           onclick="cust.value='${x.name}';custMobile.innerText='${x.mobile||""}';custAddress.innerText='${x.address||""}'">
+           <b>${x.name}</b><br>${x.mobile||""} ${x.gst||""}
+          </div>`;
+      });
+    });
+}
+
+// auto load firms on startup
+window.addEventListener("load", ()=>{
+  setTimeout(loadFirmsAuto, 500);
+});
+
+
+/* ===== DASHBOARD : ALL PARTIES ===== */
+function loadPartyDashboard(){
+  if(!db) return;
+  const tbody = document.getElementById("partyDashboardBody");
+  if(!tbody) return;
+
+  tbody.innerHTML = "<tr><td colspan='5' style='text-align:center'>Loading…</td></tr>";
+
+  db.collection("firms").get().then(firmsSnap=>{
+    tbody.innerHTML = "";
+    let found = false;
+
+    firmsSnap.forEach(firmDoc=>{
+      const firmName = firmDoc.id;
+      firmDoc.ref.collection("parties").get().then(partiesSnap=>{
+        partiesSnap.forEach(pDoc=>{
+          found = true;
+          const p = pDoc.data();
+          tbody.innerHTML += `
+            
+            
+            <tr id="prow_${firmName}_${pDoc.id}">
+              <td><input value="${p.name||""}" id="pn_${firmName}_${pDoc.id}" style="width:100%" disabled></td>
+              <td><input value="${p.address||""}" id="pa_${firmName}_${pDoc.id}" style="width:100%" disabled></td>
+              <td><input value="${p.gst||""}" id="pg_${firmName}_${pDoc.id}" style="width:100%" disabled></td>
+              <td><input value="${p.mobile||""}" id="pm_${firmName}_${pDoc.id}" style="width:100%" disabled></td>
+              <td>
+                <button onclick="enablePartyEdit('${firmName}','${pDoc.id}')">Edit</button>
+                <button onclick="savePartyInline('${firmName}','${pDoc.id}')" style="display:none" id="ps_${firmName}_${pDoc.id}">Save</button>
+                <button onclick="deletePartyFromDashboard('${firmName}','${pDoc.id}')">Delete</button>
+              </td>
+            </tr>`;
+    
+    
+        });
+      });
+    });
+
+    setTimeout(()=>{
+      if(!found){
+        tbody.innerHTML = "<tr><td colspan='5' style='text-align:center'>No parties</td></tr>";
+      }
+    }, 800);
+  });
+}
+
+function editPartyFromDashboard(firm, partyId){
+  if(!db) return;
+  db.collection("firms").doc(firm).collection("parties").doc(partyId).get().then(doc=>{
+    if(!doc.exists){ alert("Party not found"); return; }
+    const d = doc.data();
+
+    activeFirm.value = firm;
+    localStorage.setItem("ACTIVE_FIRM", firm);
+    onFirmChange(false);
+
+    fp_name.value = d.name || "";
+    fp_mobile.value = d.mobile || "";
+    fp_gst.value = d.gst || "";
+    fp_address.value = d.address || "";
+
+    window.scrollTo({top:0,behavior:"smooth"});
+  });
+}
+
+function deletePartyFromDashboard(firm, partyId){
+  if(!confirm("Delete this party?")) return;
+  db.collection("firms").doc(firm).collection("parties").doc(partyId).delete().then(()=>{
+    loadPartyDashboard();
+  });
+}
+
+
+
+/* ===== PARTY DASHBOARD EDIT MODE ===== */
+function enablePartyEdit(firm, partyId){
+  ["pn","pa","pg","pm"].forEach(p=>{
+    const el = document.getElementById(p+"_"+firm+"_"+partyId);
+    if(el) el.disabled = false;
+  });
+  const saveBtn = document.getElementById("ps_"+firm+"_"+partyId);
+  if(saveBtn) saveBtn.style.display = "inline-block";
+}
+
+function savePartyInline(firm, partyId){
+  const name = document.getElementById("pn_"+firm+"_"+partyId).value;
+  const address = document.getElementById("pa_"+firm+"_"+partyId).value;
+  const gst = document.getElementById("pg_"+firm+"_"+partyId).value;
+  const mobile = document.getElementById("pm_"+firm+"_"+partyId).value;
+
+  db.collection("firms").doc(firm).collection("parties").doc(partyId).update({
+    name, address, gst, mobile
+  }).then(()=>{
+    ["pn","pa","pg","pm"].forEach(p=>{
+      const el = document.getElementById(p+"_"+firm+"_"+partyId);
+      if(el) el.disabled = true;
+    });
+    const saveBtn = document.getElementById("ps_"+firm+"_"+partyId);
+    if(saveBtn) saveBtn.style.display = "none";
+    alert("Party updated");
+  });
+}
+
+
+/* ===== USER LOG SYSTEM ===== */
+async function getIP(){
+  try{
+    const r = await fetch("https://api.ipify.org?format=json");
+    const j = await r.json();
+    return j.ip;
+  }catch(e){
+    return "unknown";
+  }
+}
+
+async function checkUserGate(){
+  if(!db) return;
+  const ip = await getIP();
+  window._USER_IP = ip;
+
+  const snap = await db.collection("user_logs").doc(ip).get();
+  if(!snap.exists){
+    document.getElementById("userGate").style.display = "block";
+  }
+}
+
+async function submitUserGate(){
+  const name = ug_name.value.trim();
+  const mobile = ug_mobile.value.trim();
+  if(!name || !mobile){
+    alert("Name & Mobile required");
+    return;
+  }
+  const ip = window._USER_IP || "unknown";
+
+  await db.collection("user_logs").doc(ip).set({
+    name, mobile, ip,
+    time: new Date().toISOString()
+  });
+
+  document.getElementById("userGate").style.display = "none";
+}
+
+/* Admin: view logs */
+function openUserLogs(){
+  if(!db) return;
+  db.collection("user_logs").orderBy("time","desc").get().then(snap=>{
+    let msg = "USER LOGS\n----------------\n";
+    snap.forEach(d=>{
+      const x = d.data();
+      msg += `${x.name} | ${x.mobile} | ${x.ip}\n`;
+    });
+    alert(msg);
+  });
+}
+
+// auto check after load
+window.addEventListener("load", ()=>{
+  setTimeout(checkUserGate, 1200);
+});
+
+
+/* ===== FINAL SAFETY NET : FORCE DEDUP ACTIVE FIRM ===== */
+function dedupeActiveFirm(){
+  const sel = document.getElementById("activeFirm");
+  if(!sel) return;
+
+  const seen = new Set();
+  const opts = Array.from(sel.options);
+
+  sel.innerHTML = "";
+
+  opts.forEach(o=>{
+    if(!seen.has(o.value)){
+      seen.add(o.value);
+      sel.appendChild(o);
+    }
+  });
+}
+
+// run multiple times to beat async race conditions
+window.addEventListener("load", ()=>{
+  setTimeout(dedupeActiveFirm, 300);
+  setTimeout(dedupeActiveFirm, 800);
+  setTimeout(dedupeActiveFirm, 1500);
+});
+
+
+/* ===== FINAL SAFETY NET : FORCE DEDUP CUSTOMER LIST ===== */
+function dedupeCustomerList(){
+  const list = document.getElementById("custList");
+  if(!list) return;
+
+  const seen = new Set();
+  const opts = Array.from(list.options);
+
+  list.innerHTML = "";
+
+  opts.forEach(o=>{
+    if(!seen.has(o.value)){
+      seen.add(o.value);
+      list.appendChild(o);
+    }
+  });
+}
+
+// run multiple times to beat async race conditions
+window.addEventListener("load", ()=>{
+  setTimeout(dedupeCustomerList, 400);
+  setTimeout(dedupeCustomerList, 900);
+  setTimeout(dedupeCustomerList, 1600);
+});
+
+
+/* ===== CUSTOMER FULL LOAD ON SELECT ===== */
+function loadCustomerDetailsByName(name){
+  if(!db) return;
+  const firm = document.getElementById("activeFirm")?.value;
+  if(!firm || !name) return;
+
+  db.collection("firms").doc(firm).collection("parties")
+    .where("name","==",name).limit(1).get()
+    .then(snap=>{
+      if(snap.empty) return;
+      const d = snap.docs[0].data();
+
+      if(typeof cust !== "undefined") cust.value = d.name || "";
+let bn=document.getElementById("custNameBold");if(bn){bn.innerText=d.name||"";}
+      if(typeof custMobile !== "undefined") custMobile.innerText = d.mobile || "";
+      if(typeof custAddress !== "undefined") custAddress.innerText = d.address || "";
+if(!document.getElementById("custNameBold")){
+ const div=document.createElement("div");
+ div.style.fontWeight="bold";div.style.marginTop="4px";
+ div.id="custNameBold";div.innerText=d.name||"";
+ custAddress.parentNode.insertBefore(div,custAddress);
+}
+    });
+}
+
+// hook into customer input change safely
+window.addEventListener("load", ()=>{
+  const custInput = document.getElementById("cust");
+  if(custInput){
+    custInput.addEventListener("change", ()=>{
+      loadCustomerDetailsByName(custInput.value);
+    });
+  }
+});
+
 </script>
 
 
@@ -5194,6 +9102,516 @@ function openEstimate(id){
     },100);
   };
 })();
+
+/* ===== FIRM / PARTY (DETAILS BASED - FAILPROOF) ===== */
+function saveFirmParty(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const firm = fp_firm.value.trim();
+  const name = fp_name.value.trim();
+  if(!firm || !name){ alert("Firm & Party name required"); return; }
+
+  db.collection("firms").doc(firm).collection("parties").doc(name).set({
+    firm, name,
+    mobile: fp_mobile.value || "",
+    gst: fp_gst.value || "",
+    address: fp_address.value || "",
+    time: new Date().toISOString()
+  }).then(()=>{
+    alert("Saved");
+    loadFirmParties();
+  });
+}
+
+function loadFirmParties(){
+  if(!db) return;
+  const firm = fp_firm.value.trim();
+  if(!firm){ alert("Enter firm name"); return; }
+
+  fp_list.innerHTML = "Loading...";
+  db.collection("firms").doc(firm).collection("parties")
+    .orderBy("time","desc").get()
+    .then(snap=>{
+      fp_list.innerHTML = "";
+      if(snap.empty){ fp_list.innerHTML="<i>No data</i>"; return; }
+      snap.forEach(d=>{
+        const x = d.data();
+        fp_list.innerHTML += `
+          <div style="padding:6px;border-bottom:1px solid #ddd;cursor:pointer"
+           onclick="cust.value='${x.name}';custMobile.innerText='${x.mobile||""}';custAddress.innerText='${x.address||""}'">
+           <b>${x.name}</b><br>${x.mobile||""} ${x.gst||""}
+          </div>`;
+      });
+    });
+}
+
+
+/* ===== FIRM & PARTY MANAGER (SEPARATE) ===== */
+function saveFirm(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const firm = fm_firm.value.trim();
+  if(!firm){ alert("Firm name required"); return; }
+  db.collection("firms").doc(firm).set({ name: firm, time: new Date().toISOString() })
+    .then(()=>{ alert("Firm saved"); loadFirms(); });
+}
+
+function loadFirms(){
+  if(!db) return;
+  firm_list.innerHTML = "Loading...";
+  fp_firm_select.innerHTML = '<option value="">-- Select Firm --</option>';
+  db.collection("firms").orderBy("time","desc").get().then(snap=>{
+    firm_list.innerHTML = "";
+    snap.forEach(doc=>{
+      const f = doc.id;
+      firm_list.innerHTML += `<div style="cursor:pointer">${f}</div>`;
+      fp_firm_select.innerHTML += `<option value="${f}">${f}</option>`;
+    });
+  });
+}
+
+function saveFirmParty(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const firm = fp_firm_select.value;
+  const name = fp_name.value.trim();
+  if(!firm || !name){ alert("Select firm & enter party"); return; }
+
+  db.collection("firms").doc(firm).collection("parties").doc(name).set({
+    name,
+    mobile: fp_mobile.value || "",
+    gst: fp_gst.value || "",
+    address: fp_address.value || "",
+    time: new Date().toISOString()
+  }).then(()=>{
+    alert("Party saved");
+    loadFirmParties();
+  });
+}
+
+function loadFirmParties(){
+  if(!db) return;
+  const firm = fp_firm_select.value;
+  if(!firm){ fp_list.innerHTML=""; return; }
+  fp_list.innerHTML = "Loading...";
+  db.collection("firms").doc(firm).collection("parties")
+    .orderBy("time","desc").get().then(snap=>{
+      fp_list.innerHTML="";
+      snap.forEach(d=>{
+        const x = d.data();
+        fp_list.innerHTML += `
+          <div style="padding:6px;border-bottom:1px solid #ddd;cursor:pointer"
+           onclick="cust.value='${x.name}';custMobile.innerText='${x.mobile||""}';custAddress.innerText='${x.address||""}'">
+           <b>${x.name}</b><br>${x.mobile||""} ${x.gst||""}
+          </div>`;
+      });
+    });
+}
+
+
+/* ===== FIRM MASTER WITH DETAILS ===== */
+function saveFirm(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const name = fm_name.value.trim();
+  if(!name){ alert("Firm name required"); return; }
+
+  db.collection("firms").doc(name).set({
+    name: name,
+    mobile: fm_mobile.value || "",
+    gst: fm_gst.value || "",
+    email: fm_email.value || "",
+    address: fm_address.value || "",
+    time: new Date().toISOString()
+  }).then(()=>{
+    alert("Firm saved");
+    loadFirms();
+  });
+}
+
+function loadFirms(){
+  if(!db) return;
+  firm_list.innerHTML = "Loading...";
+  activeFirm.innerHTML = '<option value="">-- Select Firm --</option>';
+  fp_firm_select.innerHTML = '<option value="">-- Select Firm --</option>';
+
+  db.collection("firms").orderBy("time","desc").get().then(snap=>{
+    firm_list.innerHTML = "";
+    snap.forEach(doc=>{
+      const f = doc.data();
+      firm_list.innerHTML += `<div style="cursor:pointer">${f.name}</div>`;
+      activeFirm.innerHTML += `<option value="${f.name}">${f.name}</option>`;
+      fp_firm_select.innerHTML += `<option value="${f.name}">${f.name}</option>`;
+    });
+  });
+}
+
+/* ===== FIRM → CUSTOMER FILTER ===== */
+function onFirmChange(){
+  const firm = activeFirm.value;
+  const list = document.getElementById("custList");
+  list.innerHTML = "";
+  if(!firm || !db) return;
+
+  db.collection("firms").doc(firm).collection("parties").get().then(snap=>{
+    snap.forEach(doc=>{
+      const p = doc.data();
+      const opt = document.createElement("option");
+      opt.value = p.name;
+      list.appendChild(opt);
+    });
+  });
+}
+
+
+/* ===== ACTIVE FIRM (PERSISTENT) ===== */
+function onFirmChange(save=true){
+  const firm = activeFirm.value;
+  if(save){
+    localStorage.setItem("ACTIVE_FIRM", firm || "");
+  }
+  const list = document.getElementById("custList");
+  if(list) list.innerHTML = "";
+  if(!firm || !db) return;
+
+  db.collection("firms").doc(firm).collection("parties").get().then(snap=>{
+    snap.forEach(doc=>{
+      const p = doc.data();
+      const opt = document.createElement("option");
+      opt.value = p.name;
+      list.appendChild(opt);
+    });
+  });
+}
+
+// restore firm on page load
+window.addEventListener("load", ()=>{
+  const savedFirm = localStorage.getItem("ACTIVE_FIRM");
+  if(savedFirm){
+    setTimeout(()=>{
+      const opt = [...activeFirm.options].find(o=>o.value===savedFirm);
+      if(opt){
+        activeFirm.value = savedFirm;
+        onFirmChange(false);
+      }
+    }, 800);
+  }
+});
+
+
+/* ===== SINGLE ACTIVE FIRM SOURCE ===== */
+
+function loadFirmsAuto(){
+  if(!db) return;
+  activeFirm.innerHTML = '<option value="">-- Select Firm --</option>';
+
+  db.collection("firms").orderBy("time","desc").get().then(snap=>{
+    snap.forEach(doc=>{
+      const f = doc.data().name;
+      activeFirm.innerHTML += `<option value="${f}">${f}</option>`;
+    });
+
+    // restore saved firm
+    const saved = localStorage.getItem("ACTIVE_FIRM");
+    if(saved){
+      activeFirm.value = saved;
+      onFirmChange(false);
+    }
+  });
+}
+
+function saveFirmParty(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const firm = activeFirm.value;
+  const name = fp_name.value.trim();
+  if(!firm || !name){
+    alert("Select Active Firm once, then add parties");
+    return;
+  }
+
+  db.collection("firms").doc(firm).collection("parties").doc(name).set({
+    name,
+    mobile: fp_mobile.value || "",
+    gst: fp_gst.value || "",
+    address: fp_address.value || "",
+    time: new Date().toISOString()
+  }).then(()=>{
+    alert("Party saved");
+    loadFirmParties();
+  });
+}
+
+function loadFirmParties(){
+  if(!db) return;
+  const firm = activeFirm.value;
+  if(!firm){ fp_list.innerHTML=""; return; }
+
+  fp_list.innerHTML = "Loading...";
+  db.collection("firms").doc(firm).collection("parties")
+    .orderBy("time","desc").get().then(snap=>{
+      fp_list.innerHTML="";
+      snap.forEach(d=>{
+        const x = d.data();
+        fp_list.innerHTML += `
+          <div style="padding:6px;border-bottom:1px solid #ddd;cursor:pointer"
+           onclick="cust.value='${x.name}';custMobile.innerText='${x.mobile||""}';custAddress.innerText='${x.address||""}'">
+           <b>${x.name}</b><br>${x.mobile||""} ${x.gst||""}
+          </div>`;
+      });
+    });
+}
+
+// auto load firms on startup
+window.addEventListener("load", ()=>{
+  setTimeout(loadFirmsAuto, 500);
+});
+
+
+/* ===== DASHBOARD : ALL PARTIES ===== */
+function loadPartyDashboard(){
+  if(!db) return;
+  const tbody = document.getElementById("partyDashboardBody");
+  if(!tbody) return;
+
+  tbody.innerHTML = "<tr><td colspan='5' style='text-align:center'>Loading…</td></tr>";
+
+  db.collection("firms").get().then(firmsSnap=>{
+    tbody.innerHTML = "";
+    let found = false;
+
+    firmsSnap.forEach(firmDoc=>{
+      const firmName = firmDoc.id;
+      firmDoc.ref.collection("parties").get().then(partiesSnap=>{
+        partiesSnap.forEach(pDoc=>{
+          found = true;
+          const p = pDoc.data();
+          tbody.innerHTML += `
+            
+            
+            <tr id="prow_${firmName}_${pDoc.id}">
+              <td><input value="${p.name||""}" id="pn_${firmName}_${pDoc.id}" style="width:100%" disabled></td>
+              <td><input value="${p.address||""}" id="pa_${firmName}_${pDoc.id}" style="width:100%" disabled></td>
+              <td><input value="${p.gst||""}" id="pg_${firmName}_${pDoc.id}" style="width:100%" disabled></td>
+              <td><input value="${p.mobile||""}" id="pm_${firmName}_${pDoc.id}" style="width:100%" disabled></td>
+              <td>
+                <button onclick="enablePartyEdit('${firmName}','${pDoc.id}')">Edit</button>
+                <button onclick="savePartyInline('${firmName}','${pDoc.id}')" style="display:none" id="ps_${firmName}_${pDoc.id}">Save</button>
+                <button onclick="deletePartyFromDashboard('${firmName}','${pDoc.id}')">Delete</button>
+              </td>
+            </tr>`;
+    
+    
+        });
+      });
+    });
+
+    setTimeout(()=>{
+      if(!found){
+        tbody.innerHTML = "<tr><td colspan='5' style='text-align:center'>No parties</td></tr>";
+      }
+    }, 800);
+  });
+}
+
+function editPartyFromDashboard(firm, partyId){
+  if(!db) return;
+  db.collection("firms").doc(firm).collection("parties").doc(partyId).get().then(doc=>{
+    if(!doc.exists){ alert("Party not found"); return; }
+    const d = doc.data();
+
+    activeFirm.value = firm;
+    localStorage.setItem("ACTIVE_FIRM", firm);
+    onFirmChange(false);
+
+    fp_name.value = d.name || "";
+    fp_mobile.value = d.mobile || "";
+    fp_gst.value = d.gst || "";
+    fp_address.value = d.address || "";
+
+    window.scrollTo({top:0,behavior:"smooth"});
+  });
+}
+
+function deletePartyFromDashboard(firm, partyId){
+  if(!confirm("Delete this party?")) return;
+  db.collection("firms").doc(firm).collection("parties").doc(partyId).delete().then(()=>{
+    loadPartyDashboard();
+  });
+}
+
+
+
+/* ===== PARTY DASHBOARD EDIT MODE ===== */
+function enablePartyEdit(firm, partyId){
+  ["pn","pa","pg","pm"].forEach(p=>{
+    const el = document.getElementById(p+"_"+firm+"_"+partyId);
+    if(el) el.disabled = false;
+  });
+  const saveBtn = document.getElementById("ps_"+firm+"_"+partyId);
+  if(saveBtn) saveBtn.style.display = "inline-block";
+}
+
+function savePartyInline(firm, partyId){
+  const name = document.getElementById("pn_"+firm+"_"+partyId).value;
+  const address = document.getElementById("pa_"+firm+"_"+partyId).value;
+  const gst = document.getElementById("pg_"+firm+"_"+partyId).value;
+  const mobile = document.getElementById("pm_"+firm+"_"+partyId).value;
+
+  db.collection("firms").doc(firm).collection("parties").doc(partyId).update({
+    name, address, gst, mobile
+  }).then(()=>{
+    ["pn","pa","pg","pm"].forEach(p=>{
+      const el = document.getElementById(p+"_"+firm+"_"+partyId);
+      if(el) el.disabled = true;
+    });
+    const saveBtn = document.getElementById("ps_"+firm+"_"+partyId);
+    if(saveBtn) saveBtn.style.display = "none";
+    alert("Party updated");
+  });
+}
+
+
+/* ===== USER LOG SYSTEM ===== */
+async function getIP(){
+  try{
+    const r = await fetch("https://api.ipify.org?format=json");
+    const j = await r.json();
+    return j.ip;
+  }catch(e){
+    return "unknown";
+  }
+}
+
+async function checkUserGate(){
+  if(!db) return;
+  const ip = await getIP();
+  window._USER_IP = ip;
+
+  const snap = await db.collection("user_logs").doc(ip).get();
+  if(!snap.exists){
+    document.getElementById("userGate").style.display = "block";
+  }
+}
+
+async function submitUserGate(){
+  const name = ug_name.value.trim();
+  const mobile = ug_mobile.value.trim();
+  if(!name || !mobile){
+    alert("Name & Mobile required");
+    return;
+  }
+  const ip = window._USER_IP || "unknown";
+
+  await db.collection("user_logs").doc(ip).set({
+    name, mobile, ip,
+    time: new Date().toISOString()
+  });
+
+  document.getElementById("userGate").style.display = "none";
+}
+
+/* Admin: view logs */
+function openUserLogs(){
+  if(!db) return;
+  db.collection("user_logs").orderBy("time","desc").get().then(snap=>{
+    let msg = "USER LOGS\n----------------\n";
+    snap.forEach(d=>{
+      const x = d.data();
+      msg += `${x.name} | ${x.mobile} | ${x.ip}\n`;
+    });
+    alert(msg);
+  });
+}
+
+// auto check after load
+window.addEventListener("load", ()=>{
+  setTimeout(checkUserGate, 1200);
+});
+
+
+/* ===== FINAL SAFETY NET : FORCE DEDUP ACTIVE FIRM ===== */
+function dedupeActiveFirm(){
+  const sel = document.getElementById("activeFirm");
+  if(!sel) return;
+
+  const seen = new Set();
+  const opts = Array.from(sel.options);
+
+  sel.innerHTML = "";
+
+  opts.forEach(o=>{
+    if(!seen.has(o.value)){
+      seen.add(o.value);
+      sel.appendChild(o);
+    }
+  });
+}
+
+// run multiple times to beat async race conditions
+window.addEventListener("load", ()=>{
+  setTimeout(dedupeActiveFirm, 300);
+  setTimeout(dedupeActiveFirm, 800);
+  setTimeout(dedupeActiveFirm, 1500);
+});
+
+
+/* ===== FINAL SAFETY NET : FORCE DEDUP CUSTOMER LIST ===== */
+function dedupeCustomerList(){
+  const list = document.getElementById("custList");
+  if(!list) return;
+
+  const seen = new Set();
+  const opts = Array.from(list.options);
+
+  list.innerHTML = "";
+
+  opts.forEach(o=>{
+    if(!seen.has(o.value)){
+      seen.add(o.value);
+      list.appendChild(o);
+    }
+  });
+}
+
+// run multiple times to beat async race conditions
+window.addEventListener("load", ()=>{
+  setTimeout(dedupeCustomerList, 400);
+  setTimeout(dedupeCustomerList, 900);
+  setTimeout(dedupeCustomerList, 1600);
+});
+
+
+/* ===== CUSTOMER FULL LOAD ON SELECT ===== */
+function loadCustomerDetailsByName(name){
+  if(!db) return;
+  const firm = document.getElementById("activeFirm")?.value;
+  if(!firm || !name) return;
+
+  db.collection("firms").doc(firm).collection("parties")
+    .where("name","==",name).limit(1).get()
+    .then(snap=>{
+      if(snap.empty) return;
+      const d = snap.docs[0].data();
+
+      if(typeof cust !== "undefined") cust.value = d.name || "";
+let bn=document.getElementById("custNameBold");if(bn){bn.innerText=d.name||"";}
+      if(typeof custMobile !== "undefined") custMobile.innerText = d.mobile || "";
+      if(typeof custAddress !== "undefined") custAddress.innerText = d.address || "";
+if(!document.getElementById("custNameBold")){
+ const div=document.createElement("div");
+ div.style.fontWeight="bold";div.style.marginTop="4px";
+ div.id="custNameBold";div.innerText=d.name||"";
+ custAddress.parentNode.insertBefore(div,custAddress);
+}
+    });
+}
+
+// hook into customer input change safely
+window.addEventListener("load", ()=>{
+  const custInput = document.getElementById("cust");
+  if(custInput){
+    custInput.addEventListener("change", ()=>{
+      loadCustomerDetailsByName(custInput.value);
+    });
+  }
+});
+
 </script>
 
 
@@ -5219,6 +9637,516 @@ function openEstimate(id){
       .catch(()=>{ alert("❌ Party cloud save fail"); });
   };
 })();
+
+/* ===== FIRM / PARTY (DETAILS BASED - FAILPROOF) ===== */
+function saveFirmParty(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const firm = fp_firm.value.trim();
+  const name = fp_name.value.trim();
+  if(!firm || !name){ alert("Firm & Party name required"); return; }
+
+  db.collection("firms").doc(firm).collection("parties").doc(name).set({
+    firm, name,
+    mobile: fp_mobile.value || "",
+    gst: fp_gst.value || "",
+    address: fp_address.value || "",
+    time: new Date().toISOString()
+  }).then(()=>{
+    alert("Saved");
+    loadFirmParties();
+  });
+}
+
+function loadFirmParties(){
+  if(!db) return;
+  const firm = fp_firm.value.trim();
+  if(!firm){ alert("Enter firm name"); return; }
+
+  fp_list.innerHTML = "Loading...";
+  db.collection("firms").doc(firm).collection("parties")
+    .orderBy("time","desc").get()
+    .then(snap=>{
+      fp_list.innerHTML = "";
+      if(snap.empty){ fp_list.innerHTML="<i>No data</i>"; return; }
+      snap.forEach(d=>{
+        const x = d.data();
+        fp_list.innerHTML += `
+          <div style="padding:6px;border-bottom:1px solid #ddd;cursor:pointer"
+           onclick="cust.value='${x.name}';custMobile.innerText='${x.mobile||""}';custAddress.innerText='${x.address||""}'">
+           <b>${x.name}</b><br>${x.mobile||""} ${x.gst||""}
+          </div>`;
+      });
+    });
+}
+
+
+/* ===== FIRM & PARTY MANAGER (SEPARATE) ===== */
+function saveFirm(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const firm = fm_firm.value.trim();
+  if(!firm){ alert("Firm name required"); return; }
+  db.collection("firms").doc(firm).set({ name: firm, time: new Date().toISOString() })
+    .then(()=>{ alert("Firm saved"); loadFirms(); });
+}
+
+function loadFirms(){
+  if(!db) return;
+  firm_list.innerHTML = "Loading...";
+  fp_firm_select.innerHTML = '<option value="">-- Select Firm --</option>';
+  db.collection("firms").orderBy("time","desc").get().then(snap=>{
+    firm_list.innerHTML = "";
+    snap.forEach(doc=>{
+      const f = doc.id;
+      firm_list.innerHTML += `<div style="cursor:pointer">${f}</div>`;
+      fp_firm_select.innerHTML += `<option value="${f}">${f}</option>`;
+    });
+  });
+}
+
+function saveFirmParty(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const firm = fp_firm_select.value;
+  const name = fp_name.value.trim();
+  if(!firm || !name){ alert("Select firm & enter party"); return; }
+
+  db.collection("firms").doc(firm).collection("parties").doc(name).set({
+    name,
+    mobile: fp_mobile.value || "",
+    gst: fp_gst.value || "",
+    address: fp_address.value || "",
+    time: new Date().toISOString()
+  }).then(()=>{
+    alert("Party saved");
+    loadFirmParties();
+  });
+}
+
+function loadFirmParties(){
+  if(!db) return;
+  const firm = fp_firm_select.value;
+  if(!firm){ fp_list.innerHTML=""; return; }
+  fp_list.innerHTML = "Loading...";
+  db.collection("firms").doc(firm).collection("parties")
+    .orderBy("time","desc").get().then(snap=>{
+      fp_list.innerHTML="";
+      snap.forEach(d=>{
+        const x = d.data();
+        fp_list.innerHTML += `
+          <div style="padding:6px;border-bottom:1px solid #ddd;cursor:pointer"
+           onclick="cust.value='${x.name}';custMobile.innerText='${x.mobile||""}';custAddress.innerText='${x.address||""}'">
+           <b>${x.name}</b><br>${x.mobile||""} ${x.gst||""}
+          </div>`;
+      });
+    });
+}
+
+
+/* ===== FIRM MASTER WITH DETAILS ===== */
+function saveFirm(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const name = fm_name.value.trim();
+  if(!name){ alert("Firm name required"); return; }
+
+  db.collection("firms").doc(name).set({
+    name: name,
+    mobile: fm_mobile.value || "",
+    gst: fm_gst.value || "",
+    email: fm_email.value || "",
+    address: fm_address.value || "",
+    time: new Date().toISOString()
+  }).then(()=>{
+    alert("Firm saved");
+    loadFirms();
+  });
+}
+
+function loadFirms(){
+  if(!db) return;
+  firm_list.innerHTML = "Loading...";
+  activeFirm.innerHTML = '<option value="">-- Select Firm --</option>';
+  fp_firm_select.innerHTML = '<option value="">-- Select Firm --</option>';
+
+  db.collection("firms").orderBy("time","desc").get().then(snap=>{
+    firm_list.innerHTML = "";
+    snap.forEach(doc=>{
+      const f = doc.data();
+      firm_list.innerHTML += `<div style="cursor:pointer">${f.name}</div>`;
+      activeFirm.innerHTML += `<option value="${f.name}">${f.name}</option>`;
+      fp_firm_select.innerHTML += `<option value="${f.name}">${f.name}</option>`;
+    });
+  });
+}
+
+/* ===== FIRM → CUSTOMER FILTER ===== */
+function onFirmChange(){
+  const firm = activeFirm.value;
+  const list = document.getElementById("custList");
+  list.innerHTML = "";
+  if(!firm || !db) return;
+
+  db.collection("firms").doc(firm).collection("parties").get().then(snap=>{
+    snap.forEach(doc=>{
+      const p = doc.data();
+      const opt = document.createElement("option");
+      opt.value = p.name;
+      list.appendChild(opt);
+    });
+  });
+}
+
+
+/* ===== ACTIVE FIRM (PERSISTENT) ===== */
+function onFirmChange(save=true){
+  const firm = activeFirm.value;
+  if(save){
+    localStorage.setItem("ACTIVE_FIRM", firm || "");
+  }
+  const list = document.getElementById("custList");
+  if(list) list.innerHTML = "";
+  if(!firm || !db) return;
+
+  db.collection("firms").doc(firm).collection("parties").get().then(snap=>{
+    snap.forEach(doc=>{
+      const p = doc.data();
+      const opt = document.createElement("option");
+      opt.value = p.name;
+      list.appendChild(opt);
+    });
+  });
+}
+
+// restore firm on page load
+window.addEventListener("load", ()=>{
+  const savedFirm = localStorage.getItem("ACTIVE_FIRM");
+  if(savedFirm){
+    setTimeout(()=>{
+      const opt = [...activeFirm.options].find(o=>o.value===savedFirm);
+      if(opt){
+        activeFirm.value = savedFirm;
+        onFirmChange(false);
+      }
+    }, 800);
+  }
+});
+
+
+/* ===== SINGLE ACTIVE FIRM SOURCE ===== */
+
+function loadFirmsAuto(){
+  if(!db) return;
+  activeFirm.innerHTML = '<option value="">-- Select Firm --</option>';
+
+  db.collection("firms").orderBy("time","desc").get().then(snap=>{
+    snap.forEach(doc=>{
+      const f = doc.data().name;
+      activeFirm.innerHTML += `<option value="${f}">${f}</option>`;
+    });
+
+    // restore saved firm
+    const saved = localStorage.getItem("ACTIVE_FIRM");
+    if(saved){
+      activeFirm.value = saved;
+      onFirmChange(false);
+    }
+  });
+}
+
+function saveFirmParty(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const firm = activeFirm.value;
+  const name = fp_name.value.trim();
+  if(!firm || !name){
+    alert("Select Active Firm once, then add parties");
+    return;
+  }
+
+  db.collection("firms").doc(firm).collection("parties").doc(name).set({
+    name,
+    mobile: fp_mobile.value || "",
+    gst: fp_gst.value || "",
+    address: fp_address.value || "",
+    time: new Date().toISOString()
+  }).then(()=>{
+    alert("Party saved");
+    loadFirmParties();
+  });
+}
+
+function loadFirmParties(){
+  if(!db) return;
+  const firm = activeFirm.value;
+  if(!firm){ fp_list.innerHTML=""; return; }
+
+  fp_list.innerHTML = "Loading...";
+  db.collection("firms").doc(firm).collection("parties")
+    .orderBy("time","desc").get().then(snap=>{
+      fp_list.innerHTML="";
+      snap.forEach(d=>{
+        const x = d.data();
+        fp_list.innerHTML += `
+          <div style="padding:6px;border-bottom:1px solid #ddd;cursor:pointer"
+           onclick="cust.value='${x.name}';custMobile.innerText='${x.mobile||""}';custAddress.innerText='${x.address||""}'">
+           <b>${x.name}</b><br>${x.mobile||""} ${x.gst||""}
+          </div>`;
+      });
+    });
+}
+
+// auto load firms on startup
+window.addEventListener("load", ()=>{
+  setTimeout(loadFirmsAuto, 500);
+});
+
+
+/* ===== DASHBOARD : ALL PARTIES ===== */
+function loadPartyDashboard(){
+  if(!db) return;
+  const tbody = document.getElementById("partyDashboardBody");
+  if(!tbody) return;
+
+  tbody.innerHTML = "<tr><td colspan='5' style='text-align:center'>Loading…</td></tr>";
+
+  db.collection("firms").get().then(firmsSnap=>{
+    tbody.innerHTML = "";
+    let found = false;
+
+    firmsSnap.forEach(firmDoc=>{
+      const firmName = firmDoc.id;
+      firmDoc.ref.collection("parties").get().then(partiesSnap=>{
+        partiesSnap.forEach(pDoc=>{
+          found = true;
+          const p = pDoc.data();
+          tbody.innerHTML += `
+            
+            
+            <tr id="prow_${firmName}_${pDoc.id}">
+              <td><input value="${p.name||""}" id="pn_${firmName}_${pDoc.id}" style="width:100%" disabled></td>
+              <td><input value="${p.address||""}" id="pa_${firmName}_${pDoc.id}" style="width:100%" disabled></td>
+              <td><input value="${p.gst||""}" id="pg_${firmName}_${pDoc.id}" style="width:100%" disabled></td>
+              <td><input value="${p.mobile||""}" id="pm_${firmName}_${pDoc.id}" style="width:100%" disabled></td>
+              <td>
+                <button onclick="enablePartyEdit('${firmName}','${pDoc.id}')">Edit</button>
+                <button onclick="savePartyInline('${firmName}','${pDoc.id}')" style="display:none" id="ps_${firmName}_${pDoc.id}">Save</button>
+                <button onclick="deletePartyFromDashboard('${firmName}','${pDoc.id}')">Delete</button>
+              </td>
+            </tr>`;
+    
+    
+        });
+      });
+    });
+
+    setTimeout(()=>{
+      if(!found){
+        tbody.innerHTML = "<tr><td colspan='5' style='text-align:center'>No parties</td></tr>";
+      }
+    }, 800);
+  });
+}
+
+function editPartyFromDashboard(firm, partyId){
+  if(!db) return;
+  db.collection("firms").doc(firm).collection("parties").doc(partyId).get().then(doc=>{
+    if(!doc.exists){ alert("Party not found"); return; }
+    const d = doc.data();
+
+    activeFirm.value = firm;
+    localStorage.setItem("ACTIVE_FIRM", firm);
+    onFirmChange(false);
+
+    fp_name.value = d.name || "";
+    fp_mobile.value = d.mobile || "";
+    fp_gst.value = d.gst || "";
+    fp_address.value = d.address || "";
+
+    window.scrollTo({top:0,behavior:"smooth"});
+  });
+}
+
+function deletePartyFromDashboard(firm, partyId){
+  if(!confirm("Delete this party?")) return;
+  db.collection("firms").doc(firm).collection("parties").doc(partyId).delete().then(()=>{
+    loadPartyDashboard();
+  });
+}
+
+
+
+/* ===== PARTY DASHBOARD EDIT MODE ===== */
+function enablePartyEdit(firm, partyId){
+  ["pn","pa","pg","pm"].forEach(p=>{
+    const el = document.getElementById(p+"_"+firm+"_"+partyId);
+    if(el) el.disabled = false;
+  });
+  const saveBtn = document.getElementById("ps_"+firm+"_"+partyId);
+  if(saveBtn) saveBtn.style.display = "inline-block";
+}
+
+function savePartyInline(firm, partyId){
+  const name = document.getElementById("pn_"+firm+"_"+partyId).value;
+  const address = document.getElementById("pa_"+firm+"_"+partyId).value;
+  const gst = document.getElementById("pg_"+firm+"_"+partyId).value;
+  const mobile = document.getElementById("pm_"+firm+"_"+partyId).value;
+
+  db.collection("firms").doc(firm).collection("parties").doc(partyId).update({
+    name, address, gst, mobile
+  }).then(()=>{
+    ["pn","pa","pg","pm"].forEach(p=>{
+      const el = document.getElementById(p+"_"+firm+"_"+partyId);
+      if(el) el.disabled = true;
+    });
+    const saveBtn = document.getElementById("ps_"+firm+"_"+partyId);
+    if(saveBtn) saveBtn.style.display = "none";
+    alert("Party updated");
+  });
+}
+
+
+/* ===== USER LOG SYSTEM ===== */
+async function getIP(){
+  try{
+    const r = await fetch("https://api.ipify.org?format=json");
+    const j = await r.json();
+    return j.ip;
+  }catch(e){
+    return "unknown";
+  }
+}
+
+async function checkUserGate(){
+  if(!db) return;
+  const ip = await getIP();
+  window._USER_IP = ip;
+
+  const snap = await db.collection("user_logs").doc(ip).get();
+  if(!snap.exists){
+    document.getElementById("userGate").style.display = "block";
+  }
+}
+
+async function submitUserGate(){
+  const name = ug_name.value.trim();
+  const mobile = ug_mobile.value.trim();
+  if(!name || !mobile){
+    alert("Name & Mobile required");
+    return;
+  }
+  const ip = window._USER_IP || "unknown";
+
+  await db.collection("user_logs").doc(ip).set({
+    name, mobile, ip,
+    time: new Date().toISOString()
+  });
+
+  document.getElementById("userGate").style.display = "none";
+}
+
+/* Admin: view logs */
+function openUserLogs(){
+  if(!db) return;
+  db.collection("user_logs").orderBy("time","desc").get().then(snap=>{
+    let msg = "USER LOGS\n----------------\n";
+    snap.forEach(d=>{
+      const x = d.data();
+      msg += `${x.name} | ${x.mobile} | ${x.ip}\n`;
+    });
+    alert(msg);
+  });
+}
+
+// auto check after load
+window.addEventListener("load", ()=>{
+  setTimeout(checkUserGate, 1200);
+});
+
+
+/* ===== FINAL SAFETY NET : FORCE DEDUP ACTIVE FIRM ===== */
+function dedupeActiveFirm(){
+  const sel = document.getElementById("activeFirm");
+  if(!sel) return;
+
+  const seen = new Set();
+  const opts = Array.from(sel.options);
+
+  sel.innerHTML = "";
+
+  opts.forEach(o=>{
+    if(!seen.has(o.value)){
+      seen.add(o.value);
+      sel.appendChild(o);
+    }
+  });
+}
+
+// run multiple times to beat async race conditions
+window.addEventListener("load", ()=>{
+  setTimeout(dedupeActiveFirm, 300);
+  setTimeout(dedupeActiveFirm, 800);
+  setTimeout(dedupeActiveFirm, 1500);
+});
+
+
+/* ===== FINAL SAFETY NET : FORCE DEDUP CUSTOMER LIST ===== */
+function dedupeCustomerList(){
+  const list = document.getElementById("custList");
+  if(!list) return;
+
+  const seen = new Set();
+  const opts = Array.from(list.options);
+
+  list.innerHTML = "";
+
+  opts.forEach(o=>{
+    if(!seen.has(o.value)){
+      seen.add(o.value);
+      list.appendChild(o);
+    }
+  });
+}
+
+// run multiple times to beat async race conditions
+window.addEventListener("load", ()=>{
+  setTimeout(dedupeCustomerList, 400);
+  setTimeout(dedupeCustomerList, 900);
+  setTimeout(dedupeCustomerList, 1600);
+});
+
+
+/* ===== CUSTOMER FULL LOAD ON SELECT ===== */
+function loadCustomerDetailsByName(name){
+  if(!db) return;
+  const firm = document.getElementById("activeFirm")?.value;
+  if(!firm || !name) return;
+
+  db.collection("firms").doc(firm).collection("parties")
+    .where("name","==",name).limit(1).get()
+    .then(snap=>{
+      if(snap.empty) return;
+      const d = snap.docs[0].data();
+
+      if(typeof cust !== "undefined") cust.value = d.name || "";
+let bn=document.getElementById("custNameBold");if(bn){bn.innerText=d.name||"";}
+      if(typeof custMobile !== "undefined") custMobile.innerText = d.mobile || "";
+      if(typeof custAddress !== "undefined") custAddress.innerText = d.address || "";
+if(!document.getElementById("custNameBold")){
+ const div=document.createElement("div");
+ div.style.fontWeight="bold";div.style.marginTop="4px";
+ div.id="custNameBold";div.innerText=d.name||"";
+ custAddress.parentNode.insertBefore(div,custAddress);
+}
+    });
+}
+
+// hook into customer input change safely
+window.addEventListener("load", ()=>{
+  const custInput = document.getElementById("cust");
+  if(custInput){
+    custInput.addEventListener("change", ()=>{
+      loadCustomerDetailsByName(custInput.value);
+    });
+  }
+});
+
 </script>
 
 
@@ -5246,4 +10174,514 @@ function openEstimate(id){
     alert("✅ Estimate Firebase me save ho gaya");
   };
 })();
+
+/* ===== FIRM / PARTY (DETAILS BASED - FAILPROOF) ===== */
+function saveFirmParty(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const firm = fp_firm.value.trim();
+  const name = fp_name.value.trim();
+  if(!firm || !name){ alert("Firm & Party name required"); return; }
+
+  db.collection("firms").doc(firm).collection("parties").doc(name).set({
+    firm, name,
+    mobile: fp_mobile.value || "",
+    gst: fp_gst.value || "",
+    address: fp_address.value || "",
+    time: new Date().toISOString()
+  }).then(()=>{
+    alert("Saved");
+    loadFirmParties();
+  });
+}
+
+function loadFirmParties(){
+  if(!db) return;
+  const firm = fp_firm.value.trim();
+  if(!firm){ alert("Enter firm name"); return; }
+
+  fp_list.innerHTML = "Loading...";
+  db.collection("firms").doc(firm).collection("parties")
+    .orderBy("time","desc").get()
+    .then(snap=>{
+      fp_list.innerHTML = "";
+      if(snap.empty){ fp_list.innerHTML="<i>No data</i>"; return; }
+      snap.forEach(d=>{
+        const x = d.data();
+        fp_list.innerHTML += `
+          <div style="padding:6px;border-bottom:1px solid #ddd;cursor:pointer"
+           onclick="cust.value='${x.name}';custMobile.innerText='${x.mobile||""}';custAddress.innerText='${x.address||""}'">
+           <b>${x.name}</b><br>${x.mobile||""} ${x.gst||""}
+          </div>`;
+      });
+    });
+}
+
+
+/* ===== FIRM & PARTY MANAGER (SEPARATE) ===== */
+function saveFirm(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const firm = fm_firm.value.trim();
+  if(!firm){ alert("Firm name required"); return; }
+  db.collection("firms").doc(firm).set({ name: firm, time: new Date().toISOString() })
+    .then(()=>{ alert("Firm saved"); loadFirms(); });
+}
+
+function loadFirms(){
+  if(!db) return;
+  firm_list.innerHTML = "Loading...";
+  fp_firm_select.innerHTML = '<option value="">-- Select Firm --</option>';
+  db.collection("firms").orderBy("time","desc").get().then(snap=>{
+    firm_list.innerHTML = "";
+    snap.forEach(doc=>{
+      const f = doc.id;
+      firm_list.innerHTML += `<div style="cursor:pointer">${f}</div>`;
+      fp_firm_select.innerHTML += `<option value="${f}">${f}</option>`;
+    });
+  });
+}
+
+function saveFirmParty(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const firm = fp_firm_select.value;
+  const name = fp_name.value.trim();
+  if(!firm || !name){ alert("Select firm & enter party"); return; }
+
+  db.collection("firms").doc(firm).collection("parties").doc(name).set({
+    name,
+    mobile: fp_mobile.value || "",
+    gst: fp_gst.value || "",
+    address: fp_address.value || "",
+    time: new Date().toISOString()
+  }).then(()=>{
+    alert("Party saved");
+    loadFirmParties();
+  });
+}
+
+function loadFirmParties(){
+  if(!db) return;
+  const firm = fp_firm_select.value;
+  if(!firm){ fp_list.innerHTML=""; return; }
+  fp_list.innerHTML = "Loading...";
+  db.collection("firms").doc(firm).collection("parties")
+    .orderBy("time","desc").get().then(snap=>{
+      fp_list.innerHTML="";
+      snap.forEach(d=>{
+        const x = d.data();
+        fp_list.innerHTML += `
+          <div style="padding:6px;border-bottom:1px solid #ddd;cursor:pointer"
+           onclick="cust.value='${x.name}';custMobile.innerText='${x.mobile||""}';custAddress.innerText='${x.address||""}'">
+           <b>${x.name}</b><br>${x.mobile||""} ${x.gst||""}
+          </div>`;
+      });
+    });
+}
+
+
+/* ===== FIRM MASTER WITH DETAILS ===== */
+function saveFirm(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const name = fm_name.value.trim();
+  if(!name){ alert("Firm name required"); return; }
+
+  db.collection("firms").doc(name).set({
+    name: name,
+    mobile: fm_mobile.value || "",
+    gst: fm_gst.value || "",
+    email: fm_email.value || "",
+    address: fm_address.value || "",
+    time: new Date().toISOString()
+  }).then(()=>{
+    alert("Firm saved");
+    loadFirms();
+  });
+}
+
+function loadFirms(){
+  if(!db) return;
+  firm_list.innerHTML = "Loading...";
+  activeFirm.innerHTML = '<option value="">-- Select Firm --</option>';
+  fp_firm_select.innerHTML = '<option value="">-- Select Firm --</option>';
+
+  db.collection("firms").orderBy("time","desc").get().then(snap=>{
+    firm_list.innerHTML = "";
+    snap.forEach(doc=>{
+      const f = doc.data();
+      firm_list.innerHTML += `<div style="cursor:pointer">${f.name}</div>`;
+      activeFirm.innerHTML += `<option value="${f.name}">${f.name}</option>`;
+      fp_firm_select.innerHTML += `<option value="${f.name}">${f.name}</option>`;
+    });
+  });
+}
+
+/* ===== FIRM → CUSTOMER FILTER ===== */
+function onFirmChange(){
+  const firm = activeFirm.value;
+  const list = document.getElementById("custList");
+  list.innerHTML = "";
+  if(!firm || !db) return;
+
+  db.collection("firms").doc(firm).collection("parties").get().then(snap=>{
+    snap.forEach(doc=>{
+      const p = doc.data();
+      const opt = document.createElement("option");
+      opt.value = p.name;
+      list.appendChild(opt);
+    });
+  });
+}
+
+
+/* ===== ACTIVE FIRM (PERSISTENT) ===== */
+function onFirmChange(save=true){
+  const firm = activeFirm.value;
+  if(save){
+    localStorage.setItem("ACTIVE_FIRM", firm || "");
+  }
+  const list = document.getElementById("custList");
+  if(list) list.innerHTML = "";
+  if(!firm || !db) return;
+
+  db.collection("firms").doc(firm).collection("parties").get().then(snap=>{
+    snap.forEach(doc=>{
+      const p = doc.data();
+      const opt = document.createElement("option");
+      opt.value = p.name;
+      list.appendChild(opt);
+    });
+  });
+}
+
+// restore firm on page load
+window.addEventListener("load", ()=>{
+  const savedFirm = localStorage.getItem("ACTIVE_FIRM");
+  if(savedFirm){
+    setTimeout(()=>{
+      const opt = [...activeFirm.options].find(o=>o.value===savedFirm);
+      if(opt){
+        activeFirm.value = savedFirm;
+        onFirmChange(false);
+      }
+    }, 800);
+  }
+});
+
+
+/* ===== SINGLE ACTIVE FIRM SOURCE ===== */
+
+function loadFirmsAuto(){
+  if(!db) return;
+  activeFirm.innerHTML = '<option value="">-- Select Firm --</option>';
+
+  db.collection("firms").orderBy("time","desc").get().then(snap=>{
+    snap.forEach(doc=>{
+      const f = doc.data().name;
+      activeFirm.innerHTML += `<option value="${f}">${f}</option>`;
+    });
+
+    // restore saved firm
+    const saved = localStorage.getItem("ACTIVE_FIRM");
+    if(saved){
+      activeFirm.value = saved;
+      onFirmChange(false);
+    }
+  });
+}
+
+function saveFirmParty(){
+  if(!db){ alert("Firebase not ready"); return; }
+  const firm = activeFirm.value;
+  const name = fp_name.value.trim();
+  if(!firm || !name){
+    alert("Select Active Firm once, then add parties");
+    return;
+  }
+
+  db.collection("firms").doc(firm).collection("parties").doc(name).set({
+    name,
+    mobile: fp_mobile.value || "",
+    gst: fp_gst.value || "",
+    address: fp_address.value || "",
+    time: new Date().toISOString()
+  }).then(()=>{
+    alert("Party saved");
+    loadFirmParties();
+  });
+}
+
+function loadFirmParties(){
+  if(!db) return;
+  const firm = activeFirm.value;
+  if(!firm){ fp_list.innerHTML=""; return; }
+
+  fp_list.innerHTML = "Loading...";
+  db.collection("firms").doc(firm).collection("parties")
+    .orderBy("time","desc").get().then(snap=>{
+      fp_list.innerHTML="";
+      snap.forEach(d=>{
+        const x = d.data();
+        fp_list.innerHTML += `
+          <div style="padding:6px;border-bottom:1px solid #ddd;cursor:pointer"
+           onclick="cust.value='${x.name}';custMobile.innerText='${x.mobile||""}';custAddress.innerText='${x.address||""}'">
+           <b>${x.name}</b><br>${x.mobile||""} ${x.gst||""}
+          </div>`;
+      });
+    });
+}
+
+// auto load firms on startup
+window.addEventListener("load", ()=>{
+  setTimeout(loadFirmsAuto, 500);
+});
+
+
+/* ===== DASHBOARD : ALL PARTIES ===== */
+function loadPartyDashboard(){
+  if(!db) return;
+  const tbody = document.getElementById("partyDashboardBody");
+  if(!tbody) return;
+
+  tbody.innerHTML = "<tr><td colspan='5' style='text-align:center'>Loading…</td></tr>";
+
+  db.collection("firms").get().then(firmsSnap=>{
+    tbody.innerHTML = "";
+    let found = false;
+
+    firmsSnap.forEach(firmDoc=>{
+      const firmName = firmDoc.id;
+      firmDoc.ref.collection("parties").get().then(partiesSnap=>{
+        partiesSnap.forEach(pDoc=>{
+          found = true;
+          const p = pDoc.data();
+          tbody.innerHTML += `
+            
+            
+            <tr id="prow_${firmName}_${pDoc.id}">
+              <td><input value="${p.name||""}" id="pn_${firmName}_${pDoc.id}" style="width:100%" disabled></td>
+              <td><input value="${p.address||""}" id="pa_${firmName}_${pDoc.id}" style="width:100%" disabled></td>
+              <td><input value="${p.gst||""}" id="pg_${firmName}_${pDoc.id}" style="width:100%" disabled></td>
+              <td><input value="${p.mobile||""}" id="pm_${firmName}_${pDoc.id}" style="width:100%" disabled></td>
+              <td>
+                <button onclick="enablePartyEdit('${firmName}','${pDoc.id}')">Edit</button>
+                <button onclick="savePartyInline('${firmName}','${pDoc.id}')" style="display:none" id="ps_${firmName}_${pDoc.id}">Save</button>
+                <button onclick="deletePartyFromDashboard('${firmName}','${pDoc.id}')">Delete</button>
+              </td>
+            </tr>`;
+    
+    
+        });
+      });
+    });
+
+    setTimeout(()=>{
+      if(!found){
+        tbody.innerHTML = "<tr><td colspan='5' style='text-align:center'>No parties</td></tr>";
+      }
+    }, 800);
+  });
+}
+
+function editPartyFromDashboard(firm, partyId){
+  if(!db) return;
+  db.collection("firms").doc(firm).collection("parties").doc(partyId).get().then(doc=>{
+    if(!doc.exists){ alert("Party not found"); return; }
+    const d = doc.data();
+
+    activeFirm.value = firm;
+    localStorage.setItem("ACTIVE_FIRM", firm);
+    onFirmChange(false);
+
+    fp_name.value = d.name || "";
+    fp_mobile.value = d.mobile || "";
+    fp_gst.value = d.gst || "";
+    fp_address.value = d.address || "";
+
+    window.scrollTo({top:0,behavior:"smooth"});
+  });
+}
+
+function deletePartyFromDashboard(firm, partyId){
+  if(!confirm("Delete this party?")) return;
+  db.collection("firms").doc(firm).collection("parties").doc(partyId).delete().then(()=>{
+    loadPartyDashboard();
+  });
+}
+
+
+
+/* ===== PARTY DASHBOARD EDIT MODE ===== */
+function enablePartyEdit(firm, partyId){
+  ["pn","pa","pg","pm"].forEach(p=>{
+    const el = document.getElementById(p+"_"+firm+"_"+partyId);
+    if(el) el.disabled = false;
+  });
+  const saveBtn = document.getElementById("ps_"+firm+"_"+partyId);
+  if(saveBtn) saveBtn.style.display = "inline-block";
+}
+
+function savePartyInline(firm, partyId){
+  const name = document.getElementById("pn_"+firm+"_"+partyId).value;
+  const address = document.getElementById("pa_"+firm+"_"+partyId).value;
+  const gst = document.getElementById("pg_"+firm+"_"+partyId).value;
+  const mobile = document.getElementById("pm_"+firm+"_"+partyId).value;
+
+  db.collection("firms").doc(firm).collection("parties").doc(partyId).update({
+    name, address, gst, mobile
+  }).then(()=>{
+    ["pn","pa","pg","pm"].forEach(p=>{
+      const el = document.getElementById(p+"_"+firm+"_"+partyId);
+      if(el) el.disabled = true;
+    });
+    const saveBtn = document.getElementById("ps_"+firm+"_"+partyId);
+    if(saveBtn) saveBtn.style.display = "none";
+    alert("Party updated");
+  });
+}
+
+
+/* ===== USER LOG SYSTEM ===== */
+async function getIP(){
+  try{
+    const r = await fetch("https://api.ipify.org?format=json");
+    const j = await r.json();
+    return j.ip;
+  }catch(e){
+    return "unknown";
+  }
+}
+
+async function checkUserGate(){
+  if(!db) return;
+  const ip = await getIP();
+  window._USER_IP = ip;
+
+  const snap = await db.collection("user_logs").doc(ip).get();
+  if(!snap.exists){
+    document.getElementById("userGate").style.display = "block";
+  }
+}
+
+async function submitUserGate(){
+  const name = ug_name.value.trim();
+  const mobile = ug_mobile.value.trim();
+  if(!name || !mobile){
+    alert("Name & Mobile required");
+    return;
+  }
+  const ip = window._USER_IP || "unknown";
+
+  await db.collection("user_logs").doc(ip).set({
+    name, mobile, ip,
+    time: new Date().toISOString()
+  });
+
+  document.getElementById("userGate").style.display = "none";
+}
+
+/* Admin: view logs */
+function openUserLogs(){
+  if(!db) return;
+  db.collection("user_logs").orderBy("time","desc").get().then(snap=>{
+    let msg = "USER LOGS\n----------------\n";
+    snap.forEach(d=>{
+      const x = d.data();
+      msg += `${x.name} | ${x.mobile} | ${x.ip}\n`;
+    });
+    alert(msg);
+  });
+}
+
+// auto check after load
+window.addEventListener("load", ()=>{
+  setTimeout(checkUserGate, 1200);
+});
+
+
+/* ===== FINAL SAFETY NET : FORCE DEDUP ACTIVE FIRM ===== */
+function dedupeActiveFirm(){
+  const sel = document.getElementById("activeFirm");
+  if(!sel) return;
+
+  const seen = new Set();
+  const opts = Array.from(sel.options);
+
+  sel.innerHTML = "";
+
+  opts.forEach(o=>{
+    if(!seen.has(o.value)){
+      seen.add(o.value);
+      sel.appendChild(o);
+    }
+  });
+}
+
+// run multiple times to beat async race conditions
+window.addEventListener("load", ()=>{
+  setTimeout(dedupeActiveFirm, 300);
+  setTimeout(dedupeActiveFirm, 800);
+  setTimeout(dedupeActiveFirm, 1500);
+});
+
+
+/* ===== FINAL SAFETY NET : FORCE DEDUP CUSTOMER LIST ===== */
+function dedupeCustomerList(){
+  const list = document.getElementById("custList");
+  if(!list) return;
+
+  const seen = new Set();
+  const opts = Array.from(list.options);
+
+  list.innerHTML = "";
+
+  opts.forEach(o=>{
+    if(!seen.has(o.value)){
+      seen.add(o.value);
+      list.appendChild(o);
+    }
+  });
+}
+
+// run multiple times to beat async race conditions
+window.addEventListener("load", ()=>{
+  setTimeout(dedupeCustomerList, 400);
+  setTimeout(dedupeCustomerList, 900);
+  setTimeout(dedupeCustomerList, 1600);
+});
+
+
+/* ===== CUSTOMER FULL LOAD ON SELECT ===== */
+function loadCustomerDetailsByName(name){
+  if(!db) return;
+  const firm = document.getElementById("activeFirm")?.value;
+  if(!firm || !name) return;
+
+  db.collection("firms").doc(firm).collection("parties")
+    .where("name","==",name).limit(1).get()
+    .then(snap=>{
+      if(snap.empty) return;
+      const d = snap.docs[0].data();
+
+      if(typeof cust !== "undefined") cust.value = d.name || "";
+let bn=document.getElementById("custNameBold");if(bn){bn.innerText=d.name||"";}
+      if(typeof custMobile !== "undefined") custMobile.innerText = d.mobile || "";
+      if(typeof custAddress !== "undefined") custAddress.innerText = d.address || "";
+if(!document.getElementById("custNameBold")){
+ const div=document.createElement("div");
+ div.style.fontWeight="bold";div.style.marginTop="4px";
+ div.id="custNameBold";div.innerText=d.name||"";
+ custAddress.parentNode.insertBefore(div,custAddress);
+}
+    });
+}
+
+// hook into customer input change safely
+window.addEventListener("load", ()=>{
+  const custInput = document.getElementById("cust");
+  if(custInput){
+    custInput.addEventListener("change", ()=>{
+      loadCustomerDetailsByName(custInput.value);
+    });
+  }
+});
+
 </script>
