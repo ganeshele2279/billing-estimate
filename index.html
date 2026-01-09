@@ -1907,6 +1907,12 @@ details button.theme-btn{
 <option value="theme-black">Black</option><option value="theme-purple">Purple</option><option value="theme-orange">Orange</option><option value="theme-gold">Gold</option>
 </select>
 
+<!-- Firm Header Toggle -->
+<label class="no-print" style="display:flex;align-items:center;gap:6px;font-size:11px;margin-top:6px">
+  <input type="checkbox" id="firmHeaderToggle" checked onchange="toggleFirmHeader(this.checked)">
+  <span>Show Firm Header</span>
+</label>
+
 <div class="no-print" style="margin-top:6px;display:flex;flex-direction:column;gap:6px;align-items:flex-end">
 
   <button class="theme-btn" onclick="refreshSameEstimate()">Refresh</button>
@@ -2243,6 +2249,13 @@ function printEstimate(id){
 
 function deleteEstimate(id){
   if(!confirm("Delete this estimate?")) return;
+
+  const pass = prompt("Enter Estimate Number to confirm delete:");
+  if(!pass || pass.trim() !== id){
+    alert("❌ Wrong Estimate Number. Delete cancelled.");
+    return;
+  }
+
   db.collection("estimates").doc(id).delete().then(()=>{
     alert("Deleted");
   });
@@ -3199,6 +3212,39 @@ z-index:99999;
   </div>
 </div>
 
+
+<!-- PARTY SELECT MODAL -->
+<div id="partyModal" class="no-print" style="
+  display:none;
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  background:rgba(0,0,0,0.4);
+  z-index:5000;
+">
+  <div style="
+    background:#fff;
+    width:420px;
+    max-width:90%;
+    max-height:80%;
+    margin:5% auto;
+    padding:10px;
+    border-radius:6px;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+  ">
+    <div style="font-weight:bold;margin-bottom:6px;display:flex;justify-content:space-between">
+      <span>Select Party</span>
+      <button onclick="closePartyModal()">X</button>
+    </div>
+    <input id="partySearch" placeholder="Search party..." 
+      style="margin-bottom:6px"
+      oninput="filterPartyModal(this.value)">
+    <div id="partyModalList" style="flex:1;overflow:auto;border:1px solid #ccc"></div>
+  </div>
+</div>
+
 </body>
     </html>
   `);
@@ -3853,6 +3899,39 @@ z-index:99999;
   </div>
 </div>
 
+
+<!-- PARTY SELECT MODAL -->
+<div id="partyModal" class="no-print" style="
+  display:none;
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  background:rgba(0,0,0,0.4);
+  z-index:5000;
+">
+  <div style="
+    background:#fff;
+    width:420px;
+    max-width:90%;
+    max-height:80%;
+    margin:5% auto;
+    padding:10px;
+    border-radius:6px;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+  ">
+    <div style="font-weight:bold;margin-bottom:6px;display:flex;justify-content:space-between">
+      <span>Select Party</span>
+      <button onclick="closePartyModal()">X</button>
+    </div>
+    <input id="partySearch" placeholder="Search party..." 
+      style="margin-bottom:6px"
+      oninput="filterPartyModal(this.value)">
+    <div id="partyModalList" style="flex:1;overflow:auto;border:1px solid #ccc"></div>
+  </div>
+</div>
+
 </body>
     </html>
   `);
@@ -4500,6 +4579,39 @@ z-index:99999;
   </div>
 </div>
 
+
+<!-- PARTY SELECT MODAL -->
+<div id="partyModal" class="no-print" style="
+  display:none;
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  background:rgba(0,0,0,0.4);
+  z-index:5000;
+">
+  <div style="
+    background:#fff;
+    width:420px;
+    max-width:90%;
+    max-height:80%;
+    margin:5% auto;
+    padding:10px;
+    border-radius:6px;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+  ">
+    <div style="font-weight:bold;margin-bottom:6px;display:flex;justify-content:space-between">
+      <span>Select Party</span>
+      <button onclick="closePartyModal()">X</button>
+    </div>
+    <input id="partySearch" placeholder="Search party..." 
+      style="margin-bottom:6px"
+      oninput="filterPartyModal(this.value)">
+    <div id="partyModalList" style="flex:1;overflow:auto;border:1px solid #ccc"></div>
+  </div>
+</div>
+
 </body>
     </html>
   `);
@@ -5088,6 +5200,39 @@ z-index:99999;
     <input id="ug_name" placeholder="Your Name"><br><br>
     <input id="ug_mobile" placeholder="Mobile Number"><br><br>
     <button onclick="submitUserGate()">Continue</button>
+  </div>
+</div>
+
+
+<!-- PARTY SELECT MODAL -->
+<div id="partyModal" class="no-print" style="
+  display:none;
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  background:rgba(0,0,0,0.4);
+  z-index:5000;
+">
+  <div style="
+    background:#fff;
+    width:420px;
+    max-width:90%;
+    max-height:80%;
+    margin:5% auto;
+    padding:10px;
+    border-radius:6px;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+  ">
+    <div style="font-weight:bold;margin-bottom:6px;display:flex;justify-content:space-between">
+      <span>Select Party</span>
+      <button onclick="closePartyModal()">X</button>
+    </div>
+    <input id="partySearch" placeholder="Search party..." 
+      style="margin-bottom:6px"
+      oninput="filterPartyModal(this.value)">
+    <div id="partyModalList" style="flex:1;overflow:auto;border:1px solid #ccc"></div>
   </div>
 </div>
 
@@ -8673,6 +8818,39 @@ function closeAdmin(){
   document.getElementById("adminPanel").style.display="none";
 }
 </script>
+
+<!-- PARTY SELECT MODAL -->
+<div id="partyModal" class="no-print" style="
+  display:none;
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  background:rgba(0,0,0,0.4);
+  z-index:5000;
+">
+  <div style="
+    background:#fff;
+    width:420px;
+    max-width:90%;
+    max-height:80%;
+    margin:5% auto;
+    padding:10px;
+    border-radius:6px;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+  ">
+    <div style="font-weight:bold;margin-bottom:6px;display:flex;justify-content:space-between">
+      <span>Select Party</span>
+      <button onclick="closePartyModal()">X</button>
+    </div>
+    <input id="partySearch" placeholder="Search party..." 
+      style="margin-bottom:6px"
+      oninput="filterPartyModal(this.value)">
+    <div id="partyModalList" style="flex:1;overflow:auto;border:1px solid #ccc"></div>
+  </div>
+</div>
+
 </body>
 </html>
 
@@ -10882,6 +11060,98 @@ window.addEventListener("load", ()=>{
       loadCustomerDetailsByName(custInput.value);
     });
   }
+});
+
+
+/* ===== PARTY MODAL SELECTOR ===== */
+function openPartyFromList(){
+  const modal = document.getElementById("partyModal");
+  const list = document.getElementById("partyModalList");
+  if(!modal || !list || !db) return;
+
+  list.innerHTML = "Loading...";
+  modal.style.display = "block";
+
+  const firm = document.getElementById("activeFirm")?.value;
+  if(!firm) return;
+
+  db.collection("firms").doc(firm).collection("parties")
+    .orderBy("time","desc").get()
+    .then(snap=>{
+      list.innerHTML = "";
+      snap.forEach(d=>{
+        const p = d.data();
+        const div = document.createElement("div");
+        div.style.padding = "6px";
+        div.style.borderBottom = "1px solid #ddd";
+        div.style.cursor = "pointer";
+        div.innerHTML = "<b>"+(p.name||"")+"</b><br><span style='font-size:11px'>"+(p.mobile||"")+"</span>";
+        div.onclick = ()=>{
+          if(typeof cust !== "undefined") cust.value = p.name || "";
+          if(typeof custMobile !== "undefined") custMobile.innerText = p.mobile || "";
+          if(typeof custAddress !== "undefined") custAddress.innerText = p.address || "";
+          closePartyModal();
+        };
+        list.appendChild(div);
+      });
+    });
+}
+
+function closePartyModal(){
+  const modal = document.getElementById("partyModal");
+  if(modal) modal.style.display = "none";
+}
+
+function filterPartyModal(val){
+  const list = document.getElementById("partyModalList");
+  if(!list) return;
+  val = val.toLowerCase();
+  Array.from(list.children).forEach(div=>{
+    div.style.display = div.innerText.toLowerCase().includes(val) ? "" : "none";
+  });
+}
+
+
+/* ===== FIRM HEADER TOGGLE & BINDING ===== */
+function toggleFirmHeader(show){
+  const fh = document.getElementById("firmHeader");
+  const h2 = document.querySelector("h2");
+  if(!fh || !h2) return;
+  fh.style.display = show ? "block" : "none";
+  h2.style.display = show ? "none" : "block";
+}
+
+function loadActiveFirmHeader(){
+  if(!db) return;
+  const firm = document.getElementById("activeFirm")?.value;
+  if(!firm) return;
+
+  db.collection("firms").doc(firm).get().then(doc=>{
+    if(!doc.exists) return;
+    const d = doc.data();
+    const name = document.getElementById("firmName");
+    const det = document.getElementById("firmDetails");
+    if(name) name.innerText = d.name || firm;
+    if(det){
+      det.innerHTML = [
+        d.address || "",
+        d.mobile ? "Mobile: " + d.mobile : "",
+        d.gst ? "GST: " + d.gst : "",
+        d.email ? "Email: " + d.email : ""
+      ].filter(x=>x).join("<br>");
+    }
+  });
+}
+
+const _origOnFirmChange = onFirmChange;
+onFirmChange = function(save=true){
+  _origOnFirmChange(save);
+  setTimeout(loadActiveFirmHeader, 200);
+};
+
+window.addEventListener("load", ()=>{
+  toggleFirmHeader(true);
+  setTimeout(loadActiveFirmHeader, 600);
 });
 
 </script>
