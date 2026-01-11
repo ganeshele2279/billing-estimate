@@ -207,6 +207,25 @@ button:hover{ filter:brightness(0.9); }
   }
 }
 
+
+/* ===== PRINT DISCOUNT TOGGLE ===== */
+@media print{
+  body.print-discount-on th.no-print,
+  body.print-discount-on td.no-print{
+    display:table-cell !important;
+  }
+}
+
+
+/* ===== PRINT DISCOUNT FIXES ===== */
+@media print{
+  /* Always hide delete (X) column in print */
+  body.print-discount-on th.col-x,
+  body.print-discount-on td.col-x{
+    display:none !important;
+  }
+}
+
 </style>
 
 <style>
@@ -1912,6 +1931,13 @@ details button.theme-btn{
   <input type="checkbox" id="firmHeaderToggle" checked onchange="toggleFirmHeader(this.checked)">
   <span>Show Firm Header</span>
 </label>
+
+<!-- Print Discount Toggle -->
+<label class="no-print" style="display:flex;align-items:center;gap:6px;font-size:11px;margin-top:4px">
+  <input type="checkbox" id="printDiscountToggle" onchange="setPrintDiscountMode(this.checked)">
+  <span>Print Discount %</span>
+</label>
+
 
 <div class="no-print" style="margin-top:6px;display:flex;flex-direction:column;gap:6px;align-items:flex-end">
 
@@ -11153,5 +11179,104 @@ window.addEventListener("load", ()=>{
   toggleFirmHeader(true);
   setTimeout(loadActiveFirmHeader, 600);
 });
+
+
+/* ===== PRINT-ONLY EFFECTIVE RATE (AMOUNT / QTY) ===== */
+(function(){
+  function beforePrintRateFix(){
+    try{
+      document.querySelectorAll("#body tr").forEach(r=>{
+        const t = r.querySelectorAll("td");
+        if(t.length < 6) return;
+
+        const qtyInput = t[2].querySelector("input");
+        const rateInput = t[3].querySelector("input");
+        const amtCell = t[5];
+
+        if(!qtyInput || !rateInput || !amtCell) return;
+
+        const qty = parseFloat(qtyInput.value || "0");
+        const amt = parseFloat((amtCell.innerText || "0").replace(/[^0-9.-]/g,""));
+
+        if(!window.PRINT_DISCOUNT_ON && qty > 0 && isFinite(amt)){
+          if(!rateInput.dataset.origRate){
+            rateInput.dataset.origRate = rateInput.value;
+          }
+          const eff = (amt / qty);
+          rateInput.value = eff.toFixed(2);
+        }
+      });
+    }catch(e){}
+  }
+
+  function afterPrintRateRestore(){
+    try{
+      document.querySelectorAll("#body tr").forEach(r=>{
+        const rateInput = r.querySelector("td:nth-child(4) input");
+        if(rateInput && rateInput.dataset.origRate !== undefined){
+          rateInput.value = rateInput.dataset.origRate;
+          delete rateInput.dataset.origRate;
+        }
+      });
+    }catch(e){}
+  }
+
+  if(window.matchMedia){
+    const mql = window.matchMedia('print');
+    mql.addEventListener('change', (e)=>{
+      if(e.matches) beforePrintRateFix();
+      else afterPrintRateRestore();
+    });
+  }
+
+  window.addEventListener('beforeprint', beforePrintRateFix);
+  window.addEventListener('afterprint', afterPrintRateRestore);
+})();
+
+
+/* ===== PRINT DISCOUNT MODE CONTROL ===== */
+function setPrintDiscountMode(on){
+  document.body.classList.toggle("print-discount-on", on);
+  window.PRINT_DISCOUNT_ON = !!on;
+}
+
+// default OFF
+window.PRINT_DISCOUNT_ON = false;
+
+// hook into existing print rate logic safely
+(function(){
+  const _before = window.beforePrintRateFix;
+})();
+
+
+/* ===== PRINT DISCOUNT: FORCE ORIGINAL RATE ===== */
+(function(){
+  function ensureOriginalRate(){
+    if(!window.PRINT_DISCOUNT_ON) return;
+    document.querySelectorAll("#body tr").forEach(r=>{
+      const rateInput = r.querySelector("td:nth-child(4) input");
+      if(rateInput && rateInput.dataset.origRate){
+        rateInput.value = rateInput.dataset.origRate;
+      }
+    });
+  }
+
+  window.addEventListener("beforeprint", ensureOriginalRate);
+})();
+
+
+/* ===== HARD GUARANTEE: ORIGINAL RATE WHEN PRINT DISCOUNT ON ===== */
+(function(){
+  function restoreOriginalRatesHard(){
+    if(!window.PRINT_DISCOUNT_ON) return;
+    document.querySelectorAll("#body tr").forEach(r=>{
+      const rateInput = r.querySelector("td:nth-child(4) input");
+      if(rateInput && rateInput.dataset && rateInput.dataset.origRate !== undefined){
+        rateInput.value = rateInput.dataset.origRate;
+      }
+    });
+  }
+  window.addEventListener("beforeprint", restoreOriginalRatesHard, true);
+})();
 
 </script>
