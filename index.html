@@ -954,9 +954,10 @@ function editPartyFromDashboard(firm, partyId){
 }
 
 function deletePartyFromDashboard(firm, partyId){
+  if(!adminPasswordCheck()) return;
   if(!confirm("Delete this party?")) return;
   db.collection("firms").doc(firm).collection("parties").doc(partyId).delete().then(()=>{
-    loadPartyDashboard();
+    // loadPartyDashboard();
   });
 }
 
@@ -1544,9 +1545,10 @@ function editPartyFromDashboard(firm, partyId){
 }
 
 function deletePartyFromDashboard(firm, partyId){
+  if(!adminPasswordCheck()) return;
   if(!confirm("Delete this party?")) return;
   db.collection("firms").doc(firm).collection("parties").doc(partyId).delete().then(()=>{
-    loadPartyDashboard();
+    // loadPartyDashboard();
   });
 }
 
@@ -2074,7 +2076,12 @@ text-align:center;font-size:24px;font-weight:bold;width:100%">
 </div>
 
 <!-- ===== DASHBOARD : ALL CLOUD ESTIMATES ===== -->
-<div id="dashboardPanel" style="margin-top:20px;border-top:2px solid #000;padding-top:10px">
+<div class="no-print" style="margin:10px 0">
+<button onclick="toggleEstimates()">Load Estimates Dashboard</button>
+<button onclick="toggleFirmDashboard()">Load Firms Dashboard</button>
+<button onclick="toggleParties()">Load Parties Dashboard</button>
+</div>
+<div id="dashboardPanel" style="display:none" style="margin-top:20px;border-top:2px solid #000;padding-top:10px">
   <h3>Dashboard (All Estimates)
 </h3>
   <table style="width:100%;border-collapse:collapse;font-size:13px">
@@ -2092,8 +2099,27 @@ text-align:center;font-size:24px;font-weight:bold;width:100%">
   </table>
 </div>
 
+
+<!-- ===== DASHBOARD : ALL FIRMS ===== -->
+<div id="firmDashboardPanel" style="margin-top:20px;border-top:2px solid #000;padding-top:10px;display:none">
+  <h3>Dashboard (All Firms)</h3>
+  <table style="width:100%;border-collapse:collapse;font-size:13px">
+    <thead>
+      <tr>
+        <th style="border:1px solid #ccc;padding:4px">Firm Name</th>
+        <th style="border:1px solid #ccc;padding:4px">Address</th>
+        <th style="border:1px solid #ccc;padding:4px">GST</th>
+        <th style="border:1px solid #ccc;padding:4px">Mobile</th>
+        <th style="border:1px solid #ccc;padding:4px">Action</th>
+      </tr>
+    </thead>
+    <tbody id="firmDashboardBody">
+      <tr><td colspan="5" style="text-align:center">Loading…</td></tr>
+    </tbody>
+  </table>
+</div>
 <!-- ===== DASHBOARD : ALL PARTIES ===== -->
-<div id="partyDashboardPanel" style="margin-top:20px;border-top:2px solid #000;padding-top:10px">
+<div id="partyDashboardPanel" style="display:none" style="margin-top:20px;border-top:2px solid #000;padding-top:10px">
   <h3>Dashboard (All Parties)</h3>
   <table style="width:100%;border-collapse:collapse;font-size:13px">
     <thead>
@@ -2153,8 +2179,8 @@ window.addEventListener("load", ()=>{
     firebase.initializeApp(firebaseConfig);
     db = firebase.firestore();
     console.log("🔥 Firebase initialized");
-    loadDashboard();
-    loadPartyDashboard();
+    // loadDashboard();
+    // loadPartyDashboard();
   }catch(e){
     console.error("Firebase init error", e);
   }
@@ -6306,9 +6332,10 @@ function editPartyFromDashboard(firm, partyId){
 }
 
 function deletePartyFromDashboard(firm, partyId){
+  if(!adminPasswordCheck()) return;
   if(!confirm("Delete this party?")) return;
   db.collection("firms").doc(firm).collection("parties").doc(partyId).delete().then(()=>{
-    loadPartyDashboard();
+    // loadPartyDashboard();
   });
 }
 
@@ -7082,9 +7109,10 @@ function editPartyFromDashboard(firm, partyId){
 }
 
 function deletePartyFromDashboard(firm, partyId){
+  if(!adminPasswordCheck()) return;
   if(!confirm("Delete this party?")) return;
   db.collection("firms").doc(firm).collection("parties").doc(partyId).delete().then(()=>{
-    loadPartyDashboard();
+    // loadPartyDashboard();
   });
 }
 
@@ -7808,9 +7836,10 @@ function editPartyFromDashboard(firm, partyId){
 }
 
 function deletePartyFromDashboard(firm, partyId){
+  if(!adminPasswordCheck()) return;
   if(!confirm("Delete this party?")) return;
   db.collection("firms").doc(firm).collection("parties").doc(partyId).delete().then(()=>{
-    loadPartyDashboard();
+    // loadPartyDashboard();
   });
 }
 
@@ -8580,9 +8609,10 @@ function editPartyFromDashboard(firm, partyId){
 }
 
 function deletePartyFromDashboard(firm, partyId){
+  if(!adminPasswordCheck()) return;
   if(!confirm("Delete this party?")) return;
   db.collection("firms").doc(firm).collection("parties").doc(partyId).delete().then(()=>{
-    loadPartyDashboard();
+    // loadPartyDashboard();
   });
 }
 
@@ -9295,9 +9325,10 @@ function editPartyFromDashboard(firm, partyId){
 }
 
 function deletePartyFromDashboard(firm, partyId){
+  if(!adminPasswordCheck()) return;
   if(!confirm("Delete this party?")) return;
   db.collection("firms").doc(firm).collection("parties").doc(partyId).delete().then(()=>{
-    loadPartyDashboard();
+    // loadPartyDashboard();
   });
 }
 
@@ -9833,9 +9864,10 @@ function editPartyFromDashboard(firm, partyId){
 }
 
 function deletePartyFromDashboard(firm, partyId){
+  if(!adminPasswordCheck()) return;
   if(!confirm("Delete this party?")) return;
   db.collection("firms").doc(firm).collection("parties").doc(partyId).delete().then(()=>{
-    loadPartyDashboard();
+    // loadPartyDashboard();
   });
 }
 
@@ -10368,9 +10400,10 @@ function editPartyFromDashboard(firm, partyId){
 }
 
 function deletePartyFromDashboard(firm, partyId){
+  if(!adminPasswordCheck()) return;
   if(!confirm("Delete this party?")) return;
   db.collection("firms").doc(firm).collection("parties").doc(partyId).delete().then(()=>{
-    loadPartyDashboard();
+    // loadPartyDashboard();
   });
 }
 
@@ -10905,9 +10938,10 @@ function editPartyFromDashboard(firm, partyId){
 }
 
 function deletePartyFromDashboard(firm, partyId){
+  if(!adminPasswordCheck()) return;
   if(!confirm("Delete this party?")) return;
   db.collection("firms").doc(firm).collection("parties").doc(partyId).delete().then(()=>{
-    loadPartyDashboard();
+    // loadPartyDashboard();
   });
 }
 
@@ -11279,4 +11313,125 @@ window.PRINT_DISCOUNT_ON = false;
   window.addEventListener("beforeprint", restoreOriginalRatesHard, true);
 })();
 
+</script>
+
+<script>
+function toggleEstimates(){
+  const d=document.getElementById("dashboardPanel");
+  if(!d) return;
+  if(d.style.display==="none"){
+    d.style.display="block";
+    loadDashboard();
+  }else{
+    d.style.display="none";
+  }
+}
+function toggleParties(){
+  const p=document.getElementById("partyDashboardPanel");
+  if(!p) return;
+  if(p.style.display==="none"){
+    p.style.display="block";
+    loadPartyDashboard();
+  }else{
+    p.style.display="none";
+  }
+}
+</script>
+
+<script>
+function toggleFirmDashboard(){
+  const f = document.getElementById("firmDashboardPanel");
+  if(!f) return;
+  if(f.style.display==="none"){
+    f.style.display="block";
+    loadFirmDashboard();
+  }else{
+    f.style.display="none";
+  }
+}
+
+function loadFirmDashboard(){
+  if(!db) return;
+  const tbody = document.getElementById("firmDashboardBody");
+  tbody.innerHTML = "<tr><td colspan='5' style='text-align:center'>Loading…</td></tr>";
+
+  db.collection("firms").get().then(snap=>{
+    tbody.innerHTML = "";
+    if(snap.empty){
+      tbody.innerHTML = "<tr><td colspan='5' style='text-align:center'>No firms</td></tr>";
+      return;
+    }
+
+    snap.forEach(doc=>{
+      const f = doc.data();
+      const id = doc.id;
+      tbody.innerHTML += `
+        <tr id="frow_${id}">
+          <td><input value="${f.name||id}" id="fn_${id}" disabled></td>
+          <td><input value="${f.address||""}" id="fa_${id}" disabled></td>
+          <td><input value="${f.gst||""}" id="fg_${id}" disabled></td>
+          <td><input value="${f.mobile||""}" id="fm_${id}" disabled></td>
+          <td>
+            <button onclick="enableFirmEdit('${id}')">Edit</button>
+            <button onclick="saveFirmInline('${id}')" style="display:none" id="fs_${id}">Save</button>
+            <button onclick="deleteFirmInline('${id}')">Delete</button>
+          </td>
+        </tr>
+      `;
+    });
+  });
+}
+
+function enableFirmEdit(id){
+  ["fn","fa","fg","fm"].forEach(p=>{
+    const el = document.getElementById(p+"_"+id);
+    if(el) el.disabled = false;
+  });
+  const s = document.getElementById("fs_"+id);
+  if(s) s.style.display = "inline-block";
+}
+
+function saveFirmInline(id){
+  const name = document.getElementById("fn_"+id).value;
+  const address = document.getElementById("fa_"+id).value;
+  const gst = document.getElementById("fg_"+id).value;
+  const mobile = document.getElementById("fm_"+id).value;
+
+  db.collection("firms").doc(id).update({
+    name, address, gst, mobile
+  }).then(()=>{
+    ["fn","fa","fg","fm"].forEach(p=>{
+      const el = document.getElementById(p+"_"+id);
+      if(el) el.disabled = true;
+    });
+    const s = document.getElementById("fs_"+id);
+    if(s) s.style.display = "none";
+    alert("Firm updated");
+  });
+}
+
+function deleteFirmInline(id){
+  if(!adminPasswordCheck()) return;
+  if(!confirm("Delete this firm?")) return;
+  db.collection("firms").doc(id).delete().then(()=>{
+    loadFirmDashboard();
+  });
+}
+</script>
+
+<script>
+function adminPasswordCheck(){
+  const pass = prompt("Enter ADMIN password to confirm delete:");
+  if(!pass) return false;
+  if(typeof ADMIN_PASSWORD !== "undefined"){
+    if(pass === ADMIN_PASSWORD){
+      return true;
+    }else{
+      alert("❌ Wrong admin password");
+      return false;
+    }
+  }
+  alert("Admin password not set");
+  return false;
+}
 </script>
